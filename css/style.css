@@ -1586,8 +1586,8 @@ footer::before {
 /* --- Destinations Section --- */
 .destinations-section {
     padding: 80px 0;
-    background-color: #ffffff;
-    border-top: 1px solid var(--color-border);
+    background-color: #fbf9f4; /* Soft warm ivory cream background */
+    border-top: 1px solid rgba(197, 160, 89, 0.15);
 }
 
 .destinations-grid {
@@ -1598,19 +1598,20 @@ footer::before {
 }
 
 .destination-card {
-    background-color: var(--color-bg-light);
+    background-color: #ffffff; /* Crisp white cards */
     border-radius: var(--border-radius-md);
     overflow: hidden;
-    box-shadow: 0 10px 30px var(--color-shadow);
+    box-shadow: 0 10px 25px rgba(197, 160, 89, 0.08); /* Warm gold-tinted shadow */
     transition: var(--transition-smooth);
-    border: 1px solid rgba(18, 62, 48, 0.02);
+    border: 1px solid rgba(197, 160, 89, 0.15); /* Warm gold border */
     display: flex;
     flex-direction: column;
 }
 
 .destination-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 15px 35px var(--color-shadow-hover);
+    box-shadow: 0 15px 35px rgba(197, 160, 89, 0.16);
+    border-color: rgba(197, 160, 89, 0.35);
 }
 
 .destination-card-img {
@@ -1650,18 +1651,23 @@ footer::before {
 }
 
 .destination-card-tag.checkin {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    background-color: rgba(18, 62, 48, 0.08);
+    color: var(--color-primary);
 }
 
 .destination-card-tag.cafe {
-    background-color: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
+    background-color: rgba(197, 160, 89, 0.15);
+    color: #b58c33;
 }
 
 .destination-card-tag.sightseeing {
-    background-color: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    background-color: rgba(3, 105, 161, 0.1);
+    color: #0369a1;
+}
+
+.destination-card-tag.food {
+    background-color: rgba(185, 28, 28, 0.08);
+    color: #b91c1c;
 }
 
 .destination-card-title {
@@ -2073,6 +2079,93 @@ footer::before {
     
     .slider-nav-btn {
         display: none; /* Hide arrows on mobile for clean touch swiping/dots navigation */
+    }
+}
+
+/* --- Hamburger Menu Styles --- */
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--color-text-dark);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 6px 12px;
+    transition: var(--transition-smooth);
+    border-radius: var(--border-radius-sm);
+}
+
+#header.scrolled .nav-toggle {
+    color: var(--color-primary);
+}
+
+@media (max-width: 992px) {
+    .nav-toggle {
+        display: block;
+    }
+
+    /* Override header positioning context */
+    header .container {
+        position: relative;
+    }
+
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #ffffff;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px 24px;
+        border-bottom: 2px solid var(--color-border);
+        box-shadow: 0 15px 30px rgba(18, 62, 48, 0.1);
+        gap: 0;
+        display: none; /* Hidden by default */
+        z-index: 1000;
+        animation: slideDownMenu 0.3s ease-out;
+    }
+
+    .nav-links.active {
+        display: flex; /* Show when active */
+    }
+
+    .nav-links li {
+        margin: 0;
+        border-bottom: 1px solid rgba(18, 62, 48, 0.05);
+    }
+
+    .nav-links li:last-child {
+        border-bottom: none;
+    }
+
+    .nav-link {
+        padding: 12px 0;
+        display: block;
+        color: var(--color-text-dark);
+    }
+
+    .nav-link.active {
+        color: var(--color-primary);
+        font-weight: 700;
+    }
+
+    .nav-btn-admin {
+        text-align: center;
+        margin: 12px 0 6px;
+        display: block;
+        width: 100%;
+    }
+}
+
+@keyframes slideDownMenu {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
