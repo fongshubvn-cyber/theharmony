@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Harmony - Booking Villa Đà Lạt | Nghỉ Dưỡng Sang Trọng</title>
+    <meta name="description" content="Hệ thống đặt phòng biệt thự nghỉ dưỡng cao cấp tại Đà Lạt. Cung cấp các dòng Villa Gia Đình ấm cúng và Villa Luxury sang chảnh bậc nhất.">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header id="header">
+        <div class="container flex-between">
+            <a href="index.html" class="nav-logo">
+                <img src="asset/logo.png.png" alt="The Harmony Logo">
+                <div class="nav-logo-text">The <span>Harmony</span></div>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link active">Trang Chủ</a></li>
+                    <li><a href="#villas-section" class="nav-link" onclick="filterByCategory('family')">Villa Gia Đình</a></li>
+                    <li><a href="#villas-section" class="nav-link" onclick="filterByCategory('luxury')">Villa Luxury</a></li>
+                    <li><a href="#footer" class="nav-link">Liên Hệ</a></li>
+                    <li><a href="admin.html" class="nav-btn-admin">Quản Trị</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        
+        <!-- Hero Section (Hero Product Layout) -->
+        <section class="hero-product-section dark-theme" id="hero-product-container">
+            <!-- Dynamic Hero Product will be injected here via JavaScript -->
+        </section>
+
+        <!-- Search & Filter Bar Overlay -->
+        <section class="search-filter-container">
+            <div class="search-filter-bar">
+                <!-- Top Row: Main Filters -->
+                <div class="filter-main-row">
+                    <div class="search-input-group">
+                        <label for="search-keyword"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm từ khóa</label>
+                        <input type="text" id="search-keyword" placeholder="Nhập tên, địa chỉ, từ khóa...">
+                    </div>
+                    <div class="search-input-group">
+                        <label for="filter-category"><i class="fa-solid fa-layer-group"></i> Phân khúc biệt thự</label>
+                        <select id="filter-category">
+                            <option value="all">Tất cả</option>
+                            <option value="family">Gia đình</option>
+                            <option value="luxury">Luxury</option>
+                        </select>
+                    </div>
+                    <div class="search-input-group">
+                        <label for="filter-bedrooms"><i class="fa-solid fa-bed"></i> Số phòng ngủ</label>
+                        <select id="filter-bedrooms">
+                            <option value="all">Tất cả phòng</option>
+                            <option value="3">3+ phòng</option>
+                            <option value="4">4+ phòng</option>
+                            <option value="5">5+ phòng</option>
+                            <option value="6">6+ phòng</option>
+                        </select>
+                    </div>
+                    <div class="search-input-group">
+                        <label for="filter-capacity"><i class="fa-solid fa-user-group"></i> Sức chứa đoàn khách</label>
+                        <select id="filter-capacity">
+                            <option value="all">Tất cả khách</option>
+                            <option value="under10">Dưới 10 người</option>
+                            <option value="10-15">10 - 15 người</option>
+                            <option value="over15">Trên 15 người</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Expanded Amenities Filter (Advanced Mode) -->
+                <div class="filter-amenities-row collapsed">
+                    <span class="amenities-row-title"><i class="fa-solid fa-circle-check"></i> Chọn tiện ích biệt thự (Nâng cao):</span>
+                    <div class="amenities-checkbox-grid" id="filter-amenities-list">
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="Bể bơi" class="amenity-filter-cb">
+                            <span>Có hồ bơi / bể bơi</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="BBQ" class="amenity-filter-cb">
+                            <span>Sân nướng BBQ</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="vườn" class="amenity-filter-cb">
+                            <span>Khuôn viên sân vườn</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="bếp" class="amenity-filter-cb">
+                            <span>Bếp nấu tự phục vụ</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="Karaoke" class="amenity-filter-cb">
+                            <span>Karaoke / Smart TV</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="View" class="amenity-filter-cb">
+                            <span>View thung lũng / rừng thông</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="Bi-a" class="amenity-filter-cb">
+                            <span>Bàn Bi-a giải trí</span>
+                        </label>
+                        <label class="amenity-checkbox-label">
+                            <input type="checkbox" value="xông hơi" class="amenity-filter-cb">
+                            <span>Xông hơi Sauna</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action row -->
+                <div class="filter-actions-row">
+                    <div>
+                        <span id="filter-count-msg" class="filter-count-badge">Đang tìm kiếm...</span>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-toggle-advanced" id="btn-toggle-advanced" type="button">
+                            <i class="fa-solid fa-sliders"></i> Bộ lọc nâng cao
+                        </button>
+                        <button class="btn-clear-filters" id="btn-clear-filters" onclick="resetFilters()" type="button">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Segment Section -->
+        <section class="segment-section text-center" id="villas-section">
+            <div class="container">
+                <span class="section-tag">Bộ Sưu Tập Của Chúng Tôi</span>
+                <h2 class="section-title">Khám Phá Các Căn Biệt Thự Nổi Bật</h2>
+                <p class="section-desc">Chúng tôi phân phối 2 phân khúc chính được thiết kế riêng biệt để đáp ứng hoàn hảo mọi nhu cầu nghỉ dưỡng của quý khách.</p>
+                
+                <div class="segment-tabs">
+                    <button class="segment-tab active" id="tab-all" onclick="filterByTab('all')">Tất Cả Villa</button>
+                    <button class="segment-tab" id="tab-family" onclick="filterByTab('family')">Villa Gia Đình</button>
+                    <button class="segment-tab" id="tab-luxury" onclick="filterByTab('luxury')">Villa Luxury</button>
+                </div>
+
+                <!-- Villa Grid -->
+                <div class="villa-grid" id="villa-list-grid">
+                    <!-- Dynamic cards will be injected here via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Destinations Section (Toplist & Recommendations) -->
+        <section class="destinations-section" id="destinations-section">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag" style="color: var(--color-accent);">Cẩm Nang Đà Lạt</span>
+                    <h2 class="section-title">Gợi Ý Điểm Đến & Toplist Check-in</h2>
+                    <p class="section-desc">Khám phá những điểm tham quan du lịch, quán cafe check-in cực chill và ẩm thực phong phú không thể bỏ lỡ tại Đà Lạt.</p>
+                </div>
+                <div class="destinations-grid" id="destinations-list-grid">
+                    <!-- Dynamic cards will be injected here via JavaScript -->
+                </div>
+                <div class="text-center" style="margin-top: 40px;">
+                    <button class="btn-primary" id="btn-load-more-dest" style="padding: 12px 30px; font-size: 0.95rem; font-weight: 700; border-radius: var(--border-radius-sm); display: none;">
+                        Xem Thêm Điểm Đến <i class="fa-solid fa-chevron-down" style="margin-left: 8px;"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <img src="asset/logo.png.png" alt="The Harmony Logo">
+                    <p>The Harmony tự hào là đơn vị uy tín hàng đầu cung cấp các giải pháp thuê Villa nghỉ dưỡng cao cấp tại Đà Lạt. Sự hài lòng của bạn là tôn chỉ hoạt động của chúng tôi.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Khám Phá</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Trang Chủ</a></li>
+                        <li><a href="#villas-section" onclick="filterByCategory('family')">Villa Gia Đình</a></li>
+                        <li><a href="#villas-section" onclick="filterByCategory('luxury')">Villa Luxury</a></li>
+                        <li><a href="admin.html">Trang Quản Trị</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Liên Hệ Trực Tiếp</h4>
+                    <div class="footer-contact-info">
+                        <p><i class="fa-solid fa-location-dot"></i> 89 Hoàng Hoa Thám, Phường 10, Đà Lạt</p>
+                        <p><i class="fa-solid fa-phone"></i> Hotline: 0987.654.321</p>
+                        <p><i class="fa-solid fa-envelope"></i> booking@theharmony.vn</p>
+                        <p><i class="fa-brands fa-rocketchat"></i> Hỗ trợ Zalo/Messenger 24/7</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom text-center">
+                <p>&copy; 2026 The Harmony - Booking Villa Đà Lạt. All rights reserved. Designed for excellence.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

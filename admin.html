@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị Hệ Thống | The Harmony - Booking Villa Đà Lạt</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header id="header">
+        <div class="container flex-between">
+            <a href="index.html" class="nav-logo">
+                <img src="asset/logo.png.png" alt="The Harmony Logo">
+                <div class="nav-logo-text">The <span>Harmony</span></div>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Trang Chủ</a></li>
+                    <li><a href="index.html#villas-section" class="nav-link">Villa Gia Đình</a></li>
+                    <li><a href="index.html#villas-section" class="nav-link">Villa Luxury</a></li>
+                    <li><a href="#footer" class="nav-link">Liên Hệ</a></li>
+                    <li><a href="admin.html" class="nav-btn-admin active" style="color: white;">Quản Trị</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Screen -->
+    <div id="admin-login-screen" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="asset/logo.png.png" alt="The Harmony Logo">
+                <h2>The Harmony</h2>
+                <p>Hệ Thống Quản Trị Villa</p>
+            </div>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="login-username">Tên đăng nhập *</label>
+                    <input type="text" id="login-username" required placeholder="Nhập tên đăng nhập">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mật khẩu *</label>
+                    <input type="password" id="login-password" required placeholder="Nhập mật khẩu">
+                </div>
+                <div id="login-error-msg" class="login-error-msg" style="display: none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Tên đăng nhập hoặc mật khẩu không chính xác!
+                </div>
+                <button type="submit" class="btn-primary login-btn">Đăng Nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container admin-layout" id="admin-main-dashboard" style="display: none;">
+        
+        <div class="admin-header">
+            <div>
+                <h1 style="font-size: 2rem;">Bảng Quản Trị Hệ Thống</h1>
+                <p style="color: var(--color-text-muted);">Quản lý danh sách biệt thự, thông tin booking và điểm du lịch check-in Đà Lạt.</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn-secondary" id="btn-reset-db" title="Khôi phục lại danh sách dữ liệu mặc định ban đầu">
+                    <i class="fa-solid fa-rotate-left"></i> Khôi Phục Dữ Liệu Gốc
+                </button>
+                <button class="admin-action-btn" id="btn-add-villa">
+                    <i class="fa-solid fa-plus"></i> Đăng Villa Mới
+                </button>
+                <button class="admin-action-btn" id="btn-add-dest" style="display: none; background-color: var(--color-accent); color: var(--color-text-dark);">
+                    <i class="fa-solid fa-plus"></i> Đăng Điểm Đến Mới
+                </button>
+                <button class="btn-secondary" id="btn-logout" title="Đăng xuất khỏi tài khoản quản trị" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Control Headers -->
+        <div class="admin-tabs-header">
+            <button class="admin-tab-btn active" id="tab-villas-btn">
+                <i class="fa-solid fa-hotel"></i> Quản Lý Villa
+            </button>
+            <button class="admin-tab-btn" id="tab-destinations-btn">
+                <i class="fa-solid fa-map-location-dot"></i> Quản Lý Điểm Đến (Toplist)
+            </button>
+        </div>
+
+        <!-- Tab Content 1: Villas Management -->
+        <div id="villas-manager-view" class="admin-tab-content active">
+            <!-- Dashboard Statistics -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <span>Tổng Số Villa</span>
+                    <span id="stat-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Villa Gia Đình</span>
+                    <span id="stat-family">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Villa Luxury</span>
+                    <span id="stat-luxury">0</span>
+                </div>
+            </div>
+
+            <!-- Admin Table List -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Villa</th>
+                            <th>Phân khúc</th>
+                            <th>Phòng ngủ</th>
+                            <th>Sức chứa</th>
+                            <th>Giá hiển thị</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-villa-tbody">
+                        <!-- Dynamic rows will be injected here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab Content 2: Destinations Management -->
+        <div id="destinations-manager-view" class="admin-tab-content">
+            <!-- Destinations Statistics -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <span>Tổng Số Điểm Đến</span>
+                    <span id="stat-dest-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Cafe & Check-in</span>
+                    <span id="stat-dest-cafe">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Điểm Tham Quan</span>
+                    <span id="stat-dest-sightseeing">0</span>
+                </div>
+            </div>
+
+            <!-- Admin Destination Table List -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Điểm Đến / Toplist</th>
+                            <th>Phân Loại</th>
+                            <th>Vị Trí / Địa Chỉ</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-dest-tbody">
+                        <!-- Dynamic rows will be injected here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Form Modal Overlay (Add & Edit Villa) -->
+    <div class="modal-overlay" id="villa-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title">Đăng Villa Mới</h3>
+                <button class="close-btn" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="villa-form">
+                    <!-- Hidden ID input for updating -->
+                    <input type="hidden" id="villa-id">
+
+                    <div class="form-grid">
+                        
+                        <!-- Name -->
+                        <div class="form-group full-width">
+                            <label for="villa-name">Tên Villa *</label>
+                            <input type="text" id="villa-name" required placeholder="Ví dụ: The Harmony Luxury Horizon Estate">
+                        </div>
+
+                        <!-- Segment/Category -->
+                        <div class="form-group">
+                            <label for="villa-category">Phân Khúc Villa *</label>
+                            <select id="villa-category" required>
+                                <option value="" disabled selected>Chọn phân khúc</option>
+                                <option value="family">Villa Gia Đình</option>
+                                <option value="luxury">Villa Luxury</option>
+                            </select>
+                        </div>
+
+                        <!-- Price display -->
+                        <div class="form-group">
+                            <label for="villa-price">Giá Hiển Thị *</label>
+                            <input type="text" id="villa-price" required value="Liên hệ trực tiếp">
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group full-width">
+                            <label for="villa-address">Địa Chỉ *</label>
+                            <input type="text" id="villa-address" required placeholder="Địa chỉ cụ thể tại Đà Lạt">
+                        </div>
+
+                        <!-- Bedrooms -->
+                        <div class="form-group">
+                            <label for="villa-bedrooms">Số Phòng Ngủ *</label>
+                            <input type="number" id="villa-bedrooms" required min="1" placeholder="Số lượng phòng ngủ">
+                        </div>
+
+                        <!-- Bathrooms -->
+                        <div class="form-group">
+                            <label for="villa-bathrooms">Số Phòng Tắm *</label>
+                            <input type="number" id="villa-bathrooms" required min="1" placeholder="Số lượng phòng tắm">
+                        </div>
+
+                        <!-- Capacity -->
+                        <div class="form-group">
+                            <label for="villa-capacity">Sức Chứa Tối Đa (Khách) *</label>
+                            <input type="number" id="villa-capacity" required min="1" placeholder="Sức chứa tối đa">
+                        </div>
+
+                        <!-- Featured Checkbox -->
+                        <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 12px;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="villa-featured"> Nổi bật (Ưu tiên hiển thị đầu trang chủ)
+                            </label>
+                        </div>
+
+                        <!-- Amenities -->
+                        <div class="form-group full-width">
+                            <label>Tiện ích biệt thự</label>
+                            <div class="form-checkbox-group" id="amenities-checkboxes">
+                                <label class="checkbox-label"><input type="checkbox" value="Bể bơi mini"> Bể bơi mini</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Hồ bơi vô cực nước ấm"> Hồ bơi vô cực</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Sân nướng BBQ"> Sân BBQ ngoài trời</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Khuôn viên sân vườn"> Sân vườn rộng</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Phòng bếp đầy đủ tiện nghi"> Nhà bếp đầy đủ</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Smart TV & Karaoke"> Smart TV / Karaoke</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Chỗ đậu xe rộng rãi"> Bãi đậu xe rộng</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Bàn Bi-a & Giải trí"> Bàn Bi-a</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Phòng xông hơi Sauna"> Phòng xông hơi</label>
+                                <label class="checkbox-label"><input type="checkbox" value="View thung lũng 360 độ"> View thung lũng</label>
+                                <label class="checkbox-label"><input type="checkbox" value="Quản gia phục vụ 24/7"> Quản gia phục vụ</label>
+                            </div>
+                        </div>
+
+                        <!-- Short Description -->
+                        <div class="form-group full-width">
+                            <label for="villa-short-desc">Mô Tả Ngắn (Hiển thị ngoài card trang chủ) *</label>
+                            <textarea id="villa-short-desc" rows="2" required placeholder="Tóm tắt ngắn gọn đặc điểm nổi bật..."></textarea>
+                        </div>
+
+                        <!-- Detailed Description -->
+                        <div class="form-group full-width">
+                            <label for="villa-desc">Mô Tả Chi Tiết (Hiển thị trang phụ) *</label>
+                            <textarea id="villa-desc" rows="5" required placeholder="Nhập mô tả chi tiết đầy đủ của biệt thự, phòng ngủ, phòng khách, khuôn viên tiện ích..."></textarea>
+                        </div>
+
+                        <!-- Main Image File -->
+                        <div class="form-group">
+                            <label for="villa-main-image-file">Hình Ảnh Chính (Đại diện) *</label>
+                            <input type="file" id="villa-main-image-file" accept="image/*">
+                            <input type="hidden" id="villa-main-image-url">
+                            <div class="image-preview-container" id="main-image-preview">
+                                <!-- Main image preview will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Gallery Images Files -->
+                        <div class="form-group">
+                            <label for="villa-gallery-files">Album Ảnh Thêm (Nhiều ảnh)</label>
+                            <input type="file" id="villa-gallery-files" accept="image/*" multiple>
+                            <div class="image-preview-container" id="gallery-images-preview">
+                                <!-- Gallery preview will be rendered here -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Form Buttons -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="btn-cancel-modal">Hủy</button>
+                        <button type="submit" class="btn-primary" id="btn-save-villa">Lưu Lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Destination Modal Overlay (Add & Edit Destination) -->
+    <div class="modal-overlay" id="destination-modal">
+        <div class="modal-container">
+            <div class="modal-header" style="background-color: var(--color-primary);">
+                <h3 id="dest-modal-title">Đăng Điểm Đến Mới</h3>
+                <button class="close-btn" id="btn-close-dest-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="destination-form">
+                    <!-- Hidden ID input for updating -->
+                    <input type="hidden" id="dest-id">
+
+                    <div class="form-grid">
+                        <!-- Title -->
+                        <div class="form-group full-width">
+                            <label for="dest-title">Tên Điểm Đến / Tiêu đề Toplist *</label>
+                            <input type="text" id="dest-title" required placeholder="Ví dụ: Hồ Tuyền Lâm - Lá Phổi Xanh Của Đà Lạt">
+                        </div>
+
+                        <!-- Category -->
+                        <div class="form-group">
+                            <label for="dest-category">Phân Loại Điểm Đến *</label>
+                            <select id="dest-category" required>
+                                <option value="" disabled selected>Chọn phân loại</option>
+                                <option value="checkin">Địa điểm check-in</option>
+                                <option value="cafe">Quán cafe check-in</option>
+                                <option value="sightseeing">Điểm tham quan du lịch</option>
+                                <option value="food">Ẩn thực Đà Lạt</option>
+                            </select>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group">
+                            <label for="dest-address">Địa Chỉ / Vị Trí *</label>
+                            <input type="text" id="dest-address" required placeholder="Ví dụ: Phường 4, Đà Lạt">
+                        </div>
+
+                        <!-- Short Description -->
+                        <div class="form-group full-width">
+                            <label for="dest-short-desc">Mô Tả Ngắn (Hiển thị ngoài card) *</label>
+                            <textarea id="dest-short-desc" rows="2" required placeholder="Tóm tắt ngắn gọn điểm nổi bật..."></textarea>
+                        </div>
+
+                        <!-- Detailed Description -->
+                        <div class="form-group full-width">
+                            <label for="dest-desc">Mô Tả Chi Tiết *</label>
+                            <textarea id="dest-desc" rows="4" required placeholder="Nhập giới thiệu chi tiết, hướng dẫn đường đi, thời điểm tham quan lý tưởng..."></textarea>
+                        </div>
+
+                        <!-- Main Image File -->
+                        <div class="form-group full-width">
+                            <label for="dest-image-file">Hình Ảnh Điểm Đến *</label>
+                            <input type="file" id="dest-image-file" accept="image/*">
+                            <input type="hidden" id="dest-image-url">
+                            <div class="image-preview-container" id="dest-image-preview">
+                                <!-- Destination image preview will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Buttons -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="btn-cancel-dest-modal">Hủy</button>
+                        <button type="submit" class="btn-primary" id="btn-save-dest">Lưu Lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <img src="asset/logo.png.png" alt="The Harmony Logo">
+                    <p>The Harmony tự hào là đơn vị uy tín hàng đầu cung cấp các giải pháp thuê Villa nghỉ dưỡng cao cấp tại Đà Lạt. Sự hài lòng của bạn là tôn chỉ hoạt động của chúng tôi.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Khám Phá</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Trang Chủ</a></li>
+                        <li><a href="index.html#villas-section">Villa Gia Đình</a></li>
+                        <li><a href="index.html#villas-section">Villa Luxury</a></li>
+                        <li><a href="admin.html">Trang Quản Trị</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Liên Hệ Trực Tiếp</h4>
+                    <div class="footer-contact-info">
+                        <p><i class="fa-solid fa-location-dot"></i> 89 Hoàng Hoa Thám, Phường 10, Đà Lạt</p>
+                        <p><i class="fa-solid fa-phone"></i> Hotline: 0987.654.321</p>
+                        <p><i class="fa-solid fa-envelope"></i> booking@theharmony.vn</p>
+                        <p><i class="fa-brands fa-rocketchat"></i> Hỗ trợ Zalo/Messenger 24/7</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom text-center">
+                <p>&copy; 2026 The Harmony - Booking Villa Đà Lạt. All rights reserved. Designed for excellence.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
