@@ -81,28 +81,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tab switcher logic
     const tabVillasBtn = document.getElementById('tab-villas-btn');
     const tabDestinationsBtn = document.getElementById('tab-destinations-btn');
+    const tabBookingsBtn = document.getElementById('tab-bookings-btn');
     const villasManagerView = document.getElementById('villas-manager-view');
     const destinationsManagerView = document.getElementById('destinations-manager-view');
+    const bookingsManagerView = document.getElementById('bookings-manager-view');
     const btnAddVilla = document.getElementById('btn-add-villa');
     const btnAddDest = document.getElementById('btn-add-dest');
 
-    if (tabVillasBtn && tabDestinationsBtn) {
+    if (tabVillasBtn && tabDestinationsBtn && tabBookingsBtn) {
         tabVillasBtn.addEventListener('click', () => {
             tabVillasBtn.classList.add('active');
             tabDestinationsBtn.classList.remove('active');
+            tabBookingsBtn.classList.remove('active');
             villasManagerView.classList.add('active');
             destinationsManagerView.classList.remove('active');
+            bookingsManagerView.classList.remove('active');
             btnAddVilla.style.display = 'inline-flex';
             btnAddDest.style.display = 'none';
+            refreshAdminDashboard();
         });
 
         tabDestinationsBtn.addEventListener('click', () => {
             tabDestinationsBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
+            tabBookingsBtn.classList.remove('active');
             destinationsManagerView.classList.add('active');
             villasManagerView.classList.remove('active');
+            bookingsManagerView.classList.remove('active');
             btnAddDest.style.display = 'inline-flex';
             btnAddVilla.style.display = 'none';
+            refreshAdminDashboard();
+        });
+
+        tabBookingsBtn.addEventListener('click', () => {
+            tabBookingsBtn.classList.add('active');
+            tabVillasBtn.classList.remove('active');
+            tabDestinationsBtn.classList.remove('active');
+            bookingsManagerView.classList.add('active');
+            villasManagerView.classList.remove('active');
+            destinationsManagerView.classList.remove('active');
+            btnAddVilla.style.display = 'none';
+            btnAddDest.style.display = 'none';
+            refreshBookingsTab();
         });
     }
 
@@ -221,6 +241,20 @@ function refreshAdminDashboard() {
     document.getElementById('stat-dest-cafe').innerText = destCafe;
     document.getElementById('stat-dest-sightseeing').innerText = destSightseeing;
     renderDestinationsTable(dests);
+
+    // 3. Refresh Bookings Notification Badge
+    if (window.harmonyDB.getAllBookings) {
+        const bookings = window.harmonyDB.getAllBookings();
+        const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+        const tabBtn = document.getElementById('tab-bookings-btn');
+        if (tabBtn) {
+            const oldBadge = tabBtn.querySelector('.badge-notification');
+            if (oldBadge) oldBadge.remove();
+            if (pendingBookings > 0) {
+                tabBtn.innerHTML += ` <span class="badge-notification" style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 5px;">${pendingBookings}</span>`;
+            }
+        }
+    }
 }
 
 function renderAdminTable(villas) {
@@ -652,4 +686,135 @@ window.removeDestImage = function() {
     document.getElementById('dest-image-preview').innerHTML = "";
     document.getElementById('dest-image-file').value = "";
     document.getElementById('dest-image-url').value = "";
+};
+
+// =========================================================================
+// BOOKING / CONTACT REQUESTS CRUD LOGIC
+// =========================================================================
+
+function refreshBookingsTab() {
+    if (!window.harmonyDB) return;
+
+    const bookings = window.harmonyDB.getAllBookings();
+    const total = bookings.length;
+    const pending = bookings.filter(b => b.status === 'pending').length;
+    const contacted = bookings.filter(b => b.status === 'contacted').length;
+
+    document.getElementById('stat-booking-total').innerText = total;
+    document.getElementById('stat-booking-pending').innerText = pending;
+    document.getElementById('stat-booking-contacted').innerText = contacted;
+
+    renderBookingsTable(bookings);
+}
+
+function renderBookingsTable(bookings) {
+    const tbody = document.getElementById('admin-booking-tbody');
+    if (!tbody) return;
+
+    if (bookings.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
+                    Chưa có yêu cầu tư vấn hay liên hệ nào từ khách hàng.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    // Sort bookings: pending first, then by date desc
+    const sortedBookings = [...bookings].sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    tbody.innerHTML = sortedBookings.map(b => {
+        const dateText = b.createdAt ? new Date(b.createdAt).toLocaleString('vi-VN') : 'N/A';
+        const checkInText = b.checkIn ? new Date(b.checkIn).toLocaleDateString('vi-VN') : 'Chưa định ngày';
+        const guestsText = b.guests ? `${b.guests} khách` : 'N/A';
+        
+        let statusBadge = "";
+        let actionBtn = "";
+
+        if (b.status === 'pending') {
+            statusBadge = `<span class="table-badge" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); display: inline-block; padding: 4px 10px; border-radius: 4px;">Chờ tư vấn</span>`;
+            actionBtn = `
+                <button onclick="markBookingContacted('${b.id}')" class="action-icon-btn edit" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);" title="Đánh dấu đã liên hệ">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            `;
+        } else {
+            statusBadge = `<span class="table-badge" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); display: inline-block; padding: 4px 10px; border-radius: 4px;">Đã liên hệ</span>`;
+            actionBtn = `
+                <button onclick="markBookingPending('${b.id}')" class="action-icon-btn edit" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);" title="Đánh dấu chờ tư vấn">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            `;
+        }
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: bold; color: var(--color-primary);">${b.customerName}</div>
+                    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px;">
+                        <i class="fa-solid fa-phone"></i> ${b.customerPhone}
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: 500;">${b.villaName}</div>
+                    <small style="color: var(--color-text-muted);">ID: ${b.villaId}</small>
+                </td>
+                <td>
+                    <div><i class="fa-solid fa-calendar-days"></i> ${checkInText}</div>
+                    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px;">
+                        <i class="fa-solid fa-user-group"></i> ${guestsText}
+                    </div>
+                </td>
+                <td>
+                    <div style="max-width: 250px; font-size: 0.85rem; color: var(--color-text-dark); white-space: normal; word-break: break-word; line-height: 1.4;">
+                        ${b.note || '<span style="color: #bbb; font-style: italic;">Không có ghi chú</span>'}
+                    </div>
+                </td>
+                <td>
+                    <small style="color: var(--color-text-muted);">${dateText}</small>
+                </td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="table-actions">
+                        ${actionBtn}
+                        <button onclick="deleteBookingItem('${b.id}')" class="action-icon-btn delete" title="Xóa yêu cầu">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.markBookingContacted = function(id) {
+    if (window.harmonyDB && window.harmonyDB.updateBookingStatus(id, 'contacted')) {
+        refreshBookingsTab();
+        // Also update dashboard counts
+        refreshAdminDashboard();
+    }
+};
+
+window.markBookingPending = function(id) {
+    if (window.harmonyDB && window.harmonyDB.updateBookingStatus(id, 'pending')) {
+        refreshBookingsTab();
+        // Also update dashboard counts
+        refreshAdminDashboard();
+    }
+};
+
+window.deleteBookingItem = function(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa yêu cầu tư vấn này khỏi hệ thống?")) return;
+
+    if (window.harmonyDB && window.harmonyDB.deleteBooking(id)) {
+        refreshBookingsTab();
+        refreshAdminDashboard();
+        alert("Đã xóa yêu cầu tư vấn thành công!");
+    }
 };

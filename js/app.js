@@ -147,6 +147,91 @@ function initHomePage() {
     // Set filters based on URL hash if clicking nav links
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
+
+    // Setup FAQ Accordion Toggles
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', () => {
+            const item = question.parentElement;
+            const answer = question.nextElementSibling;
+            const isOpen = item.classList.contains('active');
+            
+            // Close other FAQ items
+            document.querySelectorAll('.faq-item').forEach(faqItem => {
+                faqItem.classList.remove('active');
+                const otherAnswer = faqItem.querySelector('.faq-answer');
+                if (otherAnswer) otherAnswer.style.maxHeight = null;
+            });
+            
+            if (!isOpen) {
+                item.classList.add('active');
+                if (answer) answer.style.maxHeight = answer.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // Simple scroll reveal observer
+    if ('IntersectionObserver' in window) {
+        const revealSections = document.querySelectorAll('.benefits-section, .testimonials-section, .faq-section, .final-cta-section, .destinations-section, .segment-section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        revealSections.forEach(section => {
+            section.classList.add('reveal-section');
+            observer.observe(section);
+        });
+    }
+
+    // Setup homepage form submit handler
+    const homeContactForm = document.getElementById('homepage-contact-form');
+    if (homeContactForm) {
+        homeContactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const bookingData = {
+                villaId: document.getElementById('form-villa-id').value,
+                villaName: document.getElementById('form-villa-name').value,
+                customerName: homeContactForm.querySelector('#form-name').value.trim(),
+                customerPhone: homeContactForm.querySelector('#form-phone').value.trim(),
+                checkIn: homeContactForm.querySelector('#form-date').value || null,
+                guests: parseInt(homeContactForm.querySelector('#form-guests').value) || null,
+                note: homeContactForm.querySelector('#form-note').value.trim(),
+                status: 'pending'
+            };
+
+            // Save to DB
+            if (window.harmonyDB && window.harmonyDB.saveBooking) {
+                window.harmonyDB.saveBooking(bookingData);
+                
+                // Show success message
+                const successMsg = homeContactForm.querySelector('#form-success-msg');
+                if (successMsg) {
+                    successMsg.style.display = 'block';
+                    successMsg.style.color = '#10b981';
+                    successMsg.style.fontWeight = 'bold';
+                    successMsg.style.marginTop = '16px';
+                    
+                    // Reset form fields
+                    homeContactForm.reset();
+                    
+                    // Auto hide after 5 seconds
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 5000);
+                }
+            } else {
+                alert("Lỗi hệ thống lưu trữ!");
+            }
+        });
+    }
 }
 
 function updateFilterCountBadge(count) {
@@ -382,13 +467,13 @@ function initDetailPage() {
     const id = params.get('id');
 
     if (!id || !window.harmonyDB) {
-        showDetailError("Không tìm thấy thông tin biệt thự yêu cầu.");
+        showDetailError("Không tìm thấy thông tin chỗ nghỉ yêu cầu.");
         return;
     }
 
     const villa = window.harmonyDB.getVillaById(id);
     if (!villa) {
-        showDetailError("Biệt thự không tồn tại hoặc đã bị xóa khỏi hệ thống.");
+        showDetailError("Villa/Homestay không tồn tại hoặc đã bị xóa khỏi hệ thống.");
         return;
     }
 
@@ -454,6 +539,57 @@ function initDetailPage() {
         } else {
             amenitiesUl.innerHTML = '<li class="amenity-item">Đầy đủ tiện ích cơ bản</li>';
         }
+    }
+
+    // Populate form hidden fields
+    const formVillaId = document.getElementById('form-villa-id');
+    const formVillaName = document.getElementById('form-villa-name');
+    if (formVillaId) formVillaId.value = villa.id;
+    if (formVillaName) formVillaName.value = villa.name;
+
+    // Setup form submit handler
+    const contactForm = document.getElementById('villa-contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const bookingData = {
+                villaId: document.getElementById('form-villa-id').value,
+                villaName: document.getElementById('form-villa-name').value,
+                customerName: document.getElementById('form-name').value.trim(),
+                customerPhone: document.getElementById('form-phone').value.trim(),
+                checkIn: document.getElementById('form-date').value || null,
+                guests: parseInt(document.getElementById('form-guests').value) || null,
+                note: document.getElementById('form-note').value.trim(),
+                status: 'pending'
+            };
+
+            // Save to DB
+            if (window.harmonyDB && window.harmonyDB.saveBooking) {
+                window.harmonyDB.saveBooking(bookingData);
+                
+                // Show success message
+                const successMsg = document.getElementById('form-success-msg');
+                if (successMsg) {
+                    successMsg.style.display = 'block';
+                    successMsg.style.color = '#10b981';
+                    successMsg.style.fontWeight = 'bold';
+                    successMsg.style.marginTop = '16px';
+                    
+                    // Reset form fields except hidden ones
+                    contactForm.reset();
+                    if (formVillaId) formVillaId.value = villa.id;
+                    if (formVillaName) formVillaName.value = villa.name;
+                    
+                    // Auto hide after 5 seconds
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 5000);
+                }
+            } else {
+                alert("Lỗi hệ thống lưu trữ!");
+            }
+        });
     }
 }
 
@@ -582,6 +718,28 @@ function renderHeroProduct(villas) {
                         <span class="hero-product-badge"><i class="fa-solid fa-crown"></i> ${badgeText}</span>
                         <h1 class="hero-product-title text-white">${villa.name}</h1>
                         <p class="hero-product-tagline text-muted-light">${villa.shortDescription}</p>
+                        
+                        <!-- Social Proof (Element 5) -->
+                        <div class="hero-product-social-proof">
+                            <div class="overlapping-avatars">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop" alt="Khách hàng">
+                                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&fit=crop" alt="Khách hàng">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop" alt="Khách hàng">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop" alt="Khách hàng">
+                            </div>
+                            <div class="social-proof-content">
+                                <div class="social-proof-stars">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>4.9 / 5★</span>
+                                </div>
+                                <span class="social-proof-desc">120+ lượt đánh giá hài lòng từ đầu năm</span>
+                            </div>
+                        </div>
+
                         <div class="hero-product-specs dark-specs">
                             <span><i class="fa-solid fa-bed"></i> ${villa.bedrooms} PN</span>
                             <span><i class="fa-solid fa-bath"></i> ${villa.bathrooms} WC</span>
@@ -684,3 +842,19 @@ window.nextSlide = function() {
 window.prevSlide = function() {
     goToSlide(currentSlideIndex - 1);
 };
+
+// Sticky Contact Widget interaction
+window.toggleStickySubmenu = function(event) {
+    event.stopPropagation();
+    const btnGroup = event.currentTarget.parentElement;
+    if (btnGroup) {
+        btnGroup.classList.toggle('active');
+    }
+};
+
+document.addEventListener('click', () => {
+    const btnGroup = document.querySelector('.sticky-btn-group');
+    if (btnGroup) {
+        btnGroup.classList.remove('active');
+    }
+});

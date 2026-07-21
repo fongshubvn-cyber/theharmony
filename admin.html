@@ -65,7 +65,7 @@
         <div class="admin-header">
             <div>
                 <h1 style="font-size: 2rem;">Bảng Quản Trị Hệ Thống</h1>
-                <p style="color: var(--color-text-muted);">Quản lý danh sách biệt thự, thông tin booking và điểm du lịch check-in Đà Lạt.</p>
+                <p style="color: var(--color-text-muted);">Quản lý danh sách home & villa, thông tin booking và điểm du lịch check-in Đà Lạt.</p>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
                 <button class="btn-secondary" id="btn-reset-db" title="Khôi phục lại danh sách dữ liệu mặc định ban đầu">
@@ -90,6 +90,9 @@
             </button>
             <button class="admin-tab-btn" id="tab-destinations-btn">
                 <i class="fa-solid fa-map-location-dot"></i> Quản Lý Điểm Đến (Toplist)
+            </button>
+            <button class="admin-tab-btn" id="tab-bookings-btn">
+                <i class="fa-solid fa-envelope-open-text"></i> Yêu Cầu Tư Vấn
             </button>
         </div>
 
@@ -166,6 +169,45 @@
                 </table>
             </div>
         </div>
+
+        <!-- Tab Content 3: Bookings Management -->
+        <div id="bookings-manager-view" class="admin-tab-content">
+            <!-- Bookings Statistics -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <span>Tổng Số Yêu Cầu</span>
+                    <span id="stat-booking-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Chờ Tư Vấn</span>
+                    <span id="stat-booking-pending" style="color: #ef4444;">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Đã Liên Hệ</span>
+                    <span id="stat-booking-contacted" style="color: #10b981;">0</span>
+                </div>
+            </div>
+
+            <!-- Admin Booking Table List -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Khách Hàng / SĐT</th>
+                            <th>Villa Cần Tư Vấn</th>
+                            <th>Lịch Đi / Số Khách</th>
+                            <th>Ghi Chú Yêu Cầu</th>
+                            <th>Thời Gian Gửi</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-booking-tbody">
+                        <!-- Dynamic rows will be injected here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <!-- Form Modal Overlay (Add & Edit Villa) -->
@@ -237,7 +279,7 @@
 
                         <!-- Amenities -->
                         <div class="form-group full-width">
-                            <label>Tiện ích biệt thự</label>
+                            <label>Tiện ích home & villa</label>
                             <div class="form-checkbox-group" id="amenities-checkboxes">
                                 <label class="checkbox-label"><input type="checkbox" value="Bể bơi mini"> Bể bơi mini</label>
                                 <label class="checkbox-label"><input type="checkbox" value="Hồ bơi vô cực nước ấm"> Hồ bơi vô cực</label>
@@ -262,7 +304,7 @@
                         <!-- Detailed Description -->
                         <div class="form-group full-width">
                             <label for="villa-desc">Mô Tả Chi Tiết (Hiển thị trang phụ) *</label>
-                            <textarea id="villa-desc" rows="5" required placeholder="Nhập mô tả chi tiết đầy đủ của biệt thự, phòng ngủ, phòng khách, khuôn viên tiện ích..."></textarea>
+                            <textarea id="villa-desc" rows="5" required placeholder="Nhập mô tả chi tiết đầy đủ của home & villa, phòng ngủ, phòng khách, khuôn viên tiện ích..."></textarea>
                         </div>
 
                         <!-- Main Image File -->
@@ -387,7 +429,7 @@
                     <h4 class="footer-title">Liên Hệ Trực Tiếp</h4>
                     <div class="footer-contact-info">
                         <p><i class="fa-solid fa-location-dot"></i> 89 Hoàng Hoa Thám, Phường 10, Đà Lạt</p>
-                        <p><i class="fa-solid fa-phone"></i> Hotline: 0987.654.321</p>
+                        <p><i class="fa-solid fa-phone"></i> Hotline: 0854.604.339</p>
                         <p><i class="fa-solid fa-envelope"></i> booking@theharmony.vn</p>
                         <p><i class="fa-brands fa-rocketchat"></i> Hỗ trợ Zalo/Messenger 24/7</p>
                     </div>

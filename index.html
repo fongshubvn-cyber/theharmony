@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Harmony - Booking Villa Đà Lạt | Nghỉ Dưỡng Sang Trọng</title>
-    <meta name="description" content="Hệ thống đặt phòng biệt thự nghỉ dưỡng cao cấp tại Đà Lạt. Cung cấp các dòng Villa Gia Đình ấm cúng và Villa Luxury sang chảnh bậc nhất.">
+    <meta name="description" content="Hệ thống đặt phòng homestay, home & villa nghỉ dưỡng tại Đà Lạt. Cung cấp các dòng Villa Gia Đình ấm cúng và Villa Luxury sang chảnh bậc nhất.">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
@@ -53,7 +53,7 @@
                         <input type="text" id="search-keyword" placeholder="Nhập tên, địa chỉ, từ khóa...">
                     </div>
                     <div class="search-input-group">
-                        <label for="filter-category"><i class="fa-solid fa-layer-group"></i> Phân khúc biệt thự</label>
+                        <label for="filter-category"><i class="fa-solid fa-layer-group"></i> Phân khúc chỗ nghỉ</label>
                         <select id="filter-category">
                             <option value="all">Tất cả</option>
                             <option value="family">Gia đình</option>
@@ -83,7 +83,7 @@
 
                 <!-- Bottom Row: Expanded Amenities Filter (Advanced Mode) -->
                 <div class="filter-amenities-row collapsed">
-                    <span class="amenities-row-title"><i class="fa-solid fa-circle-check"></i> Chọn tiện ích biệt thự (Nâng cao):</span>
+                    <span class="amenities-row-title"><i class="fa-solid fa-circle-check"></i> Chọn tiện ích (Nâng cao):</span>
                     <div class="amenities-checkbox-grid" id="filter-amenities-list">
                         <label class="amenity-checkbox-label">
                             <input type="checkbox" value="Bể bơi" class="amenity-filter-cb">
@@ -137,11 +137,52 @@
             </div>
         </section>
 
+        <!-- Core Benefits Section (Element 7) -->
+        <section class="benefits-section" id="benefits-section">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag">Thế Mạnh Của Chúng Tôi</span>
+                    <h2 class="section-title">Tại Sao Nên Lựa Chọn The Harmony?</h2>
+                    <p class="section-desc">Chúng tôi mang lại trải nghiệm nghỉ dưỡng thoải mái bằng sự chuyên nghiệp, tận tâm và chất lượng dịch vụ chu đáo nhất.</p>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fa-solid fa-house-circle-check"></i>
+                        </div>
+                        <h3 class="benefit-card-title">Chỗ Ở Đúng Mô Tả</h3>
+                        <p class="benefit-card-desc">Hình ảnh và thông tin được kiểm duyệt kỹ, hạn chế tối đa tình trạng sai lệch giữa ảnh và thực tế.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3 class="benefit-card-title">Hỗ Trợ Nhanh Chóng</h3>
+                        <p class="benefit-card-desc">Đội ngũ luôn sẵn sàng hỗ trợ trước, trong và sau chuyến đi khi có bất kỳ vấn đề phát sinh.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <h3 class="benefit-card-title">Giá Cả Minh Bạch</h3>
+                        <p class="benefit-card-desc">Chi phí được báo rõ ràng ngay từ đầu, tuyệt đối không phát sinh các phụ phí ẩn khi nhận phòng.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h3 class="benefit-card-title">Chọn Lọc Chất Lượng</h3>
+                        <p class="benefit-card-desc">Chỉ liên kết các villa & homestay dịch vụ tốt, không gian sạch sẽ để bạn yên tâm nghỉ dưỡng.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Segment Section -->
         <section class="segment-section text-center" id="villas-section">
             <div class="container">
                 <span class="section-tag">Bộ Sưu Tập Của Chúng Tôi</span>
-                <h2 class="section-title">Khám Phá Các Căn Biệt Thự Nổi Bật</h2>
+                <h2 class="section-title">Khám Phá Các Căn Home & Villa Nổi Bật</h2>
                 <p class="section-desc">Chúng tôi phân phối 2 phân khúc chính được thiết kế riêng biệt để đáp ứng hoàn hảo mọi nhu cầu nghỉ dưỡng của quý khách.</p>
                 
                 <div class="segment-tabs">
@@ -153,6 +194,58 @@
                 <!-- Villa Grid -->
                 <div class="villa-grid" id="villa-list-grid">
                     <!-- Dynamic cards will be injected here via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Testimonials Section (Element 8) -->
+        <section class="testimonials-section" id="testimonials-section">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag" style="color: var(--color-accent);">Khách Hàng Đánh Giá</span>
+                    <h2 class="section-title">Trải Nghiệm Thực Tế Từ Khách Hàng</h2>
+                    <p class="section-desc">Hơn 98% khách hàng bày tỏ sự hài lòng tuyệt đối và mong muốn quay lại The Harmony trong lần nghỉ dưỡng tiếp theo tại Đà Lạt.</p>
+                </div>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Tôi đã thuê căn Horizon Estate cho đại gia đình 15 người nghỉ hè. Căn villa có view ngắm hoàng hôn thung lũng mây đẹp xuất sắc. Hồ bơi nước ấm vô cực là điểm cộng lớn nhất, lũ trẻ thích mê. Quản gia hỗ trợ nướng BBQ nhiệt tình."</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&fit=crop" alt="Chị Nguyễn Lan Anh" class="author-avatar">
+                            <div class="author-info">
+                                <h4 class="author-name">Chị Nguyễn Lan Anh</h4>
+                                <span class="author-role">Doanh nhân - Hà Nội</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Pinecrest Cozy Retreat mang phong cách Bắc Âu rất mộc mạc, ấm cúng. Phòng khách có lò sưởi đốt củi thật rất thú vị. Vườn hồng rực rỡ hoa là nơi cả nhà ngồi nhâm nhi trà chiều cực chill. Dịch vụ dọn dẹp sạch sẽ chu đáo."</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&fit=crop" alt="Anh Trần Hoàng Minh" class="author-avatar">
+                            <div class="author-info">
+                                <h4 class="author-name">Anh Trần Hoàng Minh</h4>
+                                <span class="author-role">Nhiếp ảnh gia - TP.HCM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Một không gian nghỉ dưỡng vô cùng cao cấp. Dinh thự Obsidian có thiết kế đen tuyền hiện đại rất độc đáo. Buổi tối nhóm chúng tôi ngồi quây quần bên hố lửa trại uống rượu vang ngắm thung lũng đèn Trại Mát lung linh thật tuyệt."</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop" alt="Chị Lê Minh Hằng" class="author-avatar">
+                            <div class="author-info">
+                                <h4 class="author-name">Chị Lê Minh Hằng</h4>
+                                <span class="author-role">Giám đốc Marketing - TP.HCM</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -172,6 +265,151 @@
                     <button class="btn-primary" id="btn-load-more-dest" style="padding: 12px 30px; font-size: 0.95rem; font-weight: 700; border-radius: var(--border-radius-sm); display: none;">
                         Xem Thêm Điểm Đến <i class="fa-solid fa-chevron-down" style="margin-left: 8px;"></i>
                     </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section (Element 9) -->
+        <section class="faq-section" id="faq-section">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag">Giải Đáp Thắc Mắc</span>
+                    <h2 class="section-title">Câu Hỏi Thường Gặp</h2>
+                    <p class="section-desc">Mọi thắc mắc của bạn về quy trình đặt phòng, tiện ích dịch vụ và chính sách của The Harmony đều được giải đáp chi tiết tại đây.</p>
+                </div>
+                <div class="faq-accordion-container">
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Quy trình đặt Villa tại The Harmony như thế nào?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                <p>Để đặt phòng, quý khách có thể liên hệ trực tiếp qua Zalo, Messenger hoặc Hotline 0854.604.339. Đội ngũ tư vấn sẽ hỗ trợ kiểm tra lịch trống, báo giá chi tiết và hướng dẫn chuyển khoản đặt cọc 50% để giữ chỗ chắc chắn.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Thời gian Nhận phòng (Check-in) và Trả phòng (Check-out) là mấy giờ?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                <p>Thời gian nhận phòng tiêu chuẩn là từ 14:00 và trả phòng trước 12:00 ngày hôm sau. Trong trường hợp có nhu cầu nhận phòng sớm hoặc trả phòng muộn hơn, quý khách vui lòng báo trước để quản gia kiểm tra lịch phòng và có phương án sắp xếp (có thể phát sinh phụ phí tùy thời điểm).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Mỗi căn Villa có giới hạn số lượng khách lưu trú hay không?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                <p>Mỗi căn Villa tại The Harmony đều có sức chứa tiêu chuẩn và tối đa riêng (ví dụ: căn Family từ 8-12 khách, căn Luxury từ 15-18 khách). Nếu đoàn khách đi quá số lượng quy định, chúng tôi có thể tính phụ thu người phát sinh để trang bị thêm đệm phụ (extra bed) và đảm bảo chất lượng dịch vụ.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Chúng tôi có thể tự nấu ăn và tổ chức tiệc BBQ tại Villa không?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                <p>Hoàn toàn được. Mỗi căn Villa đều được trang bị nhà bếp hiện đại với đầy đủ thiết bị nấu nướng, gia vị cơ bản và khu vực nướng BBQ ngoài trời. Quản gia sẽ hỗ trợ chuẩn bị than nướng, dọn dẹp sau bữa tiệc nếu quý khách yêu cầu dịch vụ (có phí dọn dẹp tùy thuộc quy mô tiệc).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Chính sách hoàn/hủy đặt phòng như thế nào?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                <p>Hủy trước 14 ngày so với ngày nhận phòng: Quý khách được bảo lưu tiền cọc để đổi ngày đi trong vòng 3 tháng (tùy thuộc vào tình trạng trống của phòng). Hủy trong vòng 14 ngày trước check-in: Chúng tôi rất tiếc không thể hoàn lại tiền cọc.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA / Contact Form Section (Element 10) -->
+        <section class="final-cta-section detail-contact-section" id="contact-section" style="margin-top: 0; border: none; border-radius: 0; background-color: var(--color-bg-light); padding: 80px 0 100px;">
+            <div class="container">
+                <div class="detail-contact-grid">
+                    <!-- Left Column: Contact Info & CTA -->
+                    <div class="detail-contact-info">
+                        <span class="contact-tag"><i class="fa-solid fa-bell-concierge"></i> Nhận Tư Vấn Trực Tiếp</span>
+                        <h2 class="contact-title">Bạn Sẵn Sàng Trải Nghiệm Kỳ Nghỉ Trong Mơ Tại Đà Lạt?</h2>
+                        <p class="contact-desc">Hãy để lại thông tin liên hệ, đội ngũ hỗ trợ của The Harmony sẽ gọi điện tư vấn chi tiết về lịch phòng trống, ưu đãi tốt nhất và các dịch vụ hỗ trợ du lịch Đà Lạt chỉ trong vòng 10 phút.</p>
+                        
+                        <div class="contact-details-list">
+                            <div class="contact-detail-item">
+                                <div class="contact-detail-icon"><i class="fa-solid fa-phone"></i></div>
+                                <div>
+                                    <h4>Hotline tư vấn nhanh</h4>
+                                    <p>0854.604.339 (Chính) hoặc 0908.667.207</p>
+                                </div>
+                            </div>
+                            <div class="contact-detail-item">
+                                <div class="contact-detail-icon"><i class="fa-brands fa-facebook-messenger"></i></div>
+                                <div>
+                                    <h4>Facebook Fanpage</h4>
+                                    <p>facebook.com/dalatvillabooking</p>
+                                </div>
+                            </div>
+                            <div class="contact-detail-item">
+                                <div class="contact-detail-icon"><i class="fa-solid fa-clock"></i></div>
+                                <div>
+                                    <h4>Thời gian hỗ trợ</h4>
+                                    <p>Luôn sẵn sàng hỗ trợ khách hàng 24/7</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Submission Form -->
+                    <div class="detail-contact-form-wrapper" style="box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);">
+                        <form id="homepage-contact-form" class="detail-contact-form">
+                            <input type="hidden" id="form-villa-id" value="general">
+                            <input type="hidden" id="form-villa-name" value="Tư vấn chung (Trang chủ)">
+                            
+                            <div class="form-row-grid">
+                                <div class="form-field">
+                                    <label for="form-name">Họ và Tên *</label>
+                                    <input type="text" id="form-name" required placeholder="Nhập họ tên...">
+                                </div>
+                                <div class="form-field">
+                                    <label for="form-phone">Số Điện Thoại *</label>
+                                    <input type="tel" id="form-phone" required placeholder="Nhập số điện thoại...">
+                                </div>
+                            </div>
+                            <div class="form-row-grid">
+                                <div class="form-field">
+                                    <label for="form-date">Ngày Nhận Phòng Dự Kiến</label>
+                                    <input type="date" id="form-date">
+                                </div>
+                                <div class="form-field">
+                                    <label for="form-guests">Số Khách Dự Kiến</label>
+                                    <input type="number" id="form-guests" min="1" placeholder="Ví dụ: 10 khách">
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label for="form-note">Yêu cầu đặc biệt (Ghi chú)</label>
+                                <textarea id="form-note" rows="3" placeholder="Nhập ghi chú (ví dụ: cần bếp nấu ăn tự phục vụ, hỗ trợ setup tiệc BBQ,...)"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary form-submit-btn">
+                                <i class="fa-solid fa-paper-plane"></i> Gửi Thông Tin Liên Hệ
+                            </button>
+                            <div class="form-success-msg" id="form-success-msg" style="display: none;">
+                                <i class="fa-solid fa-circle-check"></i> Cảm ơn bạn! Yêu cầu của bạn đã được tiếp nhận thành công. Chúng tôi sẽ gọi điện tư vấn lại ngay.
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
@@ -199,7 +437,7 @@
                     <h4 class="footer-title">Liên Hệ Trực Tiếp</h4>
                     <div class="footer-contact-info">
                         <p><i class="fa-solid fa-location-dot"></i> 89 Hoàng Hoa Thám, Phường 10, Đà Lạt</p>
-                        <p><i class="fa-solid fa-phone"></i> Hotline: 0987.654.321</p>
+                        <p><i class="fa-solid fa-phone"></i> Hotline: 0854.604.339</p>
                         <p><i class="fa-solid fa-envelope"></i> booking@theharmony.vn</p>
                         <p><i class="fa-brands fa-rocketchat"></i> Hỗ trợ Zalo/Messenger 24/7</p>
                     </div>
@@ -210,6 +448,29 @@
             </div>
         </div>
     </footer>
+
+    <!-- Sticky Contact Widget (Right Corner) -->
+    <div class="sticky-contact-widget">
+        <!-- Messenger Button -->
+        <a href="https://www.facebook.com/dalatvillabooking" target="_blank" class="sticky-btn messenger" title="Nhắn tin qua Fanpage">
+            <i class="fa-brands fa-facebook-messenger"></i>
+        </a>
+        <!-- Zalo Hotline Button Group -->
+        <div class="sticky-btn-group">
+            <div class="hotline-submenu">
+                <a href="https://zalo.me/0854604339" target="_blank" class="submenu-item main-hotline">
+                    <i class="fa-solid fa-comment-dots"></i> Zalo: 0854.604.339 (Chính)
+                </a>
+                <a href="https://zalo.me/0908667207" target="_blank" class="submenu-item">
+                    <i class="fa-solid fa-comment-dots"></i> Zalo: 0908.667.207
+                </a>
+            </div>
+            <button class="sticky-btn zalo-hotline" title="Liên hệ Zalo Hotline" onclick="toggleStickySubmenu(event)">
+                <i class="fa-solid fa-phone"></i>
+                <span class="pulse-ring"></span>
+            </button>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/db.js"></script>

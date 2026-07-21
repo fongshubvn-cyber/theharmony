@@ -16,8 +16,8 @@ const INITIAL_VILLAS = [
             "asset/family_villa_2.png"
         ],
         amenities: ["Bể bơi mini", "Sân nướng BBQ", "Khuôn viên sân vườn", "Phòng bếp đầy đủ tiện nghi", "Smart TV & Karaoke", "Chỗ đậu xe rộng rãi"],
-        shortDescription: "Biệt thự gia đình ấm cúng ẩn mình giữa rừng thông Đà Lạt xanh mát, thích hợp cho nhóm 8-12 người nghỉ dưỡng.",
-        description: "The Harmony Family Pine Villa mang đến không gian yên bình tuyệt đối giữa rừng thông rì rào của Đà Lạt. Biệt thự có lối kiến trúc hiện đại kết hợp các chi tiết gỗ ấm áp, mang lại cảm giác thân thuộc như chính ngôi nhà của bạn.\n\nVới thiết kế 4 phòng ngủ khép kín rộng rãi, đầy đủ ánh sáng tự nhiên từ hệ thống cửa kính lớn nhìn thẳng ra đồi thông, căn villa là lựa chọn hoàn hảo cho các gia đình hoặc nhóm bạn thân tìm kiếm sự riêng tư.\n\nSân vườn ngoài trời được thiết kế sẵn khu vực nướng BBQ tiện lợi, bàn ăn dài cho các buổi tối quây quần ấm cúng dưới làn sương mờ của Đà Lạt. Căn villa trang bị đầy đủ dụng cụ nấu nướng hiện đại, hệ thống âm thanh giải trí gia đình tiện ích.",
+        shortDescription: "Villa gia đình ấm cúng ẩn mình giữa rừng thông Đà Lạt xanh mát, thích hợp cho nhóm 8-12 người nghỉ dưỡng.",
+        description: "The Harmony Family Pine Villa mang đến không gian yên bình tuyệt đối giữa rừng thông rì rào của Đà Lạt. Căn villa có lối kiến trúc hiện đại kết hợp các chi tiết gỗ ấm áp, mang lại cảm giác thân thuộc như chính ngôi nhà của bạn.\n\nVới thiết kế 4 phòng ngủ khép kín rộng rãi, đầy đủ ánh sáng tự nhiên từ hệ thống cửa kính lớn nhìn thẳng ra đồi thông, căn villa là lựa chọn hoàn hảo cho các gia đình hoặc nhóm bạn thân tìm kiếm sự riêng tư.\n\nSân vườn ngoài trời được thiết kế sẵn khu vực nướng BBQ tiện lợi, bàn ăn dài cho các buổi tối quây quần ấm cúng dưới làn sương mờ của Đà Lạt. Căn villa trang bị đầy đủ dụng cụ nấu nướng hiện đại, hệ thống âm thanh giải trí gia đình tiện ích.",
         featured: true,
         createdAt: "2026-07-17T12:00:00Z"
     },
@@ -36,8 +36,8 @@ const INITIAL_VILLAS = [
             "asset/luxury_villa_2.png"
         ],
         amenities: ["Hồ bơi vô cực nước ấm", "Sân BBQ ngoài trời siêu rộng", "Phòng chiếu phim gia đình", "Bàn Bi-a & Giải trí", "Phòng xông hơi Sauna", "Quản gia phục vụ 24/7", "View thung lũng 360 độ"],
-        shortDescription: "Biệt thự siêu sang view thung lũng mây 360 độ với bể bơi nước ấm vô cực đầu tiên tại Đà Lạt.",
-        description: "Tọa lạc tại vị trí đắc địa trên đồi Đống Đa, The Harmony Luxury Horizon Estate là một kiệt tác kiến trúc hiện đại, mở ra tầm nhìn bao trọn thung lũng mây ngút ngàn và toàn cảnh thành phố Đà Lạt thơ mộng.\n\nBiệt thự sở hữu 6 phòng ngủ hạng sang với bồn tắm nằm cao cấp view ngắm mây trời, phòng khách thông tầng ngập tràn ánh sáng và nội thất nhập khẩu xa xỉ. Điểm nhấn đắt giá nhất của dinh thự là hồ bơi vô cực tràn viền sử dụng hệ thống làm nóng nước hiện đại, giúp bạn thư thái ngâm mình ngắm hoàng hôn Đà Lạt rực rỡ.\n\nCác tiện ích đi kèm đẳng cấp bao gồm phòng chiếu phim mini tiêu chuẩn cao, khu giải trí có bàn Bi-a cao cấp, phòng xông hơi sauna đá nóng thư giãn. Đội ngũ quản gia chuyên nghiệp luôn sẵn sàng hỗ trợ chuẩn bị tiệc BBQ ngoài trời hay các bữa tiệc sang trọng theo yêu cầu.",
+        shortDescription: "Villa siêu sang view thung lũng mây 360 độ với bể bơi nước ấm vô cực đầu tiên tại Đà Lạt.",
+        description: "Tọa lạc tại vị trí đắc địa trên đồi Đống Đa, The Harmony Luxury Horizon Estate là một kiệt tác kiến trúc hiện đại, mở ra tầm nhìn bao trọn thung lũng mây ngút ngàn và toàn cảnh thành phố Đà Lạt thơ mộng.\n\nVilla sở hữu 6 phòng ngủ hạng sang với bồn tắm nằm cao cấp view ngắm mây trời, phòng khách thông tầng ngập tràn ánh sáng và nội thất nhập khẩu xa xỉ. Điểm nhấn đắt giá nhất của dinh thự là hồ bơi vô cực tràn viền sử dụng hệ thống làm nóng nước hiện đại, giúp bạn thư thái ngâm mình ngắm hoàng hôn Đà Lạt rực rỡ.\n\nCác tiện ích đi kèm đẳng cấp bao gồm phòng chiếu phim mini tiêu chuẩn cao, khu giải trí có bàn Bi-a cao cấp, phòng xông hơi sauna đá nóng thư giãn. Đội ngũ quản gia chuyên nghiệp luôn sẵn sàng hỗ trợ chuẩn bị tiệc BBQ ngoài trời hay các bữa tiệc sang trọng theo yêu cầu.",
         featured: true,
         createdAt: "2026-07-17T12:10:00Z"
     },
@@ -76,8 +76,8 @@ const INITIAL_VILLAS = [
             "asset/luxury_villa_1.png"
         ],
         amenities: ["Bếp sưởi lửa trại ngoài trời", "Hầm rượu vang", "Kính thiên văn ngắm sao", "Sân golf mini", "Dịch vụ trà chiều hoàng hôn", "Smart Home toàn diện"],
-        shortDescription: "Biệt thự phong cách Luxury Obsidian tối giản sang trọng với khu đốt lửa trại ngắm thung lũng đèn Trại Mát về đêm.",
-        description: "Nằm tách biệt trên ngọn đồi thơ mộng hướng thẳng về phía thung lũng đèn Trại Mát lung linh, The Harmony Obsidian Mansion mang sắc đen huyền bí kết hợp gỗ trầm ấm tạo nên một không gian nghỉ dưỡng cực kỳ tinh tế và đẳng cấp.\n\nMansion sở hữu hệ thống kính thiên văn chuyên nghiệp phục vụ trải nghiệm săn sao và ngắm thung lũng đèn lung linh về đêm. Sân thượng rộng lớn được trang bị hố lửa sưởi ấm ngoài trời thiết kế chìm ấn tượng, nơi lý tưởng để thưởng thức ly vang Đà Lạt hảo hạng giữa không khí se lạnh.\n\nTất cả các thiết bị trong nhà đều được điều khiển thông minh qua hệ thống Smart Home hiện đại. Căn biệt thự hứa hẹn sẽ mang đến trải nghiệm nghỉ dưỡng khác biệt, cao cấp khó quên cho đoàn khách quý tộc.",
+        shortDescription: "Villa phong cách Luxury Obsidian tối giản sang trọng với khu đốt lửa trại ngắm thung lũng đèn Trại Mát về đêm.",
+        description: "Nằm tách biệt trên ngọn đồi thơ mộng hướng thẳng về phía thung lũng đèn Trại Mát lung linh, The Harmony Obsidian Mansion mang sắc đen huyền bí kết hợp gỗ trầm ấm tạo nên một không gian nghỉ dưỡng cực kỳ tinh tế và đẳng cấp.\n\nMansion sở hữu hệ thống kính thiên văn chuyên nghiệp phục vụ trải nghiệm săn sao và ngắm thung lũng đèn lung linh về đêm. Sân thượng rộng lớn được trang bị hố lửa sưởi ấm ngoài trời thiết kế chìm ấn tượng, nơi lý tưởng để thưởng thức ly vang Đà Lạt hảo hạng giữa không khí se lạnh.\n\nTất cả các thiết bị trong nhà đều được điều khiển thông minh qua hệ thống Smart Home hiện đại. Căn villa hứa hẹn sẽ mang đến trải nghiệm nghỉ dưỡng khác biệt, cao cấp khó quên cho đoàn khách quý tộc.",
         featured: false,
         createdAt: "2026-07-17T12:30:00Z"
     }
@@ -499,6 +499,43 @@ function resetDestinationsDatabase() {
     return true;
 }
 
+// --- BOOKING/CONTACT REQUESTS DB METHODS ---
+
+function getAllBookings() {
+    return JSON.parse(localStorage.getItem('bookings')) || [];
+}
+
+function saveBooking(bookingData) {
+    const bookings = getAllBookings();
+    const newBooking = {
+        ...bookingData,
+        id: 'booking-' + Date.now(),
+        createdAt: new Date().toISOString(),
+        status: bookingData.status || 'pending'
+    };
+    bookings.push(newBooking);
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    return newBooking;
+}
+
+function updateBookingStatus(id, status) {
+    const bookings = getAllBookings();
+    const index = bookings.findIndex(b => b.id === id);
+    if (index !== -1) {
+        bookings[index].status = status;
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+        return true;
+    }
+    return false;
+}
+
+function deleteBooking(id) {
+    let bookings = getAllBookings();
+    bookings = bookings.filter(b => b.id !== id);
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    return true;
+}
+
 // Export functions to global scope
 window.harmonyDB = {
     getAllVillas,
@@ -511,5 +548,10 @@ window.harmonyDB = {
     getDestinationById,
     saveDestination,
     deleteDestination,
-    resetDestinationsDatabase
+    resetDestinationsDatabase,
+
+    getAllBookings,
+    saveBooking,
+    updateBookingStatus,
+    deleteBooking
 };
