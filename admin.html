@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
 <body>
 
@@ -24,11 +26,28 @@
                 </button>
                 <ul class="nav-links" id="nav-links">
                     <li><a href="index.html" class="nav-link">Trang Chủ</a></li>
-                    <li><a href="index.html#villas-section" class="nav-link">Villa Gia Đình</a></li>
-                    <li><a href="index.html#villas-section" class="nav-link">Villa Luxury</a></li>
+                    <li class="nav-dropdown">
+                        <a href="index.html#villas-section" class="nav-link dropdown-toggle">Villa <i class="fa-solid fa-chevron-down nav-arrow"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="index.html?category=villa-giadinh#villas-section">Gia đình</a></li>
+                            <li><a href="index.html?category=villa-tamtrung#villas-section">Tầm trung</a></li>
+                            <li><a href="index.html?category=villa-caocap#villas-section">Cao cấp</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-dropdown">
+                        <a href="index.html#villas-section" class="nav-link dropdown-toggle">Home <i class="fa-solid fa-chevron-down nav-arrow"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="index.html?category=home-giadinh#villas-section">Gia đình</a></li>
+                            <li><a href="index.html?category=home-nhomban#villas-section">Nhóm bạn</a></li>
+                        </ul>
+                    </li>
                     <li><a href="index.html#destinations-section" class="nav-link">Cẩm Nang Du Lịch</a></li>
                     <li><a href="#footer" class="nav-link">Liên Hệ</a></li>
-                    <li><a href="admin.html" class="nav-btn-admin active" style="color: white;">Quản Trị</a></li>
+                    <li>
+                        <a href="admin.html" class="nav-icon-admin active" title="Trang Quản Trị" style="background-color: var(--color-primary); color: #ffffff;">
+                            <img src="asset/logo.png.png" alt="Admin">
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -101,16 +120,16 @@
             <!-- Dashboard Statistics -->
             <div class="admin-stats">
                 <div class="stat-card">
-                    <span>Tổng Số Villa</span>
+                    <span>Tổng Số Chỗ Nghỉ</span>
                     <span id="stat-total">0</span>
                 </div>
                 <div class="stat-card">
-                    <span>Villa Gia Đình</span>
-                    <span id="stat-family">0</span>
+                    <span>Tổng Số Villa</span>
+                    <span id="stat-villa-count">0</span>
                 </div>
                 <div class="stat-card">
-                    <span>Villa Luxury</span>
-                    <span id="stat-luxury">0</span>
+                    <span>Tổng Số Home</span>
+                    <span id="stat-home-count">0</span>
                 </div>
             </div>
 

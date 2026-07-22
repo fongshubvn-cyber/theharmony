@@ -4,7 +4,7 @@ const INITIAL_VILLAS = [
     {
         id: "harmony-villa-family-1",
         name: "The Harmony Family Pine Villa",
-        category: "family",
+        category: "villa-giadinh",
         address: "Đường Khởi Nghĩa Bắc Sơn, Phường 10, Đà Lạt",
         bedrooms: 4,
         bathrooms: 4,
@@ -15,16 +15,16 @@ const INITIAL_VILLAS = [
             "asset/family_villa_1.png",
             "asset/family_villa_2.png"
         ],
-        amenities: ["Bể bơi mini", "Sân nướng BBQ", "Khuôn viên sân vườn", "Phòng bếp đầy đủ tiện nghi", "Smart TV & Karaoke", "Chỗ đậu xe rộng rãi"],
+        amenities: ["Bình nước nóng", "Sân nướng BBQ", "Khuôn viên sân vườn", "Phòng bếp đầy đủ tiện nghi", "Smart TV & Karaoke", "Chỗ đậu xe rộng rãi"],
         shortDescription: "Villa gia đình ấm cúng ẩn mình giữa rừng thông Đà Lạt xanh mát, thích hợp cho nhóm 8-12 người nghỉ dưỡng.",
-        description: "The Harmony Family Pine Villa mang đến không gian yên bình tuyệt đối giữa rừng thông rì rào của Đà Lạt. Căn villa có lối kiến trúc hiện đại kết hợp các chi tiết gỗ ấm áp, mang lại cảm giác thân thuộc như chính ngôi nhà của bạn.\n\nVới thiết kế 4 phòng ngủ khép kín rộng rãi, đầy đủ ánh sáng tự nhiên từ hệ thống cửa kính lớn nhìn thẳng ra đồi thông, căn villa là lựa chọn hoàn hảo cho các gia đình hoặc nhóm bạn thân tìm kiếm sự riêng tư.\n\nSân vườn ngoài trời được thiết kế sẵn khu vực nướng BBQ tiện lợi, bàn ăn dài cho các buổi tối quây quần ấm cúng dưới làn sương mờ của Đà Lạt. Căn villa trang bị đầy đủ dụng cụ nấu nướng hiện đại, hệ thống âm thanh giải trí gia đình tiện ích.",
+        description: "The Harmony Family Pine Villa mang đến không gian yên bình tuyệt đối giữa rừng thông rì rào của Đà Lạt. Căn villa có lối kiến trúc hiện đại kết hợp các chi tiết gỗ ấm áp, mang lại cảm giác thân thuộc như chính ngôi nhà của bạn.\n\nVới thiết kế 4 phòng ngủ khép kín rộng rãi, đầy đủ ánh sáng tự nhiên từ hệ thống cửa kính lớn nhìn thẳng ra đồi thông, căn villa là lựa chọn hoàn hảo cho các gia đình hoặc nhóm bạn thân tìm kiếm sự riêng tư.\n\nSân vườn ngoài trời được thiết kế sẵn khu vực nướng BBQ tiện lợi, bàn ăn dài cho các buổi tối quây quản ấm cúng dưới làn sương mờ của Đà Lạt. Căn villa trang bị đầy đủ dụng cụ nấu nướng hiện đại, hệ thống âm thanh giải trí gia đình tiện ích.",
         featured: true,
         createdAt: "2026-07-17T12:00:00Z"
     },
     {
         id: "harmony-villa-luxury-1",
         name: "The Harmony Luxury Horizon Estate",
-        category: "luxury",
+        category: "villa-caocap",
         address: "Đường Đống Đa, Phường 3, Đà Lạt",
         bedrooms: 6,
         bathrooms: 7,
@@ -44,7 +44,7 @@ const INITIAL_VILLAS = [
     {
         id: "harmony-villa-family-2",
         name: "Pinecrest Cozy Family Retreat",
-        category: "family",
+        category: "home-giadinh",
         address: "Đường Hùng Vương, Phường 11, Đà Lạt",
         bedrooms: 3,
         bathrooms: 3,
@@ -57,14 +57,14 @@ const INITIAL_VILLAS = [
         ],
         amenities: ["Sân vườn nhiều hoa", "Bếp sưởi trong nhà", "Khu vui chơi trẻ em", "Dụng cụ BBQ ngoài trời", "Bếp nấu tự phục vụ"],
         shortDescription: "Villa phong cách Bắc Âu mộc mạc với lò sưởi ấm cúng và vườn hồng xinh xắn quanh năm khoe sắc.",
-        description: "Pinecrest Cozy Family Retreat được thiết kế theo phong cách Cottage Bắc Âu với gạch đỏ và gỗ thông tự nhiên. Không gian mang tông màu ấm cúng chủ đạo, có lò sưởi đốt củi thật tại phòng khách - nơi gia đình bạn có thể cùng nhau nướng khoai và trò chuyện trong đêm lạnh Đà Lạt.\n\nVilla gồm 3 phòng ngủ nhỏ nhắn, thiết kế tinh tế với cửa sổ nhìn ra vườn hoa hồng ngoại quanh nhà. Sân vườn ngập tràn hoa cỏ là không gian lý tưởng để đọc sách, uống trà chiều, hay để trẻ nhỏ vui chơi an toàn. Căn bếp nhỏ đầy đủ gia vị sẵn sàng để bạn trổ tài nấu nướng cho gia đình.",
+        description: "Pinecrest Cozy Family Retreat được thiết kế theo phong cách Cottage Bắc Âu với gạch đỏ và gỗ thông tự nhiên. Không gian mang tông màu ấm cúng chủ đạo, có lò sưởi đóng củi thật tại phòng khách - nơi gia đình bạn có thể cùng nhau nướng khoai và trò chuyện trong đêm lạnh Đà Lạt.\n\nVilla gồm 3 phòng ngủ nhỏ nhắn, thiết kế tinh tế với cửa sổ nhìn ra vườn hoa hồng ngoại quanh nhà. Sân vườn ngập tràn hoa cỏ là không gian lý tưởng để đọc sách, uống trà chiều, hay để trẻ nhỏ vui chơi an toàn. Căn bếp nhỏ đầy đủ gia vị sẵn sàng để bạn trổ tài nấu nướng cho gia đình.",
         featured: false,
         createdAt: "2026-07-17T12:20:00Z"
     },
     {
         id: "harmony-villa-luxury-2",
         name: "The Harmony Obsidian Mansion",
-        category: "luxury",
+        category: "home-nhomban",
         address: "Phường 11 (Khu Trại Mát), Đà Lạt",
         bedrooms: 5,
         bathrooms: 6,
@@ -80,6 +80,25 @@ const INITIAL_VILLAS = [
         description: "Nằm tách biệt trên ngọn đồi thơ mộng hướng thẳng về phía thung lũng đèn Trại Mát lung linh, The Harmony Obsidian Mansion mang sắc đen huyền bí kết hợp gỗ trầm ấm tạo nên một không gian nghỉ dưỡng cực kỳ tinh tế và đẳng cấp.\n\nMansion sở hữu hệ thống kính thiên văn chuyên nghiệp phục vụ trải nghiệm săn sao và ngắm thung lũng đèn lung linh về đêm. Sân thượng rộng lớn được trang bị hố lửa sưởi ấm ngoài trời thiết kế chìm ấn tượng, nơi lý tưởng để thưởng thức ly vang Đà Lạt hảo hạng giữa không khí se lạnh.\n\nTất cả các thiết bị trong nhà đều được điều khiển thông minh qua hệ thống Smart Home hiện đại. Căn villa hứa hẹn sẽ mang đến trải nghiệm nghỉ dưỡng khác biệt, cao cấp khó quên cho đoàn khách quý tộc.",
         featured: false,
         createdAt: "2026-07-17T12:30:00Z"
+    },
+    {
+        id: "harmony-villa-mid-1",
+        name: "The Harmony Pine Hills Villa",
+        category: "villa-tamtrung",
+        address: "Đường Triệu Việt Vương, Phường 4, Đà Lạt",
+        bedrooms: 4,
+        bathrooms: 3,
+        capacity: 10,
+        price: "Liên hệ trực tiếp",
+        image: "asset/family_villa_2.png",
+        images: [
+            "asset/family_villa_2.png"
+        ],
+        amenities: ["Sân nướng BBQ rộng", "Phòng khách ấm cúng", "Nhà bếp tự nấu ăn", "Chỗ đậu xe hơi"],
+        shortDescription: "Biệt thự nghỉ dưỡng tầm trung đầy đủ tiện ích, không gian yên tĩnh gần hồ Tuyền Lâm.",
+        description: "The Harmony Pine Hills Villa tọa lạc trên đường Triệu Việt Vương bình yên. Căn chỗ nghỉ thích hợp cho các gia đình hoặc nhóm bạn nhỏ khoảng 8-10 người với mức giá thuê vô cùng hợp lý nhưng vẫn đảm bảo tiện nghi đầy đủ.",
+        featured: true,
+        createdAt: "2026-07-17T12:40:00Z"
     }
 ];
 
@@ -396,13 +415,133 @@ const INITIAL_DESTINATIONS = [
     }
 ];
 
+const INITIAL_REVIEWS = [
+    {
+        id: "rev-1",
+        villaId: "harmony-villa-family-1",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&fit=crop",
+        name: "Nguyễn Hải Yến",
+        date: "12/05/2026",
+        rating: 5,
+        content: "Đại gia đình mình 10 người đã ở đây 3 ngày 2 đêm rất vui vẻ. Villa nằm giữa đồi thông rất mát mẻ, phòng bếp đầy đủ đồ dùng tự nấu ăn. Sân nướng BBQ siêu rộng có sẵn bàn ghế gỗ."
+    },
+    {
+        id: "rev-2",
+        villaId: "harmony-villa-family-1",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&fit=crop",
+        name: "Trần Anh Tú",
+        date: "28/04/2026",
+        rating: 5,
+        content: "Nhân viên hỗ trợ rất chu đáo nhiệt tình. Villa sạch sẽ, phòng ốc thoáng mát view ngắm thông cực đẹp. Chắc chắn sẽ quay lại!"
+    },
+    {
+        id: "rev-3",
+        villaId: "harmony-villa-luxury-1",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop",
+        name: "Chị Nguyễn Lan Anh",
+        date: "15/06/2026",
+        rating: 5,
+        content: "View thung lũng mây đẹp xuất sắc. Điểm cộng lớn nhất là hồ bơi nước ấm vô cực rất sang trọng, tắm buổi chiều ngắm hoàng hôn siêu đẹp. Quản gia túc trực hỗ trợ gia đình 24/7."
+    },
+    {
+        id: "rev-4",
+        villaId: "harmony-villa-luxury-1",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&fit=crop",
+        name: "Anh Phạm Thế Hải",
+        date: "02/06/2026",
+        rating: 5,
+        content: "Trải nghiệm nghỉ dưỡng tuyệt vời, xứng đáng từng xu. Phòng chiếu phim gia đình âm thanh nổi rất xịn, bàn Bi-a chơi cực đã. Nội thất rất đẳng cấp."
+    },
+    {
+        id: "rev-5",
+        villaId: "harmony-villa-family-2",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&fit=crop",
+        name: "Chị Mai Phương",
+        date: "10/06/2026",
+        rating: 5,
+        content: "Phong cách cottage Bắc Âu rất dễ thương. Lò sưởi thật trong nhà đốt ấm cúng cực kỳ, cảm giác rất thơ mộng. Sân vườn nhiều hoa hồng ngoại nở rộ."
+    },
+    {
+        id: "rev-6",
+        villaId: "harmony-villa-family-2",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&fit=crop",
+        name: "Anh Trần Hoàng Minh",
+        date: "20/05/2026",
+        rating: 5,
+        content: "Thích hợp cho gia đình nhỏ tìm kiếm sự bình yên tĩnh lặng. Bếp tự phục vụ đầy đủ gia vị nấu ăn. Mọi ngóc ngách đều sạch sẽ tinh tươm."
+    },
+    {
+        id: "rev-7",
+        villaId: "harmony-villa-luxury-2",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop",
+        name: "Chị Lê Minh Hằng",
+        date: "05/06/2026",
+        rating: 5,
+        content: "Kiến trúc đen tối giản obsidian cực kỳ độc đáo và chất lượng. Tối nhóm mình quây quản bên hố lửa trại chìm ngắm thung lũng đèn Trại Mát siêu đẹp. Kính thiên văn ngắm sao rất thú vị."
+    },
+    {
+        id: "rev-8",
+        villaId: "harmony-villa-luxury-2",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&fit=crop",
+        name: "Anh Hoàng Quốc Việt",
+        date: "24/05/2026",
+        rating: 5,
+        content: "Dịch vụ trà chiều hoàng hôn rất chill. Villa trang bị nhà thông minh điều khiển tiện lợi. Phục vụ chuyên nghiệp 5 sao."
+    },
+    {
+        id: "rev-9",
+        villaId: "harmony-villa-mid-1",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&fit=crop",
+        name: "Chị Khánh Linh",
+        date: "14/06/2026",
+        rating: 5,
+        content: "Villa Triệu Việt Vương giá cả vô cùng hợp lý so với chất lượng nhận được. Không gian yên tĩnh, gần hồ Tuyền Lâm. Sân nướng BBQ rộng rãi."
+    },
+    {
+        id: "rev-10",
+        villaId: "harmony-villa-mid-1",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&fit=crop",
+        name: "Anh Vũ Văn Nam",
+        date: "18/05/2026",
+        rating: 5,
+        content: "Phòng khách ấm cúng, thiết bị đồ gia dụng đầy đủ nấu ăn thoải mái. Rất thích hợp cho nhóm bạn trẻ khoảng 8-10 người đi nghỉ mát."
+    }
+];
+
 // Initialize database
 function initDatabase() {
-    if (!localStorage.getItem('villas')) {
+    let villas = localStorage.getItem('villas');
+    if (!villas) {
         localStorage.setItem('villas', JSON.stringify(INITIAL_VILLAS));
+    } else {
+        try {
+            let parsed = JSON.parse(villas);
+            if (parsed.length === 4 && parsed.some(v => v.category === 'family' || v.category === 'luxury')) {
+                localStorage.setItem('villas', JSON.stringify(INITIAL_VILLAS));
+            } else {
+                let updated = false;
+                parsed.forEach(v => {
+                    if (v.category === 'family') {
+                        v.category = 'villa-giadinh';
+                        updated = true;
+                    } else if (v.category === 'luxury') {
+                        v.category = 'villa-caocap';
+                        updated = true;
+                    }
+                });
+                if (updated) {
+                    localStorage.setItem('villas', JSON.stringify(parsed));
+                }
+            }
+        } catch (e) {
+            localStorage.setItem('villas', JSON.stringify(INITIAL_VILLAS));
+        }
     }
     if (!localStorage.getItem('destinations')) {
         localStorage.setItem('destinations', JSON.stringify(INITIAL_DESTINATIONS));
+    }
+    if (!localStorage.getItem('reviews')) {
+        localStorage.setItem('reviews', JSON.stringify(INITIAL_REVIEWS));
     }
 }
 
@@ -536,6 +675,47 @@ function deleteBooking(id) {
     return true;
 }
 
+// --- REVIEWS DB METHODS ---
+
+function getAllReviews() {
+    initDatabase();
+    return JSON.parse(localStorage.getItem('reviews')) || [];
+}
+
+function getReviewsByVillaId(villaId) {
+    const reviews = getAllReviews();
+    return reviews.filter(r => r.villaId === villaId);
+}
+
+function saveReview(reviewData) {
+    const reviews = getAllReviews();
+    const newReview = {
+        ...reviewData,
+        id: 'rev-' + Date.now(),
+        createdAt: new Date().toISOString()
+    };
+    reviews.push(newReview);
+    localStorage.setItem('reviews', JSON.stringify(reviews));
+    return newReview;
+}
+
+function getVillaRatingStats(villaId) {
+    const reviews = getReviewsByVillaId(villaId);
+    if (reviews.length === 0) {
+        return {
+            average: 5.0,
+            count: 0
+        };
+    }
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    const average = parseFloat((sum / reviews.length).toFixed(1));
+    
+    return {
+        average: isNaN(average) ? 5.0 : average,
+        count: reviews.length
+    };
+}
+
 // Export functions to global scope
 window.harmonyDB = {
     getAllVillas,
@@ -553,5 +733,10 @@ window.harmonyDB = {
     getAllBookings,
     saveBooking,
     updateBookingStatus,
-    deleteBooking
+    deleteBooking,
+
+    getAllReviews,
+    getReviewsByVillaId,
+    saveReview,
+    getVillaRatingStats
 };

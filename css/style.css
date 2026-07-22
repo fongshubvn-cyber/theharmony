@@ -198,19 +198,95 @@ header.scrolled {
     width: 100%;
 }
 
-.nav-btn-admin {
-    background-color: var(--color-primary);
-    color: var(--color-text-light);
-    padding: 8px 20px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: 1px solid var(--color-primary);
+.nav-icon-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(15, 45, 35, 0.05);
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    transition: var(--transition-smooth);
+    border: 1px solid transparent;
+    overflow: hidden;
 }
 
-.nav-btn-admin:hover {
-    background-color: transparent;
-    color: var(--color-primary);
+.nav-icon-admin:hover {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.nav-icon-admin img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    transition: var(--transition-smooth);
+}
+
+.nav-icon-admin:hover img {
+    transform: scale(1.15) rotate(15deg);
+}
+
+/* --- Navigation Dropdowns --- */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-arrow {
+    font-size: 0.7rem;
+    margin-left: 2px;
+    transition: var(--transition-smooth);
+}
+
+.nav-dropdown:hover .nav-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 10px 30px rgba(15, 45, 35, 0.08);
+    padding: 8px 0;
+    list-style: none !important;
+    min-width: 160px;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-smooth);
+    z-index: 1000;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.dropdown-menu li {
+    border-bottom: none !important; /* Reset border in submenus */
+    list-style: none !important;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    transition: var(--transition-smooth);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.dropdown-menu li a:hover {
+    background-color: rgba(15, 45, 35, 0.05);
+    color: var(--color-primary) !important;
 }
 
 /* --- Hero Section --- */
@@ -815,6 +891,10 @@ header.scrolled {
     gap: 10px;
 }
 
+.info-section-title i {
+    color: var(--color-accent);
+}
+
 .info-specs-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -847,22 +927,39 @@ header.scrolled {
 .amenities-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;
     list-style: none;
 }
 
 .amenity-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     font-size: 0.95rem;
     color: var(--color-text-dark);
+    font-weight: 500;
 }
 
-.amenity-item::before {
-    content: '✓';
-    color: var(--color-accent);
-    font-weight: bold;
+.amenity-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(15, 45, 35, 0.05);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(15, 45, 35, 0.08);
+}
+
+.amenity-item:hover .amenity-icon-wrapper {
+    background-color: var(--color-accent);
+    color: #ffffff;
+    border-color: var(--color-accent);
+    transform: scale(1.1);
 }
 
 /* Booking/Contact Sidebar */
@@ -1315,6 +1412,11 @@ header.scrolled {
 .table-badge.luxury {
     background-color: rgba(197, 160, 89, 0.15);
     color: var(--luxury-gold);
+}
+
+.table-badge.home-badge {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
 }
 
 .table-actions {
@@ -2150,11 +2252,39 @@ footer::before {
         font-weight: 700;
     }
 
-    .nav-btn-admin {
-        text-align: center;
-        margin: 12px 0 6px;
-        display: block;
+    .nav-icon-admin {
+        margin: 12px auto 6px;
+        display: inline-flex;
+    }
+
+    /* Mobile Dropdown Styling */
+    .nav-dropdown .dropdown-menu {
+        position: static;
+        transform: none;
+        box-shadow: none;
+        border: none;
+        background-color: rgba(15, 45, 35, 0.03);
+        opacity: 1;
+        pointer-events: auto;
+        display: none;
+        padding: 4px 0 10px;
+        min-width: unset;
         width: 100%;
+        margin-top: -4px;
+        border-radius: var(--border-radius-sm);
+    }
+
+    .nav-dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    .nav-dropdown.active .nav-arrow {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu li a {
+        padding: 8px 30px;
+        font-size: 0.85rem;
     }
 }
 
@@ -2966,4 +3096,345 @@ footer::before {
 
 .submenu-item.main-hotline {
     border-left: 3px solid var(--color-accent);
+}
+
+/* --- Detail Page Reviews Section --- */
+.reviews-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 40px;
+    background-color: var(--color-bg-light);
+    padding: 30px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 40px;
+    align-items: center;
+}
+
+.rating-average-card {
+    text-align: center;
+    border-right: 1px solid var(--color-border);
+    padding-right: 40px;
+}
+
+.average-score {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.average-stars {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.average-count {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.rating-categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.rating-category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.category-name {
+    width: 140px;
+    color: var(--color-text-dark);
+}
+
+.progress-bar-wrapper {
+    flex-grow: 1;
+    height: 6px;
+    background-color: var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--color-primary);
+    border-radius: 10px;
+}
+
+.category-score {
+    width: 25px;
+    text-align: right;
+    color: var(--color-primary);
+}
+
+/* Reviews List Styles */
+.reviews-list-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.review-item-card {
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background-color: #ffffff;
+    transition: var(--transition-smooth);
+}
+
+.review-item-card:hover {
+    box-shadow: 0 10px 25px var(--color-shadow);
+    border-color: rgba(15, 45, 35, 0.08);
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.review-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.review-user-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.review-date {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.review-stars {
+    color: var(--color-accent);
+    font-size: 0.85rem;
+}
+
+.review-content {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    font-style: italic;
+}
+
+/* Responsive adjustments for reviews */
+@media (max-width: 768px) {
+    .reviews-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .rating-average-card {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 20px;
+    }
+    
+    .reviews-list-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* Add Review Form Styling */
+.add-review-form {
+    background-color: var(--color-bg-light);
+    padding: 30px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.add-review-form .form-row-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .add-review-form .form-row-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+.add-review-form .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-review-form .form-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.add-review-form input[type="text"],
+.add-review-form textarea,
+.add-review-form select {
+    padding: 12px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+    background-color: #ffffff;
+    transition: var(--transition-smooth);
+}
+
+.add-review-form input[type="text"]:focus,
+.add-review-form textarea:focus,
+.add-review-form select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+}
+
+/* Quick View Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(11, 26, 21, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 1100px;
+    height: auto;
+    max-height: 90vh;
+    border-radius: var(--border-radius-md);
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    cursor: pointer;
+    z-index: 10;
+    line-height: 1;
+    transition: var(--transition-smooth);
+}
+
+.modal-close:hover {
+    color: var(--color-accent);
+    transform: rotate(90deg);
+}
+
+.modal-body-container {
+    padding: 40px;
+}
+
+.quick-view-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+}
+
+@media (max-width: 992px) {
+    .quick-view-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .modal-body-container {
+        padding: 30px 20px;
+    }
+}
+
+/* Quick View Card Hover Overlay */
+.villa-card-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-view-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 45, 35, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.villa-card-image:hover .quick-view-overlay {
+    opacity: 1;
+}
+
+.quick-view-overlay span {
+    background-color: #ffffff;
+    color: var(--color-primary);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(10px);
+    transition: var(--transition-smooth);
+}
+
+.villa-card-image:hover .quick-view-overlay span {
+    transform: translateY(0);
 }

@@ -223,12 +223,12 @@ function refreshAdminDashboard() {
     // 1. Refresh Villas
     villasList = window.harmonyDB.getAllVillas();
     const total = villasList.length;
-    const family = villasList.filter(v => v.category === 'family').length;
-    const luxury = villasList.filter(v => v.category === 'luxury').length;
+    const villasCount = villasList.filter(v => v.category && v.category.startsWith('villa-')).length;
+    const homesCount = villasList.filter(v => v.category && v.category.startsWith('home-')).length;
 
     document.getElementById('stat-total').innerText = total;
-    document.getElementById('stat-family').innerText = family;
-    document.getElementById('stat-luxury').innerText = luxury;
+    document.getElementById('stat-villa-count').innerText = villasCount;
+    document.getElementById('stat-home-count').innerText = homesCount;
     renderAdminTable(villasList);
 
     // 2. Refresh Destinations
@@ -273,8 +273,19 @@ function renderAdminTable(villas) {
     }
 
     tbody.innerHTML = villas.map(villa => {
-        const isLuxury = villa.category === 'luxury';
-        const badgeLabel = isLuxury ? 'Luxury' : 'Gia Đình';
+        let badgeLabel = 'Chỗ nghỉ';
+        if (villa.category === 'villa-giadinh') badgeLabel = 'Villa Gia Đình';
+        else if (villa.category === 'villa-tamtrung') badgeLabel = 'Villa Tầm Trung';
+        else if (villa.category === 'villa-caocap') badgeLabel = 'Villa Cao Cấp';
+        else if (villa.category === 'home-giadinh') badgeLabel = 'Home Gia Đình';
+        else if (villa.category === 'home-nhomban') badgeLabel = 'Home Nhóm Bạn';
+        
+        let badgeClass = 'family';
+        if (villa.category === 'villa-caocap') {
+            badgeClass = 'luxury';
+        } else if (villa.category && villa.category.startsWith('home-')) {
+            badgeClass = 'home-badge';
+        }
         
         return `
             <tr>

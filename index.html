@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
 <body>
 
@@ -25,11 +27,28 @@
                 </button>
                 <ul class="nav-links" id="nav-links">
                     <li><a href="index.html" class="nav-link active">Trang Chủ</a></li>
-                    <li><a href="#villas-section" class="nav-link" onclick="filterByCategory('family')">Villa Gia Đình</a></li>
-                    <li><a href="#villas-section" class="nav-link" onclick="filterByCategory('luxury')">Villa Luxury</a></li>
+                    <li class="nav-dropdown">
+                        <a href="#villas-section" class="nav-link dropdown-toggle">Villa <i class="fa-solid fa-chevron-down nav-arrow"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#villas-section" onclick="filterByCategory('villa-giadinh')">Gia đình</a></li>
+                            <li><a href="#villas-section" onclick="filterByCategory('villa-tamtrung')">Tầm trung</a></li>
+                            <li><a href="#villas-section" onclick="filterByCategory('villa-caocap')">Cao cấp</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-dropdown">
+                        <a href="#villas-section" class="nav-link dropdown-toggle">Home <i class="fa-solid fa-chevron-down nav-arrow"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#villas-section" onclick="filterByCategory('home-giadinh')">Gia đình</a></li>
+                            <li><a href="#villas-section" onclick="filterByCategory('home-nhomban')">Nhóm bạn</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#destinations-section" class="nav-link">Cẩm Nang Du Lịch</a></li>
-                    <li><a href="#footer" class="nav-link">Liên Hệ</a></li>
-                    <li><a href="admin.html" class="nav-btn-admin">Quản Trị</a></li>
+                    <li><a href="#contact-section" class="nav-link">Liên Hệ</a></li>
+                    <li>
+                        <a href="admin.html" class="nav-icon-admin" title="Trang Quản Trị">
+                            <img src="asset/logo.png.png" alt="Admin">
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -469,6 +488,16 @@
                 <i class="fa-solid fa-phone"></i>
                 <span class="pulse-ring"></span>
             </button>
+        </div>
+    </div>
+
+    <!-- Quick View Modal Container -->
+    <div id="quick-view-modal" class="modal-overlay" onclick="closeQuickView()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeQuickView()">&times;</button>
+            <div id="quick-view-body" class="modal-body-container">
+                <!-- Dynamically injected via JS -->
+            </div>
         </div>
     </div>
 
