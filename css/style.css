@@ -4,7 +4,7 @@
 */
 
 /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Pinyon+Script&display=swap');
 
 /* --- Root variables (Variables System) --- */
 :root {
@@ -152,15 +152,28 @@ header.scrolled {
 }
 
 .nav-logo-text {
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.55rem;
     letter-spacing: 0.5px;
-    color: var(--color-primary);
+    display: flex;
+    align-items: center;
 }
 
-.nav-logo-text span {
-    color: var(--color-accent);
+.nav-logo-text .logo-the {
+    font-family: 'Pinyon Script', 'Great Vibes', cursive;
+    font-size: 2.3rem;
+    font-weight: 400;
+    color: #7a8a82;
+    margin-right: 8px;
+    line-height: 1;
+    transform: translateY(-2px);
+    text-transform: none;
+}
+
+.nav-logo-text .logo-harmony {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1;
 }
 
 .nav-links {
@@ -535,6 +548,27 @@ header.scrolled {
     border-color: rgba(239, 68, 68, 0.3);
 }
 
+.btn-search-submit {
+    background-color: var(--color-primary);
+    color: white;
+    border: 1px solid var(--color-primary);
+    padding: 6px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-search-submit:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
+}
+
 /* --- Villa Segment Options --- */
 .segment-section {
     padding: 80px 0 20px;
@@ -591,7 +625,7 @@ header.scrolled {
 /* --- Villa Grid & Cards --- */
 .villa-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     padding-bottom: 80px;
 }
@@ -1579,24 +1613,31 @@ footer::before {
     .admin-stats {
         grid-template-columns: 1fr;
     }
+    .villa-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    header .container {
-        flex-direction: column;
-        gap: 16px;
-    }
-    .nav-links {
-        gap: 16px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
     .filter-main-row {
         grid-template-columns: 1fr;
     }
     .hero-title {
         font-size: 2rem;
     }
+
+    /* Tinh chỉnh kích thước logo trên mobile */
+    .nav-logo-text {
+        font-size: 1.35rem;
+    }
+    .nav-logo-text .logo-the {
+        font-size: 1.9rem;
+        margin-right: 5px;
+    }
+    .nav-logo img {
+        height: 42px;
+    }
+
     .villa-grid {
         grid-template-columns: 1fr;
     }
@@ -1614,6 +1655,19 @@ footer::before {
     }
     .amenities-list {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-logo-text {
+        font-size: 1.2rem;
+    }
+    .nav-logo-text .logo-the {
+        font-size: 1.65rem;
+        margin-right: 4px;
+    }
+    .nav-logo img {
+        height: 36px;
     }
 }
 

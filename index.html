@@ -8,7 +8,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.1">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
@@ -19,7 +19,7 @@
         <div class="container flex-between">
             <a href="index.html" class="nav-logo">
                 <img src="asset/logo.png.png" alt="The Harmony Logo">
-                <div class="nav-logo-text">The <span>Harmony</span></div>
+                <div class="nav-logo-text"><span class="logo-the">The</span><span class="logo-harmony">Harmony</span></div>
             </a>
             <nav>
                 <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
                     </li>
                     <li><a href="#destinations-section" class="nav-link">Cẩm Nang Du Lịch</a></li>
                     <li><a href="#contact-section" class="nav-link">Liên Hệ</a></li>
+                    <li><a href="#" onclick="window.openPartnerModal(event)" class="nav-link" style="color: var(--color-accent); font-weight: 700;"><i class="fa-solid fa-handshake"></i> Ký Gửi</a></li>
                     <li>
                         <a href="admin.html" class="nav-icon-admin" title="Trang Quản Trị">
                             <img src="asset/logo.png.png" alt="Admin">
@@ -144,12 +145,15 @@
                     <div>
                         <span id="filter-count-msg" class="filter-count-badge">Đang tìm kiếm...</span>
                     </div>
-                    <div style="display: flex; gap: 12px;">
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <button class="btn-toggle-advanced" id="btn-toggle-advanced" type="button">
                             <i class="fa-solid fa-sliders"></i> Bộ lọc nâng cao
                         </button>
                         <button class="btn-clear-filters" id="btn-clear-filters" onclick="resetFilters()" type="button">
                             <i class="fa-solid fa-arrow-rotate-left"></i> Xóa bộ lọc
+                        </button>
+                        <button class="btn-search-submit" id="btn-search-submit" type="button">
+                            <i class="fa-solid fa-magnifying-glass"></i> Tìm Kiếm
                         </button>
                     </div>
                 </div>
@@ -213,6 +217,13 @@
                 <!-- Villa Grid -->
                 <div class="villa-grid" id="villa-list-grid">
                     <!-- Dynamic cards will be injected here via JavaScript -->
+                </div>
+
+                <!-- Load More Villas Container -->
+                <div id="load-more-villas-container" class="text-center" style="margin-top: -40px; margin-bottom: 60px; display: none;">
+                    <button class="btn-primary" id="btn-load-more-villas" style="padding: 12px 30px; font-size: 0.95rem; font-weight: 700; border-radius: var(--border-radius-sm);">
+                        <i class="fa-solid fa-arrow-down"></i> Xem Thêm Chỗ Nghỉ
+                    </button>
                 </div>
             </div>
         </section>
@@ -497,6 +508,104 @@
             <button class="modal-close" onclick="closeQuickView()">&times;</button>
             <div id="quick-view-body" class="modal-body-container">
                 <!-- Dynamically injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Consignment Modal Container -->
+    <div id="partner-modal" class="modal-overlay" onclick="window.closePartnerModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 650px;">
+            <button class="modal-close" onclick="window.closePartnerModal()">&times;</button>
+            <div class="modal-body-container" style="padding: 30px; max-height: 85vh; overflow-y: auto;">
+                <h3 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 8px; font-family: var(--font-heading); font-weight: 700; display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-handshake" style="color: var(--color-accent);"></i> Ký Gửi Chỗ Nghỉ Đối Tác</h3>
+                <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 24px;">Hợp tác cùng The Harmony để tiếp cận hàng ngàn khách du lịch Đà Lạt. Bài đăng của bạn sẽ được hiển thị ngay sau khi Admin phê duyệt.</p>
+                
+                <form id="partner-consignment-form" onsubmit="window.submitPartnerConsignment(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Tên đối tác *</label>
+                            <input type="text" id="partner-name" required placeholder="Họ và tên của bạn" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Số điện thoại *</label>
+                            <input type="text" id="partner-phone" required placeholder="Số điện thoại liên hệ" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Tên biệt thự / Homestay *</label>
+                        <input type="text" id="partner-villa-name" required placeholder="Ví dụ: The Harmony Pine Hills Villa" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Phân khúc *</label>
+                            <select id="partner-category" required style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                                <option value="villa-giadinh">Villa Gia Đình</option>
+                                <option value="villa-tamtrung">Villa Tầm Trung</option>
+                                <option value="villa-caocap">Villa Cao Cấp</option>
+                                <option value="home-giadinh">Home Gia Đình</option>
+                                <option value="home-nhomban">Home Nhóm Bạn</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Giá thuê mong muốn *</label>
+                            <input type="text" id="partner-price" required placeholder="Ví dụ: 3.500.000đ/đêm" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Địa chỉ chỗ nghỉ *</label>
+                        <input type="text" id="partner-address" required placeholder="Địa chỉ chi tiết tại Đà Lạt" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Số phòng ngủ *</label>
+                            <input type="number" id="partner-bedrooms" required min="1" placeholder="Ví dụ: 4" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Số phòng tắm *</label>
+                            <input type="number" id="partner-bathrooms" required min="1" placeholder="Ví dụ: 4" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Sức chứa tối đa *</label>
+                            <input type="number" id="partner-capacity" required min="1" placeholder="Ví dụ: 12" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Mô tả chi tiết *</label>
+                        <textarea id="partner-description" required placeholder="Giới thiệu về view, các đặc trưng của căn..." rows="3" style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; color: var(--color-text-dark);">Ảnh đại diện chỗ nghỉ *</label>
+                        <input type="file" id="partner-image-file" accept="image/*" required style="width: 100%; font-size: 0.9rem;">
+                        <div id="partner-image-preview" style="margin-top: 10px; display: none;">
+                            <img id="partner-img-prev-el" src="" alt="preview" style="height: 100px; border-radius: 4px; border: 1px solid var(--color-border);">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; color: var(--color-text-dark);">Tiện ích chỗ nghỉ</label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background-color: var(--color-bg-light); padding: 12px; border-radius: 4px; border: 1px solid var(--color-border);">
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Bể bơi"> Bể bơi</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Sân nướng BBQ"> Sân BBQ</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Khuôn viên sân vườn"> Sân vườn</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Phòng bếp đầy đủ tiện nghi"> Bếp nấu</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Smart TV & Karaoke"> Karaoke</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="View thung lũng / rừng thông"> View thung lũng</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Bàn Bi-a giải trí"> Bàn Bi-a</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;"><input type="checkbox" name="partner-amenity" value="Xông hơi Sauna"> Xông hơi</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer;">Gửi Thông Tin Ký Gửi</button>
+                    <div id="partner-form-success" style="display: none; color: #10b981; font-weight: bold; margin-top: 15px; font-size: 0.9rem; text-align: center;">
+                        <i class="fa-solid fa-circle-check"></i> Đã gửi thông tin ký gửi thành công! Hãy đợi Admin phê duyệt.
+                    </div>
+                </form>
             </div>
         </div>
     </div>

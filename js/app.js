@@ -40,6 +40,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Partner file input listener
+    const partnerImageInput = document.getElementById('partner-image-file');
+    if (partnerImageInput) {
+        partnerImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    partnerImageBase64 = event.target.result;
+                    const prevDiv = document.getElementById('partner-image-preview');
+                    const prevEl = document.getElementById('partner-img-prev-el');
+                    if (prevDiv && prevEl) {
+                        prevEl.src = partnerImageBase64;
+                        prevDiv.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
     // Detect active page and execute corresponding functions
     const path = window.location.pathname;
     if (path.includes('detail.html')) {
@@ -47,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // Default to Home page (index.html or root)
         initHomePage();
+        if (typeof checkPartnerDeepLink === 'function') {
+            checkPartnerDeepLink();
+        }
     }
 });
 
@@ -58,6 +82,7 @@ let allVillas = [];
 let currentCategoryFilter = 'all';
 let loadedDestinationsList = [];
 let currentDestinationsLimit = 9;
+let currentVillasLimit = 9;
 let currentSlideIndex = 0;
 let slideInterval;
 
@@ -82,12 +107,21 @@ function initHomePage() {
         renderDestinationsPage();
     }
 
-    // Setup Load More button event listener
+    // Setup Load More button event listener for destinations
     const loadMoreBtn = document.getElementById('btn-load-more-dest');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
             currentDestinationsLimit += 9;
             renderDestinationsPage();
+        });
+    }
+
+    // Setup Load More button event listener for villas
+    const loadMoreVillasBtn = document.getElementById('btn-load-more-villas');
+    if (loadMoreVillasBtn) {
+        loadMoreVillasBtn.addEventListener('click', () => {
+            currentVillasLimit += 9;
+            applyFilters(true); // keep current limit and expand
         });
     }
 
@@ -122,6 +156,36 @@ function initHomePage() {
         amenitiesList.addEventListener('change', (e) => {
             if (e.target.classList.contains('amenity-filter-cb')) {
                 applyFilters();
+            }
+        });
+    }
+
+    // Search button submission scroll behavior
+    const btnSearchSubmit = document.getElementById('btn-search-submit');
+    if (btnSearchSubmit) {
+        btnSearchSubmit.addEventListener('click', () => {
+            applyFilters();
+            const villasSection = document.getElementById('villas-section');
+            if (villasSection) {
+                villasSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    // Support pressing Enter key in search keyword field
+    if (searchKeyword) {
+        searchKeyword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (btnSearchSubmit) {
+                    btnSearchSubmit.click();
+                } else {
+                    applyFilters();
+                    const villasSection = document.getElementById('villas-section');
+                    if (villasSection) {
+                        villasSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
             }
         });
     }
@@ -333,7 +397,11 @@ function handleSearchAndFilter() {
     applyFilters();
 }
 
-function applyFilters() {
+function applyFilters(keepLimit = false) {
+    if (!keepLimit) {
+        currentVillasLimit = 9;
+    }
+
     const searchKeywordInput = document.getElementById('search-keyword');
     const searchKeyword = searchKeywordInput ? searchKeywordInput.value.toLowerCase().trim() : '';
 
@@ -399,6 +467,8 @@ function renderVillas(villas) {
     const grid = document.getElementById('villa-list-grid');
     if (!grid) return;
 
+    const loadMoreContainer = document.getElementById('load-more-villas-container');
+
     if (villas.length === 0) {
         grid.style.display = 'block';
         grid.innerHTML = `
@@ -408,11 +478,25 @@ function renderVillas(villas) {
                 <button onclick="resetFilters()" class="btn-secondary" style="margin-top: 16px;">Xóa Bộ Lọc</button>
             </div>
         `;
+        if (loadMoreContainer) {
+            loadMoreContainer.style.display = 'none';
+        }
         return;
     }
 
+    // Apply maximum display limit (9 items per click/load)
+    const visibleVillas = villas.slice(0, currentVillasLimit);
+
+    if (loadMoreContainer) {
+        if (villas.length > currentVillasLimit) {
+            loadMoreContainer.style.display = 'block';
+        } else {
+            loadMoreContainer.style.display = 'none';
+        }
+    }
+
     grid.style.display = 'grid';
-    grid.innerHTML = villas.map(villa => {
+    grid.innerHTML = visibleVillas.map(villa => {
         let badgeLabel = 'Chỗ Nghỉ';
         if (villa.category === 'villa-giadinh') badgeLabel = 'Villa Gia Đình';
         else if (villa.category === 'villa-tamtrung') badgeLabel = 'Villa Tầm Trung';
@@ -1324,3 +1408,96 @@ window.submitModalReview = function(event, villaId) {
         }, 1500);
     }
 };
+
+// ==========================================
+// PARTNER CONSIGNMENT MODAL CONTROLLER
+// ==========================================
+let partnerImageBase64 = "";
+
+window.openPartnerModal = function(event) {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('partner-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closePartnerModal = function() {
+    const modal = document.getElementById('partner-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+};
+
+window.submitPartnerConsignment = function(event) {
+    event.preventDefault();
+    if (!window.harmonyDB) return;
+
+    const name = document.getElementById('partner-name').value.trim();
+    const phone = document.getElementById('partner-phone').value.trim();
+    const villaName = document.getElementById('partner-villa-name').value.trim();
+    const category = document.getElementById('partner-category').value;
+    const price = document.getElementById('partner-price').value.trim();
+    const address = document.getElementById('partner-address').value.trim();
+    const bedrooms = parseInt(document.getElementById('partner-bedrooms').value) || 1;
+    const bathrooms = parseInt(document.getElementById('partner-bathrooms').value) || 1;
+    const capacity = parseInt(document.getElementById('partner-capacity').value) || 1;
+    const description = document.getElementById('partner-description').value.trim();
+
+    // Collect checked amenities
+    const checkedBoxes = document.querySelectorAll('input[name="partner-amenity"]:checked');
+    const amenities = Array.from(checkedBoxes).map(cb => cb.value);
+
+    // Save consignment as pending approval villa
+    const villaData = {
+        name: villaName,
+        category: category,
+        address: address,
+        bedrooms: bedrooms,
+        bathrooms: bathrooms,
+        capacity: capacity,
+        price: price,
+        description: description,
+        shortDescription: description.substring(0, 120) + (description.length > 120 ? '...' : ''),
+        amenities: amenities,
+        image: partnerImageBase64 || "asset/luxury_villa_1.png", // fallback image if empty
+        partnerName: name,
+        partnerPhone: phone,
+        approvalStatus: 'pending' // start as pending approval!
+    };
+
+    window.harmonyDB.saveVilla(villaData);
+
+    const successMsg = document.getElementById('partner-form-success');
+    if (successMsg) {
+        successMsg.style.display = 'block';
+        document.getElementById('partner-consignment-form').reset();
+        
+        // Hide image preview
+        const prevDiv = document.getElementById('partner-image-preview');
+        if (prevDiv) prevDiv.style.display = 'none';
+        partnerImageBase64 = "";
+
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+            window.closePartnerModal();
+            // Refresh grid if on homepage
+            if (typeof applyFilters === 'function') {
+                applyFilters();
+            }
+        }, 3000);
+    }
+};
+
+// Check if openPartner=true is in URL on homepage load
+function checkPartnerDeepLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openPartner') === 'true') {
+        window.openPartnerModal();
+        // Remove param from URL without reloading for clean UI
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+    }
+}
