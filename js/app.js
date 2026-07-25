@@ -87,9 +87,9 @@ let currentSlideIndex = 0;
 let slideInterval;
 
 function initHomePage() {
-    // Load villas
+    // Load villas (exclude pending partner consignments)
     if (window.harmonyDB) {
-        allVillas = window.harmonyDB.getAllVillas();
+        allVillas = window.harmonyDB.getAllVillas().filter(v => v.approvalStatus !== 'pending');
     }
     
     // Render Hero Product
@@ -213,10 +213,6 @@ function initHomePage() {
         });
     }
 
-    // Set filters based on URL hash if clicking nav links
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-
     // Setup FAQ Accordion Toggles
     const faqQuestions = document.querySelectorAll('.faq-question');
     faqQuestions.forEach(question => {
@@ -333,30 +329,10 @@ function updateActiveTab(category) {
     });
 }
 
-function handleHashChange() {
-    const hash = window.location.hash;
-    if (hash === '#villas-section') {
-        // Check if there was a category click
-        // Filter tabs might need to update
-    }
-}
-
 // Function triggered by clicking category tabs
 window.filterByTab = function(category) {
     currentCategoryFilter = category;
-    
-    // Update active tab styling
-    const tabs = ['all', 'family', 'luxury'];
-    tabs.forEach(tab => {
-        const tabEl = document.getElementById(`tab-${tab}`);
-        if (tabEl) {
-            if (tab === category) {
-                tabEl.classList.add('active');
-            } else {
-                tabEl.classList.remove('active');
-            }
-        }
-    });
+    updateActiveTab(category);
 
     // Sync select dropdown in search bar
     const filterSelect = document.getElementById('filter-category');
@@ -376,26 +352,6 @@ window.filterByCategory = function(category) {
         villasSec.scrollIntoView({ behavior: 'smooth' });
     }
 };
-
-function handleSearchAndFilter() {
-    const filterSelect = document.getElementById('filter-category');
-    if (filterSelect) {
-        currentCategoryFilter = filterSelect.value;
-        // Sync segment tab styling
-        const tabs = ['all', 'family', 'luxury'];
-        tabs.forEach(tab => {
-            const tabEl = document.getElementById(`tab-${tab}`);
-            if (tabEl) {
-                if (tab === currentCategoryFilter) {
-                    tabEl.classList.add('active');
-                } else {
-                    tabEl.classList.remove('active');
-                }
-            }
-        });
-    }
-    applyFilters();
-}
 
 function applyFilters(keepLimit = false) {
     if (!keepLimit) {
@@ -825,14 +781,14 @@ function renderDestinations(destinations) {
                 </div>
                 <div class="destination-card-content">
                     <span class="destination-card-tag ${dest.category || 'checkin'}">${categoryLabel}</span>
-                    <h3 class="destination-card-title" style="font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">${dest.title}</h3>
-                    <p class="destination-card-desc" style="margin-bottom: 16px;">${dest.shortDescription}</p>
-                    
-                    <div class="destination-card-footer" style="margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(18, 62, 48, 0.08); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                        <span class="destination-card-address" style="margin-bottom: 0; font-size: 0.8rem; color: var(--color-text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 60%;" title="${dest.address}">
+                    <h3 class="destination-card-title">${dest.title}</h3>
+                    <p class="destination-card-desc">${dest.shortDescription}</p>
+
+                    <div class="destination-card-footer">
+                        <span class="destination-card-address" title="${dest.address}">
                             <i class="fa-solid fa-location-dot"></i> ${dest.address}
                         </span>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest.title + ' ' + dest.address)}" target="_blank" class="destination-card-map-link" style="color: var(--color-primary); font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; white-space: nowrap; transition: var(--transition-smooth);">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest.title + ' ' + dest.address)}" target="_blank" class="destination-card-map-link">
                             <i class="fa-solid fa-map-marked-alt"></i> Bản Đồ
                         </a>
                     </div>
@@ -950,6 +906,10 @@ function renderHeroProduct(villas) {
 
     // Start auto-scroll
     startSlideShow();
+
+    // Pause autoplay while the user is reading/interacting with the slider
+    container.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    container.addEventListener('mouseleave', () => startSlideShow());
 }
 
 function startSlideShow() {
@@ -1145,6 +1105,25 @@ function renderReviews(villaId) {
         const countElem = document.querySelector('.average-count');
         if (countElem) countElem.innerText = `Dựa trên ${stats.count} lượt đánh giá thực tế`;
     }
+
+    renderRatingDistribution(villaId);
+}
+
+function renderRatingDistribution(villaId) {
+    const listEl = document.getElementById('rating-distribution-list');
+    if (!listEl || !window.harmonyDB || !window.harmonyDB.getVillaRatingDistribution) return;
+
+    const distribution = window.harmonyDB.getVillaRatingDistribution(villaId);
+
+    listEl.innerHTML = distribution.map(row => `
+        <div class="rating-category-item">
+            <span class="category-name">${row.star} sao</span>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill" style="width: ${row.percent}%;"></div>
+            </div>
+            <span class="category-score">${row.percent}%</span>
+        </div>
+    `).join('');
 }
 
 // ==========================================
@@ -1176,23 +1155,23 @@ window.openQuickView = function(villaId) {
     const reviewsListHtml = reviews.map(review => {
         const starIcons = '<i class="fa-solid fa-star"></i>'.repeat(review.rating);
         return `
-            <div class="review-item-card" style="margin-bottom: 15px; padding: 15px;">
-                <div class="review-header" style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <div class="review-user-info" style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${review.avatar}" alt="${review.name}" class="review-user-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+            <div class="review-item-card">
+                <div class="review-header">
+                    <div class="review-user-info">
+                        <img src="${review.avatar}" alt="${review.name}" class="review-user-avatar">
                         <div>
-                            <h4 class="review-user-name" style="font-size: 0.85rem; margin: 0; font-weight: 700; color: var(--color-primary);">${review.name}</h4>
-                            <span class="review-date" style="font-size: 0.75rem; color: var(--color-text-muted);">${review.date}</span>
+                            <h4 class="review-user-name">${review.name}</h4>
+                            <span class="review-date">${review.date}</span>
                         </div>
                     </div>
-                    <div class="review-stars" style="font-size: 0.75rem; color: var(--color-accent);">
+                    <div class="review-stars">
                         ${starIcons}
                     </div>
                 </div>
-                <p class="review-content" style="font-size: 0.85rem; margin: 0; color: var(--color-text-muted); line-height: 1.5; font-style: italic;">"${review.content}"</p>
+                <p class="review-content">"${review.content}"</p>
             </div>
         `;
-    }).join('') || '<p style="color: var(--color-text-muted); font-style: italic;">Chưa có đánh giá nào.</p>';
+    }).join('') || '<p class="reviews-empty-msg">Chưa có đánh giá nào.</p>';
 
     const amenitiesHtml = villa.amenities.map(amenity => `
         <li class="amenity-item">
@@ -1204,115 +1183,115 @@ window.openQuickView = function(villaId) {
     `).join('');
 
     const thumbsHtml = (villa.images && villa.images.length > 0 ? villa.images : [villa.image]).map((imgUrl, idx) => `
-        <div class="gallery-thumb ${idx === 0 ? 'active' : ''}" onclick="window.switchModalImage(this, '${imgUrl}')" style="width: 70px; height: 50px; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; flex-shrink: 0;">
-            <img src="${imgUrl}" alt="thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="gallery-thumb ${idx === 0 ? 'active' : ''} quick-view-thumb" onclick="window.switchModalImage(this, '${imgUrl}')">
+            <img src="${imgUrl}" alt="thumbnail">
         </div>
     `).join('');
 
     body.innerHTML = `
         <div class="quick-view-grid">
             <!-- Left Column: Gallery & Info -->
-            <div>
-                <span class="detail-badge ${villa.category}-badge" style="background-color: ${villa.category === 'villa-caocap' ? 'rgba(197, 160, 89, 0.9)' : 'var(--color-primary)'}; color: ${villa.category === 'villa-caocap' ? '#111413' : '#ffffff'}; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 4px; display: inline-block; margin-bottom: 12px;">
+            <div class="quick-view-info-col">
+                <span class="detail-badge ${villa.category}-badge quick-view-badge">
                     ${badgeLabel}
                 </span>
-                <h2 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 8px; font-family: var(--font-heading); font-weight: 700;">${villa.name}</h2>
-                <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 20px;"><i class="fa-solid fa-location-dot" style="color: var(--color-accent);"></i> ${villa.address}</p>
+                <h2 class="quick-view-title">${villa.name}</h2>
+                <p class="quick-view-address"><i class="fa-solid fa-location-dot"></i> ${villa.address}</p>
                 
                 <!-- Main Image -->
-                <div style="border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 12px; border: 1px solid var(--color-border); height: 350px;">
-                    <img id="modal-main-img" src="${villa.image}" alt="${villa.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="quick-view-image-wrapper">
+                    <img id="modal-main-img" src="${villa.image}" alt="${villa.name}">
                 </div>
                 
                 <!-- Thumbnails -->
-                <div id="modal-thumbs-list" style="display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 5px;">
+                <div id="modal-thumbs-list" class="quick-view-thumbs-list">
                     ${thumbsHtml}
                 </div>
 
                 <!-- Specs -->
-                <div class="info-specs-grid" style="grid-template-columns: repeat(3, 1fr); padding: 15px; margin-bottom: 24px; gap: 10px; display: grid; background-color: var(--color-bg-light); border-radius: var(--border-radius-sm);">
-                    <div class="info-spec-item" style="text-align: center; display: flex; flex-direction: column;">
-                        <span style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Phòng ngủ</span>
-                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-top: 5px;">${villa.bedrooms} PN</span>
+                <div class="info-specs-grid">
+                    <div class="info-spec-item">
+                        <span>Phòng ngủ</span>
+                        <span>${villa.bedrooms} PN</span>
                     </div>
-                    <div class="info-spec-item" style="text-align: center; display: flex; flex-direction: column;">
-                        <span style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Phòng tắm</span>
-                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-top: 5px;">${villa.bathrooms} WC</span>
+                    <div class="info-spec-item">
+                        <span>Phòng tắm</span>
+                        <span>${villa.bathrooms} WC</span>
                     </div>
-                    <div class="info-spec-item" style="text-align: center; display: flex; flex-direction: column;">
-                        <span style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Sức chứa</span>
-                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--color-primary); margin-top: 5px;">Max ${villa.capacity} khách</span>
+                    <div class="info-spec-item">
+                        <span>Sức chứa</span>
+                        <span>Max ${villa.capacity} khách</span>
                     </div>
                 </div>
 
                 <!-- Description -->
-                <h3 style="font-size: 1.15rem; color: var(--color-primary); margin-bottom: 12px; border-bottom: 2px solid var(--color-border); padding-bottom: 6px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-compass" style="color: var(--color-accent);"></i> Thông Tin Tổng Quan</h3>
-                <p style="font-size: 0.92rem; color: var(--color-text-muted); line-height: 1.7; white-space: pre-line; margin-bottom: 24px;">${villa.description}</p>
+                <h3 class="quick-view-section-title"><i class="fa-solid fa-compass"></i> Thông Tin Tổng Quan</h3>
+                <p class="quick-view-description">${villa.description}</p>
 
                 <!-- Amenities -->
-                <h3 style="font-size: 1.15rem; color: var(--color-primary); margin-bottom: 12px; border-bottom: 2px solid var(--color-border); padding-bottom: 6px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-crown" style="color: var(--color-accent);"></i> Tiện Ích Nổi Bật</h3>
-                <ul class="amenities-list" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 10px;">
+                <h3 class="quick-view-section-title"><i class="fa-solid fa-crown"></i> Tiện Ích Nổi Bật</h3>
+                <ul class="amenities-list">
                     ${amenitiesHtml}
                 </ul>
             </div>
 
             <!-- Right Column: Booking & Reviews -->
-            <div>
+            <div class="quick-view-booking-col">
                 <!-- Price Box -->
-                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius-md); padding: 20px; margin-bottom: 24px; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Giá Thuê Căn</span>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--color-accent-hover); margin-top: 5px; font-family: var(--font-heading);">${villa.price || 'Liên hệ trực tiếp'}</div>
+                <div class="quick-view-price-box">
+                    <span class="price-label">Giá Thuê Căn</span>
+                    <div class="price-value">${villa.price || 'Liên hệ trực tiếp'}</div>
                 </div>
 
                 <!-- Booking Form -->
-                <div style="background-color: #ffffff; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.1rem; color: var(--color-primary); margin-bottom: 16px; font-family: var(--font-heading); display: flex; align-items: center; gap: 8px; font-weight: 700;"><i class="fa-solid fa-bell-concierge" style="color: var(--color-accent);"></i> Đăng Ký Tư Vấn Đặt Phòng</h3>
+                <div class="quick-view-booking-box">
+                    <h3 class="booking-box-title"><i class="fa-solid fa-bell-concierge"></i> Đăng Ký Tư Vấn Đặt Phòng</h3>
                     <form id="modal-booking-form" onsubmit="window.submitModalBooking(event, '${villa.id}', '${villa.name}')">
-                        <div style="margin-bottom: 12px;">
-                            <input type="text" id="modal-form-name" required placeholder="Họ và tên của bạn *" style="width: 100%; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
+                        <div class="form-group-quick">
+                            <input type="text" id="modal-form-name" required placeholder="Họ và tên của bạn *">
                         </div>
-                        <div style="margin-bottom: 12px;">
-                            <input type="text" id="modal-form-phone" required placeholder="Số điện thoại của bạn *" style="width: 100%; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
+                        <div class="form-group-quick">
+                            <input type="text" id="modal-form-phone" required placeholder="Số điện thoại của bạn *">
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                            <input type="date" id="modal-form-date" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
-                            <input type="number" id="modal-form-guests" placeholder="Số khách" min="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; font-size: 0.9rem;">
+                        <div class="form-grid-quick">
+                            <input type="date" id="modal-form-date">
+                            <input type="number" id="modal-form-guests" placeholder="Số khách" min="1">
                         </div>
-                        <div style="margin-bottom: 16px;">
-                            <textarea id="modal-form-note" placeholder="Ghi chú về yêu cầu đặc biệt của bạn..." rows="2" style="width: 100%; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+                        <div class="form-group-quick">
+                            <textarea id="modal-form-note" placeholder="Ghi chú về yêu cầu đặc biệt của bạn..." rows="2"></textarea>
                         </div>
-                        <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; text-align: center;">Gửi Yêu Cầu Tư Vấn</button>
-                        <div id="modal-booking-success" style="display: none; color: #10b981; font-weight: bold; margin-top: 12px; font-size: 0.85rem; text-align: center;">
+                        <button type="submit" class="btn-primary btn-submit-quick">Gửi Yêu Cầu Tư Vấn</button>
+                        <div id="modal-booking-success" class="booking-success-quick">
                             <i class="fa-solid fa-circle-check"></i> Cảm ơn! Yêu cầu của bạn đã được gửi thành công.
                         </div>
                     </form>
                 </div>
 
                 <!-- Reviews Panel -->
-                <div style="background-color: var(--color-bg-light); border: 1px solid var(--color-border); border-radius: var(--border-radius-md); padding: 24px;">
-                    <h3 style="font-size: 1.1rem; color: var(--color-primary); margin-bottom: 16px; font-family: var(--font-heading); display: flex; align-items: center; gap: 8px; font-weight: 700;"><i class="fa-solid fa-quote-left" style="color: var(--color-accent);"></i> Khách Hàng Đánh Giá</h3>
+                <div class="quick-view-reviews-box">
+                    <h3 class="reviews-box-title"><i class="fa-solid fa-quote-left"></i> Khách Hàng Đánh Giá</h3>
                     
                     <!-- Rating Summary -->
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--color-border);">
-                        <div style="font-size: 2.2rem; font-weight: 700; color: var(--color-primary); line-height: 1;">${ratingStats.average.toFixed(1)}</div>
-                        <div>
-                            <div style="color: var(--color-accent); font-size: 0.85rem; margin-bottom: 4px;">${starsHtml}</div>
-                            <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600;">Dựa trên ${ratingStats.count} lượt đánh giá thực tế</div>
+                    <div class="quick-view-rating-summary">
+                        <div class="rating-number">${ratingStats.average.toFixed(1)}</div>
+                        <div class="rating-stars-info">
+                            <div class="stars-row">${starsHtml}</div>
+                            <div class="rating-count-text">Dựa trên ${ratingStats.count} lượt đánh giá thực tế</div>
                         </div>
                     </div>
 
                     <!-- Reviews List Scroll Box -->
-                    <div id="modal-reviews-list-box" style="max-height: 220px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+                    <div id="modal-reviews-list-box" class="quick-view-reviews-list">
                         ${reviewsListHtml}
                     </div>
 
                     <!-- Add Review inline Form -->
-                    <div style="border-top: 1px dashed var(--color-border); padding-top: 15px;">
-                        <h4 style="font-size: 0.9rem; color: var(--color-primary); margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-pen-to-square" style="color: var(--color-accent);"></i> Viết đánh giá của bạn</h4>
+                    <div class="quick-view-add-review-section">
+                        <h4 class="add-review-title"><i class="fa-solid fa-pen-to-square"></i> Viết đánh giá của bạn</h4>
                         <form id="modal-review-form" onsubmit="window.submitModalReview(event, '${villa.id}')">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                                <input type="text" id="modal-rev-name" required placeholder="Tên của bạn *" style="padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.85rem; font-family: inherit;">
-                                <select id="modal-rev-rating" required style="padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.85rem; font-family: inherit;">
+                            <div class="form-grid-quick">
+                                <input type="text" id="modal-rev-name" required placeholder="Tên của bạn *">
+                                <select id="modal-rev-rating" required>
                                     <option value="5">★★★★★ (5/5)</option>
                                     <option value="4">★★★★☆ (4/5)</option>
                                     <option value="3">★★★☆☆ (3/5)</option>
@@ -1320,11 +1299,11 @@ window.openQuickView = function(villaId) {
                                     <option value="1">★☆☆☆☆ (1/5)</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom: 10px;">
-                                <textarea id="modal-rev-content" required placeholder="Nội dung nhận xét thực tế về trải nghiệm của bạn... *" rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.85rem; font-family: inherit; resize: vertical;"></textarea>
+                            <div class="form-group-quick">
+                                <textarea id="modal-rev-content" required placeholder="Nội dung nhận xét thực tế về trải nghiệm của bạn... *" rows="2"></textarea>
                             </div>
-                            <button type="submit" class="btn-primary" style="padding: 8px 20px; font-size: 0.85rem; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; display: inline-block;">Gửi Nhận Xét</button>
-                            <div id="modal-rev-success" style="display: none; color: #10b981; font-weight: bold; margin-top: 8px; font-size: 0.8rem; text-align: center;">
+                            <button type="submit" class="btn-primary btn-submit-review">Gửi Nhận Xét</button>
+                            <div id="modal-rev-success" class="review-success-quick">
                                 <i class="fa-solid fa-circle-check"></i> Cảm ơn bạn! Đánh giá đã hiển thị ngay.
                             </div>
                         </form>
@@ -1355,9 +1334,24 @@ window.switchModalImage = function(thumbElement, imgUrl) {
     thumbElement.classList.add('active');
 };
 
+// Disables a submit button and swaps its label to a loading state; returns a restore function
+function setSubmitLoading(submitBtn, loadingText) {
+    if (!submitBtn) return () => {};
+    const originalHtml = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}`;
+    return () => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
+    };
+}
+
 window.submitModalBooking = function(event, villaId, villaName) {
     event.preventDefault();
     if (!window.harmonyDB) return;
+
+    const form = document.getElementById('modal-booking-form');
+    const restoreBtn = setSubmitLoading(form.querySelector('button[type="submit"]'), 'Đang gửi...');
 
     const bookingData = {
         villaId: villaId,
@@ -1375,9 +1369,10 @@ window.submitModalBooking = function(event, villaId, villaName) {
     const successMsg = document.getElementById('modal-booking-success');
     if (successMsg) {
         successMsg.style.display = 'block';
-        document.getElementById('modal-booking-form').reset();
+        form.reset();
         setTimeout(() => {
             successMsg.style.display = 'none';
+            restoreBtn();
         }, 5000);
     }
 };
@@ -1385,6 +1380,9 @@ window.submitModalBooking = function(event, villaId, villaName) {
 window.submitModalReview = function(event, villaId) {
     event.preventDefault();
     if (!window.harmonyDB) return;
+
+    const form = document.getElementById('modal-review-form');
+    const restoreBtn = setSubmitLoading(form.querySelector('button[type="submit"]'), 'Đang gửi...');
 
     const reviewData = {
         villaId: villaId,
@@ -1400,10 +1398,11 @@ window.submitModalReview = function(event, villaId) {
     const successMsg = document.getElementById('modal-rev-success');
     if (successMsg) {
         successMsg.style.display = 'block';
-        document.getElementById('modal-review-form').reset();
-        
+        form.reset();
+
         setTimeout(() => {
             successMsg.style.display = 'none';
+            restoreBtn();
             window.openQuickView(villaId);
         }, 1500);
     }
@@ -1434,6 +1433,8 @@ window.closePartnerModal = function() {
 window.submitPartnerConsignment = function(event) {
     event.preventDefault();
     if (!window.harmonyDB) return;
+
+    const restoreBtn = setSubmitLoading(document.getElementById('partner-submit-btn'), 'Đang gửi...');
 
     const name = document.getElementById('partner-name').value.trim();
     const phone = document.getElementById('partner-phone').value.trim();
@@ -1482,6 +1483,7 @@ window.submitPartnerConsignment = function(event) {
 
         setTimeout(() => {
             successMsg.style.display = 'none';
+            restoreBtn();
             window.closePartnerModal();
             // Refresh grid if on homepage
             if (typeof applyFilters === 'function') {

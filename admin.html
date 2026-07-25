@@ -7,7 +7,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="css/style.css?v=2.1">
+    <link rel="stylesheet" href="css/style.css?v=2.3">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
@@ -113,6 +113,9 @@
             </button>
             <button class="admin-tab-btn" id="tab-bookings-btn">
                 <i class="fa-solid fa-envelope-open-text"></i> Yêu Cầu Tư Vấn
+            </button>
+            <button class="admin-tab-btn" id="tab-partners-btn">
+                <i class="fa-solid fa-handshake"></i> Quản Lý Ký Gửi
             </button>
         </div>
 
@@ -228,10 +231,49 @@
                 </table>
             </div>
         </div>
+
+        <!-- Tab Content 4: Partners Management -->
+        <div id="partners-manager-view" class="admin-tab-content">
+            <!-- Partners Statistics -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <span>Tổng Số Ký Gửi</span>
+                    <span id="stat-partner-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Chờ Duyệt</span>
+                    <span id="stat-partner-pending" style="color: #ef4444;">0</span>
+                </div>
+                <div class="stat-card">
+                    <span>Đã Duyệt</span>
+                    <span id="stat-partner-approved" style="color: #10b981;">0</span>
+                </div>
+            </div>
+
+            <!-- Admin Partner Table List -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Đối Tác / SĐT</th>
+                            <th>Chỗ Nghỉ Ký Gửi</th>
+                            <th>Phân Khúc</th>
+                            <th>PN / WC / Sức Chứa</th>
+                            <th>Giá Thuê</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-partner-tbody">
+                        <!-- Dynamic rows will be injected here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <!-- Form Modal Overlay (Add & Edit Villa) -->
-    <div class="modal-overlay" id="villa-modal">
+    <div class="admin-modal-overlay" id="villa-modal">
         <div class="modal-container">
             <div class="modal-header">
                 <h3 id="modal-title">Đăng Villa Mới</h3>
@@ -359,7 +401,7 @@
     </div>
 
     <!-- Destination Modal Overlay (Add & Edit Destination) -->
-    <div class="modal-overlay" id="destination-modal">
+    <div class="admin-modal-overlay" id="destination-modal">
         <div class="modal-container">
             <div class="modal-header" style="background-color: var(--color-primary);">
                 <h3 id="dest-modal-title">Đăng Điểm Đến Mới</h3>
@@ -462,7 +504,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="js/db.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/db.js?v=2.3"></script>
+    <script src="js/admin.js?v=2.3"></script>
 </body>
 </html>

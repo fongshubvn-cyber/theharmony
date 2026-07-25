@@ -1,0 +1,9 @@
+Đây là folder ví dụ minh hoạ cấu trúc info.txt — chưa có ảnh thật.
+
+Hãy chép ảnh villa (.jpg/.jpeg/.png/.webp) vào folder này, ví dụ:
+  1-mat-tien.jpg
+  2-phong-khach.jpg
+  3-san-vuon.jpg
+
+rồi xoá file ghi chú này đi. Nếu chạy script import khi folder chưa có ảnh
+thật, hệ thống sẽ tự dùng ảnh mặc định tạm thời và ghi cảnh báo ra màn hình.

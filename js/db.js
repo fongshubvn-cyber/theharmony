@@ -709,11 +709,26 @@ function getVillaRatingStats(villaId) {
     }
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     const average = parseFloat((sum / reviews.length).toFixed(1));
-    
+
     return {
         average: isNaN(average) ? 5.0 : average,
         count: reviews.length
     };
+}
+
+// Returns the % of reviews at each star level (5 down to 1) for a villa
+function getVillaRatingDistribution(villaId) {
+    const reviews = getReviewsByVillaId(villaId);
+    const total = reviews.length;
+
+    return [5, 4, 3, 2, 1].map(star => {
+        const count = reviews.filter(r => r.rating === star).length;
+        return {
+            star: star,
+            count: count,
+            percent: total === 0 ? 0 : Math.round((count / total) * 100)
+        };
+    });
 }
 
 // Export functions to global scope
@@ -738,5 +753,6 @@ window.harmonyDB = {
     getAllReviews,
     getReviewsByVillaId,
     saveReview,
-    getVillaRatingStats
+    getVillaRatingStats,
+    getVillaRatingDistribution
 };

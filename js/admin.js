@@ -68,10 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
-            if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống quản trị?")) {
-                sessionStorage.removeItem('harmony_logged_in');
-                window.location.reload();
-            }
+            sessionStorage.removeItem('harmony_logged_in');
+            window.location.href = 'admin.html';
         });
     }
 
@@ -82,20 +80,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabVillasBtn = document.getElementById('tab-villas-btn');
     const tabDestinationsBtn = document.getElementById('tab-destinations-btn');
     const tabBookingsBtn = document.getElementById('tab-bookings-btn');
+    const tabPartnersBtn = document.getElementById('tab-partners-btn');
     const villasManagerView = document.getElementById('villas-manager-view');
     const destinationsManagerView = document.getElementById('destinations-manager-view');
     const bookingsManagerView = document.getElementById('bookings-manager-view');
+    const partnersManagerView = document.getElementById('partners-manager-view');
     const btnAddVilla = document.getElementById('btn-add-villa');
     const btnAddDest = document.getElementById('btn-add-dest');
 
-    if (tabVillasBtn && tabDestinationsBtn && tabBookingsBtn) {
+    if (tabVillasBtn && tabDestinationsBtn && tabBookingsBtn && tabPartnersBtn) {
         tabVillasBtn.addEventListener('click', () => {
             tabVillasBtn.classList.add('active');
             tabDestinationsBtn.classList.remove('active');
             tabBookingsBtn.classList.remove('active');
+            tabPartnersBtn.classList.remove('active');
             villasManagerView.classList.add('active');
             destinationsManagerView.classList.remove('active');
             bookingsManagerView.classList.remove('active');
+            partnersManagerView.classList.remove('active');
             btnAddVilla.style.display = 'inline-flex';
             btnAddDest.style.display = 'none';
             refreshAdminDashboard();
@@ -105,9 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
             tabDestinationsBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
             tabBookingsBtn.classList.remove('active');
+            tabPartnersBtn.classList.remove('active');
             destinationsManagerView.classList.add('active');
             villasManagerView.classList.remove('active');
             bookingsManagerView.classList.remove('active');
+            partnersManagerView.classList.remove('active');
             btnAddDest.style.display = 'inline-flex';
             btnAddVilla.style.display = 'none';
             refreshAdminDashboard();
@@ -117,12 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
             tabBookingsBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
             tabDestinationsBtn.classList.remove('active');
+            tabPartnersBtn.classList.remove('active');
             bookingsManagerView.classList.add('active');
             villasManagerView.classList.remove('active');
             destinationsManagerView.classList.remove('active');
+            partnersManagerView.classList.remove('active');
             btnAddVilla.style.display = 'none';
             btnAddDest.style.display = 'none';
             refreshBookingsTab();
+        });
+
+        tabPartnersBtn.addEventListener('click', () => {
+            tabPartnersBtn.classList.add('active');
+            tabVillasBtn.classList.remove('active');
+            tabDestinationsBtn.classList.remove('active');
+            tabBookingsBtn.classList.remove('active');
+            partnersManagerView.classList.add('active');
+            villasManagerView.classList.remove('active');
+            destinationsManagerView.classList.remove('active');
+            bookingsManagerView.classList.remove('active');
+            btnAddVilla.style.display = 'none';
+            btnAddDest.style.display = 'none';
+            refreshPartnersTab();
         });
     }
 
@@ -220,8 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function refreshAdminDashboard() {
     if (!window.harmonyDB) return;
     
-    // 1. Refresh Villas
-    villasList = window.harmonyDB.getAllVillas();
+    // 1. Refresh Villas (Exclude pending partner consignments)
+    const allRawVillas = window.harmonyDB.getAllVillas();
+    villasList = allRawVillas.filter(v => v.approvalStatus !== 'pending');
+    
     const total = villasList.length;
     const villasCount = villasList.filter(v => v.category && v.category.startsWith('villa-')).length;
     const homesCount = villasList.filter(v => v.category && v.category.startsWith('home-')).length;
@@ -251,10 +273,28 @@ function refreshAdminDashboard() {
             const oldBadge = tabBtn.querySelector('.badge-notification');
             if (oldBadge) oldBadge.remove();
             if (pendingBookings > 0) {
-                tabBtn.innerHTML += ` <span class="badge-notification" style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 5px;">${pendingBookings}</span>`;
+                tabBtn.innerHTML += ` <span class="badge-notification">${pendingBookings}</span>`;
             }
         }
     }
+
+    // 4. Refresh Partner Consignments Notification Badge
+    const pendingPartners = allRawVillas.filter(v => v.approvalStatus === 'pending').length;
+    const tabPartnersBtn = document.getElementById('tab-partners-btn');
+    if (tabPartnersBtn) {
+        const oldBadge = tabPartnersBtn.querySelector('.badge-notification');
+        if (oldBadge) oldBadge.remove();
+        if (pendingPartners > 0) {
+            tabPartnersBtn.innerHTML += ` <span class="badge-notification">${pendingPartners}</span>`;
+        }
+    }
+}
+
+// Shared category -> .table-badge modifier class, used by both the villas and partners tables
+function getCategoryBadgeClass(category) {
+    if (category === 'villa-caocap') return 'luxury';
+    if (category && category.startsWith('home-')) return 'home-badge';
+    return 'family';
 }
 
 function renderAdminTable(villas) {
@@ -264,7 +304,7 @@ function renderAdminTable(villas) {
     if (villas.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
+                <td colspan="6" class="text-center table-empty-cell">
                     Không có villa nào trong hệ thống. Hãy đăng villa mới hoặc nhấn nút khôi phục dữ liệu gốc.
                 </td>
             </tr>
@@ -279,14 +319,9 @@ function renderAdminTable(villas) {
         else if (villa.category === 'villa-caocap') badgeLabel = 'Villa Cao Cấp';
         else if (villa.category === 'home-giadinh') badgeLabel = 'Home Gia Đình';
         else if (villa.category === 'home-nhomban') badgeLabel = 'Home Nhóm Bạn';
-        
-        let badgeClass = 'family';
-        if (villa.category === 'villa-caocap') {
-            badgeClass = 'luxury';
-        } else if (villa.category && villa.category.startsWith('home-')) {
-            badgeClass = 'home-badge';
-        }
-        
+
+        const badgeClass = getCategoryBadgeClass(villa.category);
+
         return `
             <tr>
                 <td>
@@ -294,18 +329,18 @@ function renderAdminTable(villas) {
                         <img src="${villa.image || 'asset/luxury_villa_1.png'}" class="table-villa-img" alt="${villa.name}">
                         <div>
                             <div class="table-villa-title">${villa.name}</div>
-                            <small style="color: var(--color-text-muted); display: block; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <small class="table-villa-address">
                                 <i class="fa-solid fa-location-dot"></i> ${villa.address}
                             </small>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <span class="table-badge ${villa.category}">${badgeLabel}</span>
+                    <span class="table-badge ${badgeClass}">${badgeLabel}</span>
                 </td>
                 <td><strong>${villa.bedrooms} PN</strong></td>
                 <td>Tối đa <strong>${villa.capacity}</strong> khách</td>
-                <td style="color: var(--color-accent-hover); font-weight: 600;">${villa.price || 'Liên hệ'}</td>
+                <td class="table-price-cell">${villa.price || 'Liên hệ'}</td>
                 <td>
                     <div class="table-actions">
                         <button onclick="editVilla('${villa.id}')" class="action-icon-btn edit" title="Chỉnh sửa thông tin">
@@ -524,7 +559,7 @@ function renderDestinationsTable(dests) {
     if (dests.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
+                <td colspan="4" class="text-center table-empty-cell">
                     Không có gợi ý điểm đến nào. Nhấp nút "Đăng Điểm Đến Mới" để thêm địa điểm.
                 </td>
             </tr>
@@ -533,18 +568,12 @@ function renderDestinationsTable(dests) {
     }
 
     tbody.innerHTML = dests.map(dest => {
-        let catBadge = "";
-        if (dest.category === 'checkin') {
-            catBadge = `<span class="table-badge" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">Check-in</span>`;
-        } else if (dest.category === 'cafe') {
-            catBadge = `<span class="table-badge" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">Cà phê</span>`;
-        } else if (dest.category === 'sightseeing') {
-            catBadge = `<span class="table-badge" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981;">Tham quan</span>`;
-        } else if (dest.category === 'food') {
-            catBadge = `<span class="table-badge" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;">Ẩm thực</span>`;
-        } else {
-            catBadge = `<span class="table-badge">${dest.category}</span>`;
-        }
+        let catLabel = dest.category;
+        if (dest.category === 'checkin') catLabel = 'Check-in';
+        else if (dest.category === 'cafe') catLabel = 'Cà phê';
+        else if (dest.category === 'sightseeing') catLabel = 'Tham quan';
+        else if (dest.category === 'food') catLabel = 'Ẩm thực';
+        const catBadge = `<span class="table-badge ${dest.category || ''}">${catLabel}</span>`;
 
         return `
             <tr>
@@ -552,13 +581,13 @@ function renderDestinationsTable(dests) {
                     <div class="table-villa-info">
                         <img src="${dest.image || 'asset/dest_lake.png'}" class="table-villa-img" alt="${dest.title}">
                         <div>
-                            <div class="table-villa-title" style="font-weight: 600;">${dest.title}</div>
+                            <div class="table-villa-title">${dest.title}</div>
                         </div>
                     </div>
                 </td>
                 <td>${catBadge}</td>
                 <td>
-                    <small style="color: var(--color-text-muted);">
+                    <small class="table-address-text">
                         <i class="fa-solid fa-location-dot"></i> ${dest.address}
                     </small>
                 </td>
@@ -725,7 +754,7 @@ function renderBookingsTable(bookings) {
     if (bookings.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
+                <td colspan="7" class="text-center table-empty-cell">
                     Chưa có yêu cầu tư vấn hay liên hệ nào từ khách hàng.
                 </td>
             </tr>
@@ -749,16 +778,16 @@ function renderBookingsTable(bookings) {
         let actionBtn = "";
 
         if (b.status === 'pending') {
-            statusBadge = `<span class="table-badge" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); display: inline-block; padding: 4px 10px; border-radius: 4px;">Chờ tư vấn</span>`;
+            statusBadge = `<span class="table-badge status-pending">Chờ tư vấn</span>`;
             actionBtn = `
-                <button onclick="markBookingContacted('${b.id}')" class="action-icon-btn edit" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);" title="Đánh dấu đã liên hệ">
+                <button onclick="markBookingContacted('${b.id}')" class="table-pill-btn success" title="Đánh dấu đã liên hệ">
                     <i class="fa-solid fa-check"></i>
                 </button>
             `;
         } else {
-            statusBadge = `<span class="table-badge" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); display: inline-block; padding: 4px 10px; border-radius: 4px;">Đã liên hệ</span>`;
+            statusBadge = `<span class="table-badge status-done">Đã liên hệ</span>`;
             actionBtn = `
-                <button onclick="markBookingPending('${b.id}')" class="action-icon-btn edit" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);" title="Đánh dấu chờ tư vấn">
+                <button onclick="markBookingPending('${b.id}')" class="table-pill-btn warning" title="Đánh dấu chờ tư vấn">
                     <i class="fa-solid fa-rotate-left"></i>
                 </button>
             `;
@@ -767,28 +796,28 @@ function renderBookingsTable(bookings) {
         return `
             <tr>
                 <td>
-                    <div style="font-weight: bold; color: var(--color-primary);">${b.customerName}</div>
-                    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px;">
+                    <div class="table-cell-title">${b.customerName}</div>
+                    <div class="table-cell-subtext">
                         <i class="fa-solid fa-phone"></i> ${b.customerPhone}
                     </div>
                 </td>
                 <td>
-                    <div style="font-weight: 500;">${b.villaName}</div>
-                    <small style="color: var(--color-text-muted);">ID: ${b.villaId}</small>
+                    <div class="table-cell-title">${b.villaName}</div>
+                    <small class="table-address-text">ID: ${b.villaId}</small>
                 </td>
                 <td>
                     <div><i class="fa-solid fa-calendar-days"></i> ${checkInText}</div>
-                    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 4px;">
+                    <div class="table-cell-subtext">
                         <i class="fa-solid fa-user-group"></i> ${guestsText}
                     </div>
                 </td>
                 <td>
-                    <div style="max-width: 250px; font-size: 0.85rem; color: var(--color-text-dark); white-space: normal; word-break: break-word; line-height: 1.4;">
-                        ${b.note || '<span style="color: #bbb; font-style: italic;">Không có ghi chú</span>'}
+                    <div class="table-cell-note">
+                        ${b.note || '<span class="table-cell-note-empty">Không có ghi chú</span>'}
                     </div>
                 </td>
                 <td>
-                    <small style="color: var(--color-text-muted);">${dateText}</small>
+                    <small class="table-address-text">${dateText}</small>
                 </td>
                 <td>${statusBadge}</td>
                 <td>
@@ -827,5 +856,137 @@ window.deleteBookingItem = function(id) {
         refreshBookingsTab();
         refreshAdminDashboard();
         alert("Đã xóa yêu cầu tư vấn thành công!");
+    }
+};
+
+// =========================================================================
+// PARTNER CONSIGNMENTS CRUD LOGIC
+// =========================================================================
+
+function refreshPartnersTab() {
+    if (!window.harmonyDB) return;
+
+    const allVillas = window.harmonyDB.getAllVillas();
+    const consignments = allVillas.filter(v => v.approvalStatus !== undefined);
+
+    const total = consignments.length;
+    const pending = consignments.filter(c => c.approvalStatus === 'pending').length;
+    const approved = consignments.filter(c => c.approvalStatus === 'approved').length;
+
+    document.getElementById('stat-partner-total').innerText = total;
+    document.getElementById('stat-partner-pending').innerText = pending;
+    document.getElementById('stat-partner-approved').innerText = approved;
+
+    renderPartnersTable(consignments);
+}
+
+function renderPartnersTable(consignments) {
+    const tbody = document.getElementById('admin-partner-tbody');
+    if (!tbody) return;
+
+    if (consignments.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center table-empty-cell">
+                    Chưa có chỗ nghỉ nào được đối tác ký gửi.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const sorted = [...consignments].sort((a, b) => {
+        if (a.approvalStatus === 'pending' && b.approvalStatus !== 'pending') return -1;
+        if (a.approvalStatus !== 'pending' && b.approvalStatus === 'pending') return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    tbody.innerHTML = sorted.map(c => {
+        let badgeLabel = 'Chỗ nghỉ';
+        if (c.category === 'villa-giadinh') badgeLabel = 'Villa Gia Đình';
+        else if (c.category === 'villa-tamtrung') badgeLabel = 'Villa Tầm Trung';
+        else if (c.category === 'villa-caocap') badgeLabel = 'Villa Cao Cấp';
+        else if (c.category === 'home-giadinh') badgeLabel = 'Home Gia Đình';
+        else if (c.category === 'home-nhomban') badgeLabel = 'Home Nhóm Bạn';
+
+        const badgeClass = getCategoryBadgeClass(c.category);
+        let statusBadge = "";
+        let actionBtns = "";
+
+        if (c.approvalStatus === 'pending') {
+            statusBadge = `<span class="table-badge status-pending">Chờ duyệt</span>`;
+            actionBtns = `
+                <button onclick="approvePartnerVilla('${c.id}')" class="table-pill-btn success" title="Duyệt đăng bài">
+                    <i class="fa-solid fa-circle-check"></i> Duyệt
+                </button>
+                <button onclick="rejectPartnerVilla('${c.id}')" class="table-pill-btn danger" title="Từ chối ký gửi">
+                    <i class="fa-solid fa-ban"></i> Từ chối
+                </button>
+            `;
+        } else {
+            statusBadge = `<span class="table-badge status-done">Đã duyệt</span>`;
+            actionBtns = `
+                <button onclick="rejectPartnerVilla('${c.id}')" class="table-pill-btn danger" title="Xóa chỗ nghỉ">
+                    <i class="fa-solid fa-trash-can"></i> Gỡ bỏ
+                </button>
+            `;
+        }
+
+        return `
+            <tr>
+                <td>
+                    <div class="table-cell-title">${c.partnerName || 'N/A'}</div>
+                    <div class="table-cell-subtext">
+                        <i class="fa-solid fa-phone"></i> ${c.partnerPhone || 'N/A'}
+                    </div>
+                </td>
+                <td>
+                    <div class="table-villa-info">
+                        <img src="${c.image || 'asset/luxury_villa_1.png'}" class="table-villa-img" alt="${c.name}">
+                        <div>
+                            <div class="table-villa-title">${c.name}</div>
+                            <small class="table-villa-address">
+                                <i class="fa-solid fa-location-dot"></i> ${c.address}
+                            </small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="table-badge ${badgeClass}">${badgeLabel}</span>
+                </td>
+                <td>
+                    <div><strong>${c.bedrooms}</strong> PN / <strong>${c.bathrooms}</strong> WC</div>
+                    <div class="table-cell-subtext">Max ${c.capacity} khách</div>
+                </td>
+                <td class="table-price-cell">${c.price || 'Liên hệ'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="table-actions">
+                        ${actionBtns}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.approvePartnerVilla = function(id) {
+    if (!window.harmonyDB) return;
+    const villa = window.harmonyDB.getVillaById(id);
+    if (villa) {
+        villa.approvalStatus = 'approved';
+        window.harmonyDB.saveVilla(villa);
+        refreshPartnersTab();
+        refreshAdminDashboard();
+        alert("Đã duyệt chỗ nghỉ thành công! Chỗ nghỉ này hiện đã hiển thị công khai trên trang chủ.");
+    }
+};
+
+window.rejectPartnerVilla = function(id) {
+    if (!confirm("Bạn có chắc chắn muốn từ chối/gỡ bỏ chỗ nghỉ ký gửi này khỏi hệ thống?")) return;
+    if (window.harmonyDB && window.harmonyDB.deleteVilla(id)) {
+        refreshPartnersTab();
+        refreshAdminDashboard();
+        alert("Đã gỡ bỏ chỗ nghỉ ký gửi thành công!");
     }
 };

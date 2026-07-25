@@ -1,0 +1,18 @@
+TITLE: Tên đầy đủ của villa
+PHAN_KHUC: villa-tamtrung
+PHONG_NGU: 4
+PHONG_TAM: 3
+SUC_CHUA: 10
+GIA: Liên hệ trực tiếp
+DIA_CHI: Địa chỉ đầy đủ tại Đà Lạt
+TIEN_ICH: Sân nướng BBQ, Khuôn viên sân vườn, Phòng bếp đầy đủ tiện nghi
+NOI_BAT: false
+---
+NOI_DUNG:
+Câu mở đầu ngắn gọn giới thiệu villa (câu này sẽ tự động dùng làm mô tả ngắn
+hiển thị ngoài card trang chủ, nên viết súc tích trong 1-2 câu).
+
+Đoạn tiếp theo mô tả chi tiết hơn: kiến trúc, không gian, số phòng, view cảnh...
+
+Có thể viết nhiều đoạn, mỗi đoạn cách nhau một dòng trống. Toàn bộ phần
+NOI_DUNG (kể cả câu mở đầu) sẽ hiển thị đầy đủ ở trang chi tiết villa.

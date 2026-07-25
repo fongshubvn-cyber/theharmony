@@ -1,0 +1,22 @@
+TITLE: The Harmony Misty Hills Homestay
+PHAN_KHUC: home-giadinh
+PHONG_NGU: 3
+PHONG_TAM: 2
+SUC_CHUA: 9
+GIA: 2.800.000đ/đêm
+DIA_CHI: Đường Yên Thế, Phường 10, Đà Lạt
+TIEN_ICH: Bếp nấu tự phục vụ, Sân vườn nhiều hoa, Lò sưởi trong nhà, Chỗ đậu xe rộng rãi
+NOI_BAT: false
+---
+NOI_DUNG:
+Homestay nhỏ xinh ẩn mình trong sương sớm Đà Lạt, view trực diện đồi thông và
+thung lũng, phù hợp cho nhóm bạn hoặc gia đình nhỏ 6-9 người tìm không gian
+yên tĩnh.
+
+Không gian được thiết kế mộc mạc với gỗ thông tự nhiên, cửa kính lớn đón trọn
+ánh sáng và sương mù buổi sáng. Phòng khách có lò sưởi thật, là nơi lý tưởng
+để quây quần buổi tối se lạnh.
+
+Khu bếp trang bị đầy đủ dụng cụ nấu nướng để khách tự chế biến bữa ăn, sân
+vườn nhỏ trồng nhiều loại hoa theo mùa, thích hợp chụp ảnh check-in vào sáng
+sớm khi sương còn giăng kín thung lũng.

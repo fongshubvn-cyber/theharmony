@@ -7,7 +7,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="css/style.css?v=2.1">
+    <link rel="stylesheet" href="css/style.css?v=2.3">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
@@ -163,36 +163,9 @@
                         <div class="average-count">Dựa trên 45 lượt đánh giá thực tế</div>
                     </div>
                     
-                    <!-- Progress Bars for categories -->
-                    <div class="rating-categories-list">
-                        <div class="rating-category-item">
-                            <span class="category-name">Sạch sẽ</span>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-fill" style="width: 98%;"></div>
-                            </div>
-                            <span class="category-score">4.9</span>
-                        </div>
-                        <div class="rating-category-item">
-                            <span class="category-name">Dịch vụ & Hỗ trợ</span>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-fill" style="width: 100%;"></div>
-                            </div>
-                            <span class="category-score">5.0</span>
-                        </div>
-                        <div class="rating-category-item">
-                            <span class="category-name">Vị trí & View cảnh</span>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-fill" style="width: 96%;"></div>
-                            </div>
-                            <span class="category-score">4.8</span>
-                        </div>
-                        <div class="rating-category-item">
-                            <span class="category-name">Giá trị xứng đáng</span>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-fill" style="width: 96%;"></div>
-                            </div>
-                            <span class="category-score">4.8</span>
-                        </div>
+                    <!-- Star rating distribution (populated from real reviews via JS) -->
+                    <div class="rating-categories-list" id="rating-distribution-list">
+                        <!-- Dynamic rows injected via JS (renderRatingDistribution) -->
                     </div>
                 </div>
 
@@ -371,7 +344,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/db.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/db.js?v=2.3"></script>
+    <script src="js/app.js?v=2.3"></script>
 </body>
 </html>
