@@ -110,15 +110,15 @@ async function saveVilla(villaData) {
     if (villaData.id) {
         row.updated_at = new Date().toISOString();
         const { error } = await client().from('villas').update(row).eq('id', villaData.id);
-        if (error) { console.error('saveVilla (update) error:', error); return false; }
-        return true;
+        if (error) { console.error('saveVilla (update) error:', error); return { success: false, error: error.message }; }
+        return { success: true };
     }
 
     row.id = 'villa-' + Date.now();
     row.created_at = new Date().toISOString();
     const { error } = await client().from('villas').insert(row);
-    if (error) { console.error('saveVilla (insert) error:', error); return false; }
-    return true;
+    if (error) { console.error('saveVilla (insert) error:', error); return { success: false, error: error.message }; }
+    return { success: true };
 }
 
 async function deleteVilla(id) {
@@ -154,15 +154,15 @@ async function saveDestination(destData) {
     if (destData.id) {
         row.updated_at = new Date().toISOString();
         const { error } = await client().from('destinations').update(row).eq('id', destData.id);
-        if (error) { console.error('saveDestination (update) error:', error); return false; }
-        return true;
+        if (error) { console.error('saveDestination (update) error:', error); return { success: false, error: error.message }; }
+        return { success: true };
     }
 
     row.id = 'dest-' + Date.now();
     row.created_at = new Date().toISOString();
     const { error } = await client().from('destinations').insert(row);
-    if (error) { console.error('saveDestination (insert) error:', error); return false; }
-    return true;
+    if (error) { console.error('saveDestination (insert) error:', error); return { success: false, error: error.message }; }
+    return { success: true };
 }
 
 async function deleteDestination(id) {

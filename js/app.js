@@ -1513,7 +1513,12 @@ window.submitPartnerConsignment = async function(event) {
         approvalStatus: 'pending' // start as pending approval!
     };
 
-    await window.harmonyDB.saveVilla(villaData);
+    const saveResult = await window.harmonyDB.saveVilla(villaData);
+    if (!saveResult.success) {
+        restoreBtn();
+        alert("Gửi ký gửi THẤT BẠI:\n" + saveResult.error + "\n\nVui lòng thử lại.");
+        return;
+    }
 
     const successMsg = document.getElementById('partner-form-success');
     if (successMsg) {

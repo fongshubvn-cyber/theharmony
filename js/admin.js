@@ -232,15 +232,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 let successCount = 0;
+                const failures = [];
                 for (const entry of entries) {
                     if (!entry || !entry.name) continue;
                     // Strip any "id" field so saveVilla always takes the create-new path
                     const { id, ...villaData } = entry;
-                    if (window.harmonyDB && await window.harmonyDB.saveVilla(villaData)) successCount++;
+                    if (!window.harmonyDB) continue;
+                    const result = await window.harmonyDB.saveVilla(villaData);
+                    if (result.success) successCount++;
+                    else failures.push(`${entry.name}: ${result.error}`);
                 }
 
                 await refreshAdminDashboard();
-                alert(`Đã nhập thành công ${successCount}/${entries.length} villa vào hệ thống!`);
+                let msg = `Đã nhập thành công ${successCount}/${entries.length} villa vào hệ thống!`;
+                if (failures.length > 0) msg += `\n\nLỗi:\n` + failures.join('\n');
+                alert(msg);
                 bulkImportFileInput.value = '';
             };
             reader.readAsText(file);
@@ -589,7 +595,11 @@ async function handleFormSubmit(e) {
     }
 
     // Save to Database
-    await window.harmonyDB.saveVilla(villaData);
+    const result = await window.harmonyDB.saveVilla(villaData);
+    if (!result.success) {
+        alert("Lưu villa THẤT BẠI:\n" + result.error + "\n\nVui lòng thử đăng nhập lại rồi thử lại.");
+        return;
+    }
 
     // Close modal, notify, refresh dashboard
     closeModal();
@@ -790,7 +800,11 @@ async function handleDestFormSubmit(e) {
     }
 
     // Save to Database
-    await window.harmonyDB.saveDestination(destData);
+    const destResult = await window.harmonyDB.saveDestination(destData);
+    if (!destResult.success) {
+        alert("Lưu điểm đến THẤT BẠI:\n" + destResult.error + "\n\nVui lòng thử đăng nhập lại rồi thử lại.");
+        return;
+    }
 
     // Close modal, refresh dashboard
     closeDestModal();
@@ -1067,7 +1081,11 @@ window.approvePartnerVilla = async function(id) {
     const villa = await window.harmonyDB.getVillaById(id);
     if (villa) {
         villa.approvalStatus = 'approved';
-        await window.harmonyDB.saveVilla(villa);
+        const result = await window.harmonyDB.saveVilla(villa);
+        if (!result.success) {
+            alert("Duyệt THẤT BẠI:\n" + result.error);
+            return;
+        }
         await refreshPartnersTab();
         await refreshAdminDashboard();
         alert("Đã duyệt chỗ nghỉ thành công! Chỗ nghỉ này hiện đã hiển thị công khai trên trang chủ.");
