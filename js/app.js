@@ -428,6 +428,13 @@ function applyFilters(keepLimit = false) {
     renderVillas(filtered);
 }
 
+// Category -> .villa-card-badge modifier class (villa-caocap = luxury, home-* = home-badge, rest = family)
+function getVillaCardBadgeClass(category) {
+    if (category === 'villa-caocap') return 'luxury';
+    if (category && category.startsWith('home-')) return 'home-badge';
+    return 'family';
+}
+
 function renderVillas(villas) {
     const grid = document.getElementById('villa-list-grid');
     if (!grid) return;
@@ -469,14 +476,16 @@ function renderVillas(villas) {
         else if (villa.category === 'home-giadinh') badgeLabel = 'Home Gia Đình';
         else if (villa.category === 'home-nhomban') badgeLabel = 'Home Nhóm Bạn';
         
-        const badgeClass = villa.category;
+        const badgeClass = getVillaCardBadgeClass(villa.category);
         const cardClass = villa.category === 'villa-caocap' ? 'villa-card luxury-card' : 'villa-card';
+        const hotBadgeHtml = villa.featured ? '<span class="hot-badge"><i class="fa-solid fa-fire"></i> Hot</span>' : '';
 
         return `
             <article class="${cardClass}">
                 <div class="villa-card-image" onclick="openQuickView('${villa.id}')" style="cursor: pointer;" title="Nhấn để xem chi tiết nhanh không cần chuyển trang">
                     <img src="${villa.image || 'asset/luxury_villa_1.png'}" alt="${villa.name}">
                     <span class="villa-card-badge ${badgeClass}">${badgeLabel}</span>
+                    ${hotBadgeHtml}
                     <div class="quick-view-overlay">
                         <span><i class="fa-solid fa-expand"></i> Xem Nhanh</span>
                     </div>
@@ -579,6 +588,12 @@ async function initDetailPage() {
         } else {
             badge.style.backgroundColor = 'var(--color-primary)';
             badge.style.color = '#ffffff';
+        }
+
+        const existingHotBadge = document.getElementById('detail-hot-badge');
+        if (existingHotBadge) existingHotBadge.remove();
+        if (villa.featured) {
+            badge.insertAdjacentHTML('afterend', '<span id="detail-hot-badge" class="hot-badge-inline"><i class="fa-solid fa-fire"></i> Hot</span>');
         }
     }
 
@@ -903,7 +918,8 @@ async function renderHeroProduct(villas) {
                     <div class="hero-product-media">
                         <div class="hero-product-img-wrapper dark-border">
                             <img src="${villa.image || 'asset/luxury_villa_1.png'}" alt="${villa.name}">
-                            <span class="floating-discount-badge">${villa.category === 'luxury' ? 'View Thung Lũng' : 'View Đồi Thông'}</span>
+                            <span class="floating-discount-badge">${villa.category === 'villa-caocap' ? 'View Thung Lũng' : 'View Đồi Thông'}</span>
+                            ${villa.featured ? '<span class="hot-badge"><i class="fa-solid fa-fire"></i> Hot</span>' : ''}
                         </div>
                     </div>
                 </div>
@@ -1222,6 +1238,7 @@ window.openQuickView = async function(villaId) {
                 <span class="detail-badge ${villa.category}-badge quick-view-badge">
                     ${badgeLabel}
                 </span>
+                ${villa.featured ? '<span class="hot-badge-inline"><i class="fa-solid fa-fire"></i> Hot</span>' : ''}
                 <h2 class="quick-view-title">${villa.name}</h2>
                 <p class="quick-view-address"><i class="fa-solid fa-location-dot"></i> ${villa.address}</p>
                 

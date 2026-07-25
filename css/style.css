@@ -633,6 +633,54 @@ header.scrolled {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.villa-card-badge.home-badge {
+    background-color: rgba(59, 130, 246, 0.9);
+    color: #ffffff;
+}
+
+.hot-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #ef4444;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+    z-index: 2;
+}
+
+/* In the hero slider the discount badge already occupies the top-right corner */
+.hero-product-img-wrapper .hot-badge {
+    top: 20px;
+    left: 20px;
+    right: auto;
+}
+
+.hot-badge-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #ef4444;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    margin-bottom: 12px;
+    vertical-align: middle;
+}
+
 .villa-card-content {
     padding: 24px;
     display: flex;
