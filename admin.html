@@ -64,15 +64,15 @@
             </div>
             <form id="admin-login-form">
                 <div class="form-group">
-                    <label for="login-username">Tên đăng nhập *</label>
-                    <input type="text" id="login-username" required placeholder="Nhập tên đăng nhập">
+                    <label for="login-username">Email đăng nhập *</label>
+                    <input type="email" id="login-username" required placeholder="Nhập email đăng nhập">
                 </div>
                 <div class="form-group">
                     <label for="login-password">Mật khẩu *</label>
                     <input type="password" id="login-password" required placeholder="Nhập mật khẩu">
                 </div>
                 <div id="login-error-msg" class="login-error-msg" style="display: none;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Tên đăng nhập hoặc mật khẩu không chính xác!
+                    <i class="fa-solid fa-triangle-exclamation"></i> Email hoặc mật khẩu không chính xác!
                 </div>
                 <button type="submit" class="btn-primary login-btn">Đăng Nhập</button>
             </form>
@@ -88,9 +88,6 @@
                 <p style="color: var(--color-text-muted);">Quản lý danh sách home & villa, thông tin booking và điểm du lịch check-in Đà Lạt.</p>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <button class="btn-secondary" id="btn-reset-db" title="Khôi phục lại danh sách dữ liệu mặc định ban đầu">
-                    <i class="fa-solid fa-rotate-left"></i> Khôi Phục Dữ Liệu Gốc
-                </button>
                 <button class="btn-secondary" id="btn-bulk-import" title="Nhập nhiều villa cùng lúc từ file villa-post-import.json">
                     <i class="fa-solid fa-file-import"></i> Nhập Hàng Loạt
                 </button>
@@ -513,7 +510,9 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="js/db.js?v=2.3"></script>
-    <script src="js/admin.js?v=2.5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js?v=1.0"></script>
+    <script src="js/db.js?v=3.0"></script>
+    <script src="js/admin.js?v=3.0"></script>
 </body>
 </html>

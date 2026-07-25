@@ -1,6 +1,6 @@
 // App Logic for The Harmony - Booking Villa Đà Lạt (Customer Facing)
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Header styling on scroll
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {
@@ -43,20 +43,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Partner file input listener
     const partnerImageInput = document.getElementById('partner-image-file');
     if (partnerImageInput) {
-        partnerImageInput.addEventListener('change', (e) => {
+        partnerImageInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    partnerImageBase64 = event.target.result;
-                    const prevDiv = document.getElementById('partner-image-preview');
-                    const prevEl = document.getElementById('partner-img-prev-el');
-                    if (prevDiv && prevEl) {
-                        prevEl.src = partnerImageBase64;
-                        prevDiv.style.display = 'block';
-                    }
-                };
-                reader.readAsDataURL(file);
+            if (!file || !window.harmonyDB) return;
+
+            const url = await window.harmonyDB.uploadVillaImage(file);
+            if (!url) {
+                alert("Tải ảnh lên thất bại, vui lòng thử lại.");
+                partnerImageInput.value = "";
+                return;
+            }
+            partnerImageUrl = url;
+            const prevDiv = document.getElementById('partner-image-preview');
+            const prevEl = document.getElementById('partner-img-prev-el');
+            if (prevDiv && prevEl) {
+                prevEl.src = partnerImageUrl;
+                prevDiv.style.display = 'block';
             }
         });
     }
@@ -64,10 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Detect active page and execute corresponding functions
     const path = window.location.pathname;
     if (path.includes('detail.html')) {
-        initDetailPage();
+        await initDetailPage();
     } else {
         // Default to Home page (index.html or root)
-        initHomePage();
+        await initHomePage();
         if (typeof checkPartnerDeepLink === 'function') {
             checkPartnerDeepLink();
         }
@@ -86,14 +88,15 @@ let currentVillasLimit = 9;
 let currentSlideIndex = 0;
 let slideInterval;
 
-function initHomePage() {
+async function initHomePage() {
     // Load villas (exclude pending partner consignments)
     if (window.harmonyDB) {
-        allVillas = window.harmonyDB.getAllVillas().filter(v => v.approvalStatus !== 'pending');
+        const rawVillas = await window.harmonyDB.getAllVillas();
+        allVillas = rawVillas.filter(v => v.approvalStatus !== 'pending');
     }
-    
+
     // Render Hero Product
-    renderHeroProduct(allVillas);
+    await renderHeroProduct(allVillas);
 
     // Initial render
     renderVillas(allVillas);
@@ -101,7 +104,7 @@ function initHomePage() {
 
     // Load and render destinations (Toplist)
     if (window.harmonyDB) {
-        loadedDestinationsList = window.harmonyDB.getAllDestinations();
+        loadedDestinationsList = await window.harmonyDB.getAllDestinations();
         // Sort destinations so that newer items appear first
         loadedDestinationsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         renderDestinationsPage();
@@ -258,9 +261,17 @@ function initHomePage() {
     // Setup homepage form submit handler
     const homeContactForm = document.getElementById('homepage-contact-form');
     if (homeContactForm) {
-        homeContactForm.addEventListener('submit', (e) => {
+        homeContactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            if (!window.harmonyDB || !window.harmonyDB.saveBooking) {
+                alert("Lỗi hệ thống lưu trữ!");
+                return;
+            }
+
+            const submitBtn = homeContactForm.querySelector('button[type="submit"]');
+            const restoreBtn = setSubmitLoading(submitBtn, 'Đang gửi...');
+
             const bookingData = {
                 villaId: document.getElementById('form-villa-id').value,
                 villaName: document.getElementById('form-villa-name').value,
@@ -272,28 +283,26 @@ function initHomePage() {
                 status: 'pending'
             };
 
-            // Save to DB
-            if (window.harmonyDB && window.harmonyDB.saveBooking) {
-                window.harmonyDB.saveBooking(bookingData);
-                
-                // Show success message
-                const successMsg = homeContactForm.querySelector('#form-success-msg');
-                if (successMsg) {
-                    successMsg.style.display = 'block';
-                    successMsg.style.color = '#10b981';
-                    successMsg.style.fontWeight = 'bold';
-                    successMsg.style.marginTop = '16px';
-                    
-                    // Reset form fields
-                    homeContactForm.reset();
-                    
-                    // Auto hide after 5 seconds
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 5000);
-                }
+            await window.harmonyDB.saveBooking(bookingData);
+
+            // Show success message
+            const successMsg = homeContactForm.querySelector('#form-success-msg');
+            if (successMsg) {
+                successMsg.style.display = 'block';
+                successMsg.style.color = '#10b981';
+                successMsg.style.fontWeight = 'bold';
+                successMsg.style.marginTop = '16px';
+
+                // Reset form fields
+                homeContactForm.reset();
+
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                    restoreBtn();
+                }, 5000);
             } else {
-                alert("Lỗi hệ thống lưu trữ!");
+                restoreBtn();
             }
         });
     }
@@ -523,7 +532,7 @@ window.resetFilters = function() {
 // DETAIL PAGE FUNCTIONS
 // ==========================================
 
-function initDetailPage() {
+async function initDetailPage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
 
@@ -532,7 +541,7 @@ function initDetailPage() {
         return;
     }
 
-    const villa = window.harmonyDB.getVillaById(id);
+    const villa = await window.harmonyDB.getVillaById(id);
     if (!villa) {
         showDetailError("Villa/Homestay không tồn tại hoặc đã bị xóa khỏi hệ thống.");
         return;
@@ -615,7 +624,7 @@ function initDetailPage() {
     }
 
     // Render reviews
-    renderReviews(villa.id);
+    await renderReviews(villa.id);
 
     // Populate form hidden fields
     const formVillaId = document.getElementById('form-villa-id');
@@ -626,9 +635,16 @@ function initDetailPage() {
     // Setup form submit handler
     const contactForm = document.getElementById('villa-contact-form');
     if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            if (!window.harmonyDB || !window.harmonyDB.saveBooking) {
+                alert("Lỗi hệ thống lưu trữ!");
+                return;
+            }
+
+            const restoreBtn = setSubmitLoading(contactForm.querySelector('button[type="submit"]'), 'Đang gửi...');
+
             const bookingData = {
                 villaId: document.getElementById('form-villa-id').value,
                 villaName: document.getElementById('form-villa-name').value,
@@ -640,30 +656,28 @@ function initDetailPage() {
                 status: 'pending'
             };
 
-            // Save to DB
-            if (window.harmonyDB && window.harmonyDB.saveBooking) {
-                window.harmonyDB.saveBooking(bookingData);
-                
-                // Show success message
-                const successMsg = document.getElementById('form-success-msg');
-                if (successMsg) {
-                    successMsg.style.display = 'block';
-                    successMsg.style.color = '#10b981';
-                    successMsg.style.fontWeight = 'bold';
-                    successMsg.style.marginTop = '16px';
-                    
-                    // Reset form fields except hidden ones
-                    contactForm.reset();
-                    if (formVillaId) formVillaId.value = villa.id;
-                    if (formVillaName) formVillaName.value = villa.name;
-                    
-                    // Auto hide after 5 seconds
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 5000);
-                }
+            await window.harmonyDB.saveBooking(bookingData);
+
+            // Show success message
+            const successMsg = document.getElementById('form-success-msg');
+            if (successMsg) {
+                successMsg.style.display = 'block';
+                successMsg.style.color = '#10b981';
+                successMsg.style.fontWeight = 'bold';
+                successMsg.style.marginTop = '16px';
+
+                // Reset form fields except hidden ones
+                contactForm.reset();
+                if (formVillaId) formVillaId.value = villa.id;
+                if (formVillaName) formVillaName.value = villa.name;
+
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                    restoreBtn();
+                }, 5000);
             } else {
-                alert("Lỗi hệ thống lưu trữ!");
+                restoreBtn();
             }
         });
     }
@@ -671,9 +685,16 @@ function initDetailPage() {
     // Setup review form submit handler (Allowing user to add review without login)
     const addReviewForm = document.getElementById('add-review-form');
     if (addReviewForm) {
-        addReviewForm.addEventListener('submit', (e) => {
+        addReviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            if (!window.harmonyDB || !window.harmonyDB.saveReview) {
+                alert("Lỗi hệ thống lưu trữ đánh giá!");
+                return;
+            }
+
+            const restoreBtn = setSubmitLoading(addReviewForm.querySelector('button[type="submit"]'), 'Đang gửi...');
+
             const reviewData = {
                 villaId: villa.id,
                 avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop",
@@ -682,24 +703,23 @@ function initDetailPage() {
                 rating: parseInt(document.getElementById('review-rating').value),
                 content: document.getElementById('review-content').value.trim()
             };
-            
-            if (window.harmonyDB && window.harmonyDB.saveReview) {
-                window.harmonyDB.saveReview(reviewData);
-                
-                const successMsg = document.getElementById('review-success-msg');
-                if (successMsg) {
-                    successMsg.style.display = 'block';
-                    
-                    addReviewForm.reset();
-                    
-                    renderReviews(villa.id);
-                    
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 5000);
-                }
+
+            await window.harmonyDB.saveReview(reviewData);
+
+            const successMsg = document.getElementById('review-success-msg');
+            if (successMsg) {
+                successMsg.style.display = 'block';
+
+                addReviewForm.reset();
+
+                await renderReviews(villa.id);
+
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                    restoreBtn();
+                }, 5000);
             } else {
-                alert("Lỗi hệ thống lưu trữ đánh giá!");
+                restoreBtn();
             }
         });
     }
@@ -802,7 +822,7 @@ function renderDestinations(destinations) {
 // HERO PRODUCT FUNCTIONS
 // ==========================================
 
-function renderHeroProduct(villas) {
+async function renderHeroProduct(villas) {
     const container = document.getElementById('hero-product-container');
     if (!container) return;
 
@@ -818,10 +838,18 @@ function renderHeroProduct(villas) {
     // Filter to only show featured or all default villas as slides (up to 5 slides)
     const sliderVillas = villas.slice(0, 5);
 
+    // Pre-fetch rating stats for all slider villas up front (getVillaRatingStats is async)
+    const statsByVillaId = {};
+    await Promise.all(sliderVillas.map(async (villa) => {
+        statsByVillaId[villa.id] = (window.harmonyDB && window.harmonyDB.getVillaRatingStats)
+            ? await window.harmonyDB.getVillaRatingStats(villa.id)
+            : { average: 4.9, count: 120 };
+    }));
+
     // Generate slides HTML
     const slidesHtml = sliderVillas.map((villa, idx) => {
         const activeClass = idx === 0 ? 'active' : '';
-        
+
         let badgeText = 'Chỗ Nghỉ';
         if (villa.category === 'villa-giadinh') badgeText = 'Villa Gia Đình';
         else if (villa.category === 'villa-tamtrung') badgeText = 'Villa Tầm Trung';
@@ -829,9 +857,7 @@ function renderHeroProduct(villas) {
         else if (villa.category === 'home-giadinh') badgeText = 'Home Gia Đình';
         else if (villa.category === 'home-nhomban') badgeText = 'Home Nhóm Bạn';
 
-        const ratingStats = (window.harmonyDB && window.harmonyDB.getVillaRatingStats) 
-            ? window.harmonyDB.getVillaRatingStats(villa.id) 
-            : { average: 4.9, count: 120 };
+        const ratingStats = statsByVillaId[villa.id];
 
         const wholeStars = Math.floor(ratingStats.average);
         let starsHtml = '<i class="fa-solid fa-star"></i>'.repeat(wholeStars);
@@ -1057,14 +1083,15 @@ function getAmenityIcon(amenity) {
 // ==========================================
 // RENDER REVIEWS DYNAMICALLY
 // ==========================================
-function renderReviews(villaId) {
+async function renderReviews(villaId) {
     const listContainer = document.getElementById('detail-reviews-list');
     if (!listContainer) return;
-    
-    const reviews = (window.harmonyDB && window.harmonyDB.getReviewsByVillaId) 
-        ? window.harmonyDB.getReviewsByVillaId(villaId) 
+
+    const reviews = (window.harmonyDB && window.harmonyDB.getReviewsByVillaId)
+        ? await window.harmonyDB.getReviewsByVillaId(villaId)
         : [];
-        
+
+
     listContainer.innerHTML = reviews.map(review => {
         const starIcons = '<i class="fa-solid fa-star"></i>'.repeat(review.rating);
         return `
@@ -1087,8 +1114,8 @@ function renderReviews(villaId) {
     }).join('');
 
     if (window.harmonyDB && window.harmonyDB.getVillaRatingStats) {
-        const stats = window.harmonyDB.getVillaRatingStats(villaId);
-        
+        const stats = await window.harmonyDB.getVillaRatingStats(villaId);
+
         const scoreElem = document.querySelector('.average-score');
         if (scoreElem) scoreElem.innerText = stats.average.toFixed(1);
         
@@ -1106,14 +1133,14 @@ function renderReviews(villaId) {
         if (countElem) countElem.innerText = `Dựa trên ${stats.count} lượt đánh giá thực tế`;
     }
 
-    renderRatingDistribution(villaId);
+    await renderRatingDistribution(villaId);
 }
 
-function renderRatingDistribution(villaId) {
+async function renderRatingDistribution(villaId) {
     const listEl = document.getElementById('rating-distribution-list');
     if (!listEl || !window.harmonyDB || !window.harmonyDB.getVillaRatingDistribution) return;
 
-    const distribution = window.harmonyDB.getVillaRatingDistribution(villaId);
+    const distribution = await window.harmonyDB.getVillaRatingDistribution(villaId);
 
     listEl.innerHTML = distribution.map(row => `
         <div class="rating-category-item">
@@ -1129,12 +1156,12 @@ function renderRatingDistribution(villaId) {
 // ==========================================
 // QUICK VIEW MODAL CONTROLLER
 // ==========================================
-window.openQuickView = function(villaId) {
+window.openQuickView = async function(villaId) {
     const modal = document.getElementById('quick-view-modal');
     const body = document.getElementById('quick-view-body');
     if (!modal || !body || !window.harmonyDB) return;
 
-    const villa = window.harmonyDB.getVillaById(villaId);
+    const villa = await window.harmonyDB.getVillaById(villaId);
     if (!villa) return;
 
     let badgeLabel = 'Chỗ Nghỉ';
@@ -1144,14 +1171,14 @@ window.openQuickView = function(villaId) {
     else if (villa.category === 'home-giadinh') badgeLabel = 'Home Gia Đình';
     else if (villa.category === 'home-nhomban') badgeLabel = 'Home Nhóm Bạn';
 
-    const ratingStats = window.harmonyDB.getVillaRatingStats(villa.id);
+    const ratingStats = await window.harmonyDB.getVillaRatingStats(villa.id);
     const wholeStars = Math.floor(ratingStats.average);
     let starsHtml = '<i class="fa-solid fa-star"></i>'.repeat(wholeStars);
     if (ratingStats.average % 1 >= 0.5) {
         starsHtml += '<i class="fa-solid fa-star-half-stroke"></i>';
     }
 
-    const reviews = window.harmonyDB.getReviewsByVillaId(villa.id);
+    const reviews = await window.harmonyDB.getReviewsByVillaId(villa.id);
     const reviewsListHtml = reviews.map(review => {
         const starIcons = '<i class="fa-solid fa-star"></i>'.repeat(review.rating);
         return `
@@ -1346,7 +1373,7 @@ function setSubmitLoading(submitBtn, loadingText) {
     };
 }
 
-window.submitModalBooking = function(event, villaId, villaName) {
+window.submitModalBooking = async function(event, villaId, villaName) {
     event.preventDefault();
     if (!window.harmonyDB) return;
 
@@ -1364,7 +1391,7 @@ window.submitModalBooking = function(event, villaId, villaName) {
         status: 'pending'
     };
 
-    window.harmonyDB.saveBooking(bookingData);
+    await window.harmonyDB.saveBooking(bookingData);
 
     const successMsg = document.getElementById('modal-booking-success');
     if (successMsg) {
@@ -1377,7 +1404,7 @@ window.submitModalBooking = function(event, villaId, villaName) {
     }
 };
 
-window.submitModalReview = function(event, villaId) {
+window.submitModalReview = async function(event, villaId) {
     event.preventDefault();
     if (!window.harmonyDB) return;
 
@@ -1393,7 +1420,7 @@ window.submitModalReview = function(event, villaId) {
         content: document.getElementById('modal-rev-content').value.trim()
     };
 
-    window.harmonyDB.saveReview(reviewData);
+    await window.harmonyDB.saveReview(reviewData);
 
     const successMsg = document.getElementById('modal-rev-success');
     if (successMsg) {
@@ -1411,7 +1438,7 @@ window.submitModalReview = function(event, villaId) {
 // ==========================================
 // PARTNER CONSIGNMENT MODAL CONTROLLER
 // ==========================================
-let partnerImageBase64 = "";
+let partnerImageUrl = "";
 
 window.openPartnerModal = function(event) {
     if (event) event.preventDefault();
@@ -1430,7 +1457,7 @@ window.closePartnerModal = function() {
     }
 };
 
-window.submitPartnerConsignment = function(event) {
+window.submitPartnerConsignment = async function(event) {
     event.preventDefault();
     if (!window.harmonyDB) return;
 
@@ -1463,23 +1490,23 @@ window.submitPartnerConsignment = function(event) {
         description: description,
         shortDescription: description.substring(0, 120) + (description.length > 120 ? '...' : ''),
         amenities: amenities,
-        image: partnerImageBase64 || "asset/luxury_villa_1.png", // fallback image if empty
+        image: partnerImageUrl || "asset/luxury_villa_1.png", // fallback image if empty
         partnerName: name,
         partnerPhone: phone,
         approvalStatus: 'pending' // start as pending approval!
     };
 
-    window.harmonyDB.saveVilla(villaData);
+    await window.harmonyDB.saveVilla(villaData);
 
     const successMsg = document.getElementById('partner-form-success');
     if (successMsg) {
         successMsg.style.display = 'block';
         document.getElementById('partner-consignment-form').reset();
-        
+
         // Hide image preview
         const prevDiv = document.getElementById('partner-image-preview');
         if (prevDiv) prevDiv.style.display = 'none';
-        partnerImageBase64 = "";
+        partnerImageUrl = "";
 
         setTimeout(() => {
             successMsg.style.display = 'none';

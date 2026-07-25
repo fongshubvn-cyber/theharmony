@@ -1,8 +1,8 @@
 // Backend Admin Dashboard logic for The Harmony - Booking Villa Đà Lạt
 
 let villasList = [];
-let currentMainImageBase64 = "";
-let currentGalleryImagesBase64 = [];
+let currentMainImageUrl = "";
+let currentGalleryImageUrls = [];
 
 const MIN_ALBUM_IMAGES = 5;
 const MAX_ALBUM_IMAGES = 20;
@@ -16,13 +16,25 @@ function formatFileSize(bytes) {
 // existing villa loads its saved "images" array — which already includes the
 // main photo — straight into the gallery state).
 function getAlbumImages() {
-    const combined = currentMainImageBase64
-        ? [currentMainImageBase64, ...currentGalleryImagesBase64]
-        : [...currentGalleryImagesBase64];
+    const combined = currentMainImageUrl
+        ? [currentMainImageUrl, ...currentGalleryImageUrls]
+        : [...currentGalleryImageUrls];
     return combined.filter((src, idx) => src && combined.indexOf(src) === idx);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Disables a submit button and swaps its label to a loading state; returns a restore function
+function setSubmitLoading(submitBtn, loadingText) {
+    if (!submitBtn) return () => {};
+    const originalHtml = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}`;
+    return () => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
+    };
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     // Hamburger menu toggle
     const navToggle = document.getElementById('nav-toggle');
     const navLinks = document.getElementById('nav-links');
@@ -47,30 +59,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Check login state
-    const loggedIn = sessionStorage.getItem('harmony_logged_in') === 'true';
+    // Check login state via Supabase Auth
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
     const loginScreen = document.getElementById('admin-login-screen');
     const dashboard = document.getElementById('admin-main-dashboard');
 
-    if (!loggedIn) {
+    if (!session) {
         if (loginScreen) loginScreen.style.display = 'flex';
         if (dashboard) dashboard.style.display = 'none';
 
         // Setup login form submission
         const loginForm = document.getElementById('admin-login-form');
         if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const username = document.getElementById('login-username').value.trim();
+                const email = document.getElementById('login-username').value.trim();
                 const password = document.getElementById('login-password').value;
                 const errorMsg = document.getElementById('login-error-msg');
+                const restoreBtn = setSubmitLoading(loginForm.querySelector('button[type="submit"]'), 'Đang đăng nhập...');
 
-                if (username === 'admin' && password === '123456A!') {
-                    sessionStorage.setItem('harmony_logged_in', 'true');
+                const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+                if (!error) {
                     if (errorMsg) errorMsg.style.display = 'none';
                     alert("Đăng nhập quản trị thành công!");
                     window.location.reload();
                 } else {
+                    restoreBtn();
                     if (errorMsg) errorMsg.style.display = 'flex';
                 }
             });
@@ -85,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup Logout event listener
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            sessionStorage.removeItem('harmony_logged_in');
+        btnLogout.addEventListener('click', async () => {
+            await window.supabaseClient.auth.signOut();
             window.location.href = 'admin.html';
         });
     }
 
     // Refresh the table and stats
-    refreshAdminDashboard();
+    await refreshAdminDashboard();
 
     // Tab switcher logic
     const tabVillasBtn = document.getElementById('tab-villas-btn');
@@ -108,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnBulkImport = document.getElementById('btn-bulk-import');
 
     if (tabVillasBtn && tabDestinationsBtn && tabBookingsBtn && tabPartnersBtn) {
-        tabVillasBtn.addEventListener('click', () => {
+        tabVillasBtn.addEventListener('click', async () => {
             tabVillasBtn.classList.add('active');
             tabDestinationsBtn.classList.remove('active');
             tabBookingsBtn.classList.remove('active');
@@ -120,10 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAddVilla.style.display = 'inline-flex';
             btnAddDest.style.display = 'none';
             if (btnBulkImport) btnBulkImport.style.display = 'inline-flex';
-            refreshAdminDashboard();
+            await refreshAdminDashboard();
         });
 
-        tabDestinationsBtn.addEventListener('click', () => {
+        tabDestinationsBtn.addEventListener('click', async () => {
             tabDestinationsBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
             tabBookingsBtn.classList.remove('active');
@@ -135,10 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAddDest.style.display = 'inline-flex';
             btnAddVilla.style.display = 'none';
             if (btnBulkImport) btnBulkImport.style.display = 'none';
-            refreshAdminDashboard();
+            await refreshAdminDashboard();
         });
 
-        tabBookingsBtn.addEventListener('click', () => {
+        tabBookingsBtn.addEventListener('click', async () => {
             tabBookingsBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
             tabDestinationsBtn.classList.remove('active');
@@ -150,10 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAddVilla.style.display = 'none';
             btnAddDest.style.display = 'none';
             if (btnBulkImport) btnBulkImport.style.display = 'none';
-            refreshBookingsTab();
+            await refreshBookingsTab();
         });
 
-        tabPartnersBtn.addEventListener('click', () => {
+        tabPartnersBtn.addEventListener('click', async () => {
             tabPartnersBtn.classList.add('active');
             tabVillasBtn.classList.remove('active');
             tabDestinationsBtn.classList.remove('active');
@@ -165,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAddVilla.style.display = 'none';
             btnAddDest.style.display = 'none';
             if (btnBulkImport) btnBulkImport.style.display = 'none';
-            refreshPartnersTab();
+            await refreshPartnersTab();
         });
     }
 
@@ -192,21 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCloseDestModal) btnCloseDestModal.addEventListener('click', closeDestModal);
     if (destForm) destForm.addEventListener('submit', handleDestFormSubmit);
 
-    // Reset database listener
-    const btnResetDb = document.getElementById('btn-reset-db');
-    if (btnResetDb) {
-        btnResetDb.addEventListener('click', () => {
-            if (confirm("Bạn có chắc chắn muốn KHÔI PHỤC DỮ LIỆU GỐC? Tất cả những biệt thự và điểm du lịch tự thêm hoặc chỉnh sửa sẽ bị xóa.")) {
-                if (window.harmonyDB) {
-                    window.harmonyDB.resetDatabase();
-                    window.harmonyDB.resetDestinationsDatabase();
-                    refreshAdminDashboard();
-                    alert("Đã khôi phục dữ liệu gốc thành công!");
-                }
-            }
-        });
-    }
-
     // Bulk import villas from a villa-post-import.json file (see scripts/import-villa-posts.js)
     const bulkImportFileInput = document.getElementById('bulk-import-file-input');
     if (btnBulkImport && bulkImportFileInput) {
@@ -216,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
                 let entries;
                 try {
                     entries = JSON.parse(event.target.result);
@@ -233,14 +232,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 let successCount = 0;
-                entries.forEach(entry => {
-                    if (!entry || !entry.name) return;
+                for (const entry of entries) {
+                    if (!entry || !entry.name) continue;
                     // Strip any "id" field so saveVilla always takes the create-new path
                     const { id, ...villaData } = entry;
-                    if (window.harmonyDB && window.harmonyDB.saveVilla(villaData)) successCount++;
-                });
+                    if (window.harmonyDB && await window.harmonyDB.saveVilla(villaData)) successCount++;
+                }
 
-                refreshAdminDashboard();
+                await refreshAdminDashboard();
                 alert(`Đã nhập thành công ${successCount}/${entries.length} villa vào hệ thống!`);
                 bulkImportFileInput.value = '';
             };
@@ -248,9 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Convert villa main image file to Base64 on upload
+    // Upload villa main image to Supabase Storage
     if (mainImageFileInput) {
-        mainImageFileInput.addEventListener('change', (e) => {
+        mainImageFileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
@@ -260,18 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                currentMainImageBase64 = event.target.result;
-                renderMainImagePreview(currentMainImageBase64);
-            };
-            reader.readAsDataURL(file);
+            const url = await window.harmonyDB.uploadVillaImage(file);
+            if (!url) {
+                alert("Tải ảnh lên thất bại, vui lòng thử lại.");
+                mainImageFileInput.value = "";
+                return;
+            }
+            currentMainImageUrl = url;
+            renderMainImagePreview(currentMainImageUrl);
         });
     }
 
-    // Convert villa gallery images files to Base64 on upload
+    // Upload villa gallery images to Supabase Storage
     if (galleryFileInput) {
-        galleryFileInput.addEventListener('change', (e) => {
+        galleryFileInput.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
             galleryFileInput.value = ""; // Clear input value so same files can be selected again
 
@@ -291,44 +292,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (validFiles.length === 0) return;
 
-            let processed = 0;
-            validFiles.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    currentGalleryImagesBase64.push(event.target.result);
-                    processed++;
-                    if (processed === validFiles.length) {
-                        renderGalleryPreview();
-                    }
-                };
-                reader.readAsDataURL(file);
+            const uploadedUrls = await Promise.all(validFiles.map(file => window.harmonyDB.uploadVillaImage(file)));
+            uploadedUrls.forEach(url => {
+                if (url) currentGalleryImageUrls.push(url);
             });
+            if (uploadedUrls.some(url => !url)) {
+                alert("Một số ảnh tải lên thất bại, vui lòng thử lại.");
+            }
+            renderGalleryPreview();
         });
     }
 
-    // Convert destination image file to Base64 on upload
+    // Upload destination image to Supabase Storage
     if (destImageFileInput) {
-        destImageFileInput.addEventListener('change', (e) => {
+        destImageFileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    currentDestImageBase64 = event.target.result;
-                    renderDestImagePreview(currentDestImageBase64);
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            const url = await window.harmonyDB.uploadVillaImage(file);
+            if (!url) {
+                alert("Tải ảnh lên thất bại, vui lòng thử lại.");
+                destImageFileInput.value = "";
+                return;
             }
+            currentDestImageUrl = url;
+            renderDestImagePreview(currentDestImageUrl);
         });
     }
 });
 
-function refreshAdminDashboard() {
+async function refreshAdminDashboard() {
     if (!window.harmonyDB) return;
-    
+
     // 1. Refresh Villas (Exclude pending partner consignments)
-    const allRawVillas = window.harmonyDB.getAllVillas();
+    const allRawVillas = await window.harmonyDB.getAllVillas();
     villasList = allRawVillas.filter(v => v.approvalStatus !== 'pending');
-    
+
     const total = villasList.length;
     const villasCount = villasList.filter(v => v.category && v.category.startsWith('villa-')).length;
     const homesCount = villasList.filter(v => v.category && v.category.startsWith('home-')).length;
@@ -339,7 +338,7 @@ function refreshAdminDashboard() {
     renderAdminTable(villasList);
 
     // 2. Refresh Destinations
-    const dests = window.harmonyDB.getAllDestinations();
+    const dests = await window.harmonyDB.getAllDestinations();
     const destTotal = dests.length;
     const destCafe = dests.filter(d => d.category === 'cafe' || d.category === 'checkin').length;
     const destSightseeing = dests.filter(d => d.category === 'sightseeing').length;
@@ -351,7 +350,7 @@ function refreshAdminDashboard() {
 
     // 3. Refresh Bookings Notification Badge
     if (window.harmonyDB.getAllBookings) {
-        const bookings = window.harmonyDB.getAllBookings();
+        const bookings = await window.harmonyDB.getAllBookings();
         const pendingBookings = bookings.filter(b => b.status === 'pending').length;
         const tabBtn = document.getElementById('tab-bookings-btn');
         if (tabBtn) {
@@ -452,8 +451,8 @@ function openModal() {
     document.getElementById('modal-title').innerText = "Đăng Villa Mới";
     
     // Reset image states
-    currentMainImageBase64 = "";
-    currentGalleryImagesBase64 = [];
+    currentMainImageUrl = "";
+    currentGalleryImageUrls = [];
     document.getElementById('main-image-preview').innerHTML = "";
     document.getElementById('gallery-images-preview').innerHTML = "";
     
@@ -472,10 +471,10 @@ function closeModal() {
 }
 
 // Open modal populated with villa data for editing
-window.editVilla = function(id) {
+window.editVilla = async function(id) {
     if (!window.harmonyDB) return;
-    
-    const villa = window.harmonyDB.getVillaById(id);
+
+    const villa = await window.harmonyDB.getVillaById(id);
     if (!villa) {
         alert("Không tìm thấy villa cần sửa!");
         return;
@@ -504,30 +503,30 @@ window.editVilla = function(id) {
     });
 
     // Handle images
-    currentMainImageBase64 = villa.image || "";
-    if (currentMainImageBase64) {
-        renderMainImagePreview(currentMainImageBase64);
+    currentMainImageUrl = villa.image || "";
+    if (currentMainImageUrl) {
+        renderMainImagePreview(currentMainImageUrl);
     }
 
-    currentGalleryImagesBase64 = villa.images ? [...villa.images] : [];
-    if (currentGalleryImagesBase64.length > 0) {
+    currentGalleryImageUrls = villa.images ? [...villa.images] : [];
+    if (currentGalleryImageUrls.length > 0) {
         renderGalleryPreview();
     }
 };
 
 // Delete a villa
-window.deleteVillaItem = function(id) {
+window.deleteVillaItem = async function(id) {
     if (!window.harmonyDB) return;
-    
+
     if (confirm("Bạn có chắc chắn muốn XÓA villa này khỏi danh sách?")) {
-        window.harmonyDB.deleteVilla(id);
-        refreshAdminDashboard();
+        await window.harmonyDB.deleteVilla(id);
+        await refreshAdminDashboard();
         alert("Đã xóa villa thành công!");
     }
 };
 
 // Handle form submission
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
     e.preventDefault();
 
     if (!window.harmonyDB) return;
@@ -546,7 +545,7 @@ function handleFormSubmit(e) {
     const description = document.getElementById('villa-desc').value.trim();
 
     // Check if main image is uploaded
-    if (!currentMainImageBase64) {
+    if (!currentMainImageUrl) {
         alert("Vui lòng tải lên hình ảnh đại diện chính cho villa.");
         return;
     }
@@ -581,7 +580,7 @@ function handleFormSubmit(e) {
         amenities: selectedAmenities,
         shortDescription,
         description,
-        image: currentMainImageBase64,
+        image: currentMainImageUrl,
         images: albumImages
     };
 
@@ -590,12 +589,12 @@ function handleFormSubmit(e) {
     }
 
     // Save to Database
-    window.harmonyDB.saveVilla(villaData);
-    
+    await window.harmonyDB.saveVilla(villaData);
+
     // Close modal, notify, refresh dashboard
     closeModal();
-    refreshAdminDashboard();
-    
+    await refreshAdminDashboard();
+
     alert(id ? "Đã lưu thay đổi thành công!" : "Đăng villa mới thành công!");
 }
 
@@ -613,7 +612,7 @@ function renderMainImagePreview(src) {
 }
 
 window.removeMainImage = function() {
-    currentMainImageBase64 = "";
+    currentMainImageUrl = "";
     document.getElementById('main-image-preview').innerHTML = "";
     document.getElementById('villa-main-image-file').value = "";
 };
@@ -623,7 +622,7 @@ function renderGalleryPreview() {
     const container = document.getElementById('gallery-images-preview');
     if (!container) return;
     
-    container.innerHTML = currentGalleryImagesBase64.map((src, index) => `
+    container.innerHTML = currentGalleryImageUrls.map((src, index) => `
         <div class="image-preview-item">
             <img src="${src}" alt="Gallery Preview ${index}">
             <button type="button" class="image-preview-remove" onclick="removeGalleryImage(${index})">&times;</button>
@@ -632,7 +631,7 @@ function renderGalleryPreview() {
 }
 
 window.removeGalleryImage = function(index) {
-    currentGalleryImagesBase64.splice(index, 1);
+    currentGalleryImageUrls.splice(index, 1);
     renderGalleryPreview();
 };
 
@@ -640,7 +639,7 @@ window.removeGalleryImage = function(index) {
 // DESTINATIONS (TOPLIST) CRUD LOGIC
 // =========================================================================
 
-let currentDestImageBase64 = "";
+let currentDestImageUrl = "";
 
 // Render destinations table rows
 function renderDestinationsTable(dests) {
@@ -706,7 +705,7 @@ function openDestModal() {
     document.getElementById('dest-id').value = "";
     document.getElementById('dest-modal-title').innerText = "Đăng Điểm Đến Mới";
     
-    currentDestImageBase64 = "";
+    currentDestImageUrl = "";
     document.getElementById('dest-image-preview').innerHTML = "";
     document.getElementById('dest-image-url').value = "";
     
@@ -719,10 +718,10 @@ function closeDestModal() {
 }
 
 // Open modal and populate for editing destination
-window.editDestination = function(id) {
+window.editDestination = async function(id) {
     if (!window.harmonyDB) return;
 
-    const dest = window.harmonyDB.getDestinationById(id);
+    const dest = await window.harmonyDB.getDestinationById(id);
     if (!dest) {
         alert("Không tìm thấy điểm đến yêu cầu!");
         return;
@@ -739,24 +738,25 @@ window.editDestination = function(id) {
     document.getElementById('dest-desc').value = dest.description;
     
     if (dest.image) {
-        currentDestImageBase64 = dest.image;
+        currentDestImageUrl = dest.image;
         document.getElementById('dest-image-url').value = dest.image;
         renderDestImagePreview(dest.image);
     }
 }
 
 // Delete destination item
-window.deleteDestinationItem = function(id) {
+window.deleteDestinationItem = async function(id) {
     if (!confirm("Bạn có chắc chắn muốn xóa điểm đến này khỏi danh mục gợi ý?")) return;
+    if (!window.harmonyDB) return;
 
-    if (window.harmonyDB && window.harmonyDB.deleteDestination(id)) {
-        refreshAdminDashboard();
+    if (await window.harmonyDB.deleteDestination(id)) {
+        await refreshAdminDashboard();
         alert("Đã xóa điểm đến thành công!");
     }
 }
 
 // Submit handler for destinations form
-function handleDestFormSubmit(e) {
+async function handleDestFormSubmit(e) {
     e.preventDefault();
 
     if (!window.harmonyDB) return;
@@ -769,7 +769,7 @@ function handleDestFormSubmit(e) {
     const description = document.getElementById('dest-desc').value.trim();
     const existingImageUrl = document.getElementById('dest-image-url').value;
 
-    let finalImageUrl = currentDestImageBase64 || existingImageUrl;
+    let finalImageUrl = currentDestImageUrl || existingImageUrl;
 
     if (!finalImageUrl) {
         alert("Vui lòng tải lên một hình ảnh đại diện cho điểm đến!");
@@ -790,12 +790,12 @@ function handleDestFormSubmit(e) {
     }
 
     // Save to Database
-    window.harmonyDB.saveDestination(destData);
-    
+    await window.harmonyDB.saveDestination(destData);
+
     // Close modal, refresh dashboard
     closeDestModal();
-    refreshAdminDashboard();
-    
+    await refreshAdminDashboard();
+
     alert(id ? "Cập nhật điểm đến thành công!" : "Thêm mới điểm đến thành công!");
 }
 
@@ -813,7 +813,7 @@ function renderDestImagePreview(src) {
 }
 
 window.removeDestImage = function() {
-    currentDestImageBase64 = "";
+    currentDestImageUrl = "";
     document.getElementById('dest-image-preview').innerHTML = "";
     document.getElementById('dest-image-file').value = "";
     document.getElementById('dest-image-url').value = "";
@@ -823,10 +823,10 @@ window.removeDestImage = function() {
 // BOOKING / CONTACT REQUESTS CRUD LOGIC
 // =========================================================================
 
-function refreshBookingsTab() {
+async function refreshBookingsTab() {
     if (!window.harmonyDB) return;
 
-    const bookings = window.harmonyDB.getAllBookings();
+    const bookings = await window.harmonyDB.getAllBookings();
     const total = bookings.length;
     const pending = bookings.filter(b => b.status === 'pending').length;
     const contacted = bookings.filter(b => b.status === 'contacted').length;
@@ -924,28 +924,29 @@ function renderBookingsTable(bookings) {
     }).join('');
 }
 
-window.markBookingContacted = function(id) {
-    if (window.harmonyDB && window.harmonyDB.updateBookingStatus(id, 'contacted')) {
-        refreshBookingsTab();
+window.markBookingContacted = async function(id) {
+    if (window.harmonyDB && await window.harmonyDB.updateBookingStatus(id, 'contacted')) {
+        await refreshBookingsTab();
         // Also update dashboard counts
-        refreshAdminDashboard();
+        await refreshAdminDashboard();
     }
 };
 
-window.markBookingPending = function(id) {
-    if (window.harmonyDB && window.harmonyDB.updateBookingStatus(id, 'pending')) {
-        refreshBookingsTab();
+window.markBookingPending = async function(id) {
+    if (window.harmonyDB && await window.harmonyDB.updateBookingStatus(id, 'pending')) {
+        await refreshBookingsTab();
         // Also update dashboard counts
-        refreshAdminDashboard();
+        await refreshAdminDashboard();
     }
 };
 
-window.deleteBookingItem = function(id) {
+window.deleteBookingItem = async function(id) {
     if (!confirm("Bạn có chắc chắn muốn xóa yêu cầu tư vấn này khỏi hệ thống?")) return;
+    if (!window.harmonyDB) return;
 
-    if (window.harmonyDB && window.harmonyDB.deleteBooking(id)) {
-        refreshBookingsTab();
-        refreshAdminDashboard();
+    if (await window.harmonyDB.deleteBooking(id)) {
+        await refreshBookingsTab();
+        await refreshAdminDashboard();
         alert("Đã xóa yêu cầu tư vấn thành công!");
     }
 };
@@ -954,11 +955,11 @@ window.deleteBookingItem = function(id) {
 // PARTNER CONSIGNMENTS CRUD LOGIC
 // =========================================================================
 
-function refreshPartnersTab() {
+async function refreshPartnersTab() {
     if (!window.harmonyDB) return;
 
-    const allVillas = window.harmonyDB.getAllVillas();
-    const consignments = allVillas.filter(v => v.approvalStatus !== undefined);
+    const allVillas = await window.harmonyDB.getAllVillas();
+    const consignments = allVillas.filter(v => !!v.approvalStatus);
 
     const total = consignments.length;
     const pending = consignments.filter(c => c.approvalStatus === 'pending').length;
@@ -1061,23 +1062,25 @@ function renderPartnersTable(consignments) {
     }).join('');
 }
 
-window.approvePartnerVilla = function(id) {
+window.approvePartnerVilla = async function(id) {
     if (!window.harmonyDB) return;
-    const villa = window.harmonyDB.getVillaById(id);
+    const villa = await window.harmonyDB.getVillaById(id);
     if (villa) {
         villa.approvalStatus = 'approved';
-        window.harmonyDB.saveVilla(villa);
-        refreshPartnersTab();
-        refreshAdminDashboard();
+        await window.harmonyDB.saveVilla(villa);
+        await refreshPartnersTab();
+        await refreshAdminDashboard();
         alert("Đã duyệt chỗ nghỉ thành công! Chỗ nghỉ này hiện đã hiển thị công khai trên trang chủ.");
     }
 };
 
-window.rejectPartnerVilla = function(id) {
+window.rejectPartnerVilla = async function(id) {
     if (!confirm("Bạn có chắc chắn muốn từ chối/gỡ bỏ chỗ nghỉ ký gửi này khỏi hệ thống?")) return;
-    if (window.harmonyDB && window.harmonyDB.deleteVilla(id)) {
-        refreshPartnersTab();
-        refreshAdminDashboard();
+    if (!window.harmonyDB) return;
+
+    if (await window.harmonyDB.deleteVilla(id)) {
+        await refreshPartnersTab();
+        await refreshAdminDashboard();
         alert("Đã gỡ bỏ chỗ nghỉ ký gửi thành công!");
     }
 };
