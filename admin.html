@@ -7,7 +7,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="css/style.css?v=2.3">
+    <link rel="stylesheet" href="css/style.css?v=2.4">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="asset/logo.png.png">
 </head>
@@ -91,6 +91,10 @@
                 <button class="btn-secondary" id="btn-reset-db" title="Khôi phục lại danh sách dữ liệu mặc định ban đầu">
                     <i class="fa-solid fa-rotate-left"></i> Khôi Phục Dữ Liệu Gốc
                 </button>
+                <button class="btn-secondary" id="btn-bulk-import" title="Nhập nhiều villa cùng lúc từ file villa-post-import.json">
+                    <i class="fa-solid fa-file-import"></i> Nhập Hàng Loạt
+                </button>
+                <input type="file" id="bulk-import-file-input" accept="application/json,.json" style="display: none;">
                 <button class="admin-action-btn" id="btn-add-villa">
                     <i class="fa-solid fa-plus"></i> Đăng Villa Mới
                 </button>
@@ -297,8 +301,11 @@
                             <label for="villa-category">Phân Khúc Villa *</label>
                             <select id="villa-category" required>
                                 <option value="" disabled selected>Chọn phân khúc</option>
-                                <option value="family">Villa Gia Đình</option>
-                                <option value="luxury">Villa Luxury</option>
+                                <option value="villa-giadinh">Villa Gia Đình</option>
+                                <option value="villa-tamtrung">Villa Tầm Trung</option>
+                                <option value="villa-caocap">Villa Cao Cấp</option>
+                                <option value="home-giadinh">Home Gia Đình</option>
+                                <option value="home-nhomban">Home Nhóm Bạn</option>
                             </select>
                         </div>
 
@@ -374,6 +381,7 @@
                             <label for="villa-main-image-file">Hình Ảnh Chính (Đại diện) *</label>
                             <input type="file" id="villa-main-image-file" accept="image/*">
                             <input type="hidden" id="villa-main-image-url">
+                            <small class="form-hint">Mỗi ảnh dưới 3MB.</small>
                             <div class="image-preview-container" id="main-image-preview">
                                 <!-- Main image preview will be rendered here -->
                             </div>
@@ -383,6 +391,7 @@
                         <div class="form-group">
                             <label for="villa-gallery-files">Album Ảnh Thêm (Nhiều ảnh)</label>
                             <input type="file" id="villa-gallery-files" accept="image/*" multiple>
+                            <small class="form-hint">Album villa (gồm cả ảnh đại diện) cần tối thiểu 5 ảnh, tối đa 20 ảnh — mỗi ảnh dưới 3MB.</small>
                             <div class="image-preview-container" id="gallery-images-preview">
                                 <!-- Gallery preview will be rendered here -->
                             </div>
@@ -505,6 +514,6 @@
 
     <!-- Scripts -->
     <script src="js/db.js?v=2.3"></script>
-    <script src="js/admin.js?v=2.3"></script>
+    <script src="js/admin.js?v=2.5"></script>
 </body>
 </html>

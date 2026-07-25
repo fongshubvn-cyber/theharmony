@@ -4,6 +4,24 @@ let villasList = [];
 let currentMainImageBase64 = "";
 let currentGalleryImagesBase64 = [];
 
+const MIN_ALBUM_IMAGES = 5;
+const MAX_ALBUM_IMAGES = 20;
+const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024; // 3MB
+
+function formatFileSize(bytes) {
+    return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+}
+
+// The full villa photo album = main image + gallery, de-duplicated (editing an
+// existing villa loads its saved "images" array — which already includes the
+// main photo — straight into the gallery state).
+function getAlbumImages() {
+    const combined = currentMainImageBase64
+        ? [currentMainImageBase64, ...currentGalleryImagesBase64]
+        : [...currentGalleryImagesBase64];
+    return combined.filter((src, idx) => src && combined.indexOf(src) === idx);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Hamburger menu toggle
     const navToggle = document.getElementById('nav-toggle');
@@ -87,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const partnersManagerView = document.getElementById('partners-manager-view');
     const btnAddVilla = document.getElementById('btn-add-villa');
     const btnAddDest = document.getElementById('btn-add-dest');
+    const btnBulkImport = document.getElementById('btn-bulk-import');
 
     if (tabVillasBtn && tabDestinationsBtn && tabBookingsBtn && tabPartnersBtn) {
         tabVillasBtn.addEventListener('click', () => {
@@ -100,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             partnersManagerView.classList.remove('active');
             btnAddVilla.style.display = 'inline-flex';
             btnAddDest.style.display = 'none';
+            if (btnBulkImport) btnBulkImport.style.display = 'inline-flex';
             refreshAdminDashboard();
         });
 
@@ -114,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             partnersManagerView.classList.remove('active');
             btnAddDest.style.display = 'inline-flex';
             btnAddVilla.style.display = 'none';
+            if (btnBulkImport) btnBulkImport.style.display = 'none';
             refreshAdminDashboard();
         });
 
@@ -128,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             partnersManagerView.classList.remove('active');
             btnAddVilla.style.display = 'none';
             btnAddDest.style.display = 'none';
+            if (btnBulkImport) btnBulkImport.style.display = 'none';
             refreshBookingsTab();
         });
 
@@ -142,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bookingsManagerView.classList.remove('active');
             btnAddVilla.style.display = 'none';
             btnAddDest.style.display = 'none';
+            if (btnBulkImport) btnBulkImport.style.display = 'none';
             refreshPartnersTab();
         });
     }
@@ -184,18 +207,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Bulk import villas from a villa-post-import.json file (see scripts/import-villa-posts.js)
+    const bulkImportFileInput = document.getElementById('bulk-import-file-input');
+    if (btnBulkImport && bulkImportFileInput) {
+        btnBulkImport.addEventListener('click', () => bulkImportFileInput.click());
+        bulkImportFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                let entries;
+                try {
+                    entries = JSON.parse(event.target.result);
+                } catch (err) {
+                    alert("File không đúng định dạng JSON. Vui lòng chọn đúng file villa-post-import.json.");
+                    bulkImportFileInput.value = '';
+                    return;
+                }
+
+                if (!Array.isArray(entries) || entries.length === 0) {
+                    alert("File không chứa villa nào để nhập.");
+                    bulkImportFileInput.value = '';
+                    return;
+                }
+
+                let successCount = 0;
+                entries.forEach(entry => {
+                    if (!entry || !entry.name) return;
+                    // Strip any "id" field so saveVilla always takes the create-new path
+                    const { id, ...villaData } = entry;
+                    if (window.harmonyDB && window.harmonyDB.saveVilla(villaData)) successCount++;
+                });
+
+                refreshAdminDashboard();
+                alert(`Đã nhập thành công ${successCount}/${entries.length} villa vào hệ thống!`);
+                bulkImportFileInput.value = '';
+            };
+            reader.readAsText(file);
+        });
+    }
+
     // Convert villa main image file to Base64 on upload
     if (mainImageFileInput) {
         mainImageFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    currentMainImageBase64 = event.target.result;
-                    renderMainImagePreview(currentMainImageBase64);
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                alert(`Ảnh "${file.name}" nặng ${formatFileSize(file.size)}, vượt quá giới hạn 3MB. Vui lòng chọn ảnh nhẹ hơn.`);
+                mainImageFileInput.value = "";
+                return;
             }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentMainImageBase64 = event.target.result;
+                renderMainImagePreview(currentMainImageBase64);
+            };
+            reader.readAsDataURL(file);
         });
     }
 
@@ -203,21 +273,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (galleryFileInput) {
         galleryFileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
+            galleryFileInput.value = ""; // Clear input value so same files can be selected again
+
+            const oversized = files.filter(f => f.size > MAX_IMAGE_SIZE_BYTES);
+            let validFiles = files.filter(f => f.size <= MAX_IMAGE_SIZE_BYTES);
+
+            if (oversized.length > 0) {
+                alert(`${oversized.length} ảnh vượt quá 3MB nên bị bỏ qua:\n` +
+                    oversized.map(f => `- ${f.name} (${formatFileSize(f.size)})`).join('\n'));
+            }
+
+            const remainingSlots = MAX_ALBUM_IMAGES - getAlbumImages().length;
+            if (validFiles.length > remainingSlots) {
+                alert(`Album villa chỉ được tối đa ${MAX_ALBUM_IMAGES} ảnh. Chỉ ${Math.max(remainingSlots, 0)} ảnh đầu trong lượt chọn này được thêm vào.`);
+                validFiles = validFiles.slice(0, Math.max(remainingSlots, 0));
+            }
+
+            if (validFiles.length === 0) return;
+
             let processed = 0;
-            
-            files.forEach(file => {
+            validFiles.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     currentGalleryImagesBase64.push(event.target.result);
                     processed++;
-                    if (processed === files.length) {
+                    if (processed === validFiles.length) {
                         renderGalleryPreview();
                     }
                 };
                 reader.readAsDataURL(file);
             });
-            // Clear input value so same files can be selected again
-            galleryFileInput.value = "";
         });
     }
 
@@ -466,17 +551,23 @@ function handleFormSubmit(e) {
         return;
     }
 
+    // Album (main + gallery) must have between MIN and MAX total photos
+    const albumImages = getAlbumImages();
+    if (albumImages.length < MIN_ALBUM_IMAGES) {
+        alert(`Album ảnh villa cần tối thiểu ${MIN_ALBUM_IMAGES} ảnh (hiện có ${albumImages.length}). Vui lòng tải thêm ảnh vào Album Ảnh Thêm.`);
+        return;
+    }
+    if (albumImages.length > MAX_ALBUM_IMAGES) {
+        alert(`Album ảnh villa chỉ được tối đa ${MAX_ALBUM_IMAGES} ảnh (hiện có ${albumImages.length}). Vui lòng bớt bớt ảnh.`);
+        return;
+    }
+
     // Selected amenities
     const selectedAmenities = [];
     const checkboxes = document.querySelectorAll('#amenities-checkboxes input[type="checkbox"]:checked');
     checkboxes.forEach(cb => {
         selectedAmenities.push(cb.value);
     });
-
-    // Make sure gallery contains at least the main image if empty
-    const galleryList = currentGalleryImagesBase64.length > 0 
-        ? currentGalleryImagesBase64 
-        : [currentMainImageBase64];
 
     const villaData = {
         name,
@@ -491,7 +582,7 @@ function handleFormSubmit(e) {
         shortDescription,
         description,
         image: currentMainImageBase64,
-        images: galleryList
+        images: albumImages
     };
 
     if (id) {
@@ -505,7 +596,7 @@ function handleFormSubmit(e) {
     closeModal();
     refreshAdminDashboard();
     
-    alert(id ? "Cập nhật villa thành công!" : "Đăng villa mới thành công!");
+    alert(id ? "Đã lưu thay đổi thành công!" : "Đăng villa mới thành công!");
 }
 
 // Render main image preview

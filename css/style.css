@@ -1259,6 +1259,15 @@ header.scrolled {
     accent-color: var(--color-primary);
 }
 
+.form-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-top: 6px;
+    text-transform: none;
+    font-weight: 500;
+}
+
 .image-preview-container {
     display: flex;
     gap: 12px;
