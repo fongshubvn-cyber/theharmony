@@ -1244,7 +1244,7 @@ window.openQuickView = async function(villaId) {
                 
                 <!-- Main Image -->
                 <div class="quick-view-image-wrapper">
-                    <img id="modal-main-img" src="${villa.image}" alt="${villa.name}">
+                    <img id="modal-main-img" src="${villa.image}" alt="${villa.name}" onload="if(this.naturalHeight > this.naturalWidth) { this.parentElement.classList.add('portrait-main'); } else { this.parentElement.classList.remove('portrait-main'); }">
                 </div>
                 
                 <!-- Thumbnails -->

@@ -869,6 +869,14 @@ header.scrolled {
     object-fit: cover;
 }
 
+.gallery-main.portrait-main {
+    background-color: #0c1411;
+}
+
+.gallery-main.portrait-main img {
+    object-fit: contain;
+}
+
 .gallery-thumbs {
     display: flex;
     gap: 12px;
@@ -3759,6 +3767,14 @@ footer::before {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.quick-view-image-wrapper.portrait-main {
+    background-color: #0c1411;
+}
+
+.quick-view-image-wrapper.portrait-main img {
+    object-fit: contain;
 }
 
 .quick-view-thumbs-list {

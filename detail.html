@@ -82,7 +82,7 @@
                     <!-- Image Gallery Slider -->
                     <div class="detail-gallery">
                         <div class="gallery-main">
-                            <img id="gallery-main-img" src="" alt="Main Image">
+                            <img id="gallery-main-img" src="" alt="Main Image" onload="if(this.naturalHeight > this.naturalWidth) { this.parentElement.classList.add('portrait-main'); } else { this.parentElement.classList.remove('portrait-main'); }">
                         </div>
                         <div class="gallery-thumbs" id="gallery-thumbs-list">
                             <!-- Thumbnails injected via JS -->
