@@ -898,6 +898,14 @@ header.scrolled {
     object-fit: cover;
 }
 
+.gallery-thumb.portrait-thumb {
+    background-color: #0c1411;
+}
+
+.gallery-thumb.portrait-thumb img {
+    object-fit: contain;
+}
+
 /* Detail Info */
 .info-section {
     background-color: #ffffff;
@@ -3789,6 +3797,14 @@ footer::before {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.quick-view-thumb.portrait-thumb {
+    background-color: #0c1411;
+}
+
+.quick-view-thumb.portrait-thumb img {
+    object-fit: contain;
 }
 
 .quick-view-section-title {

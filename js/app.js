@@ -608,7 +608,7 @@ async function initDetailPage() {
             const activeClass = idx === 0 ? 'active' : '';
             return `
                 <div class="gallery-thumb ${activeClass}" onclick="switchGalleryImage(this, '${imgUrl}')">
-                    <img src="${imgUrl}" alt="${villa.name} thumbnail">
+                    <img src="${imgUrl}" alt="${villa.name} thumbnail" onload="if(this.naturalHeight > this.naturalWidth) this.parentElement.classList.add('portrait-thumb')">
                 </div>
             `;
         }).join('');
@@ -616,7 +616,7 @@ async function initDetailPage() {
         // Fallback thumbnail using main image
         thumbsList.innerHTML = `
             <div class="gallery-thumb active" onclick="switchGalleryImage(this, '${villa.image}')">
-                <img src="${villa.image}" alt="${villa.name} thumbnail">
+                <img src="${villa.image}" alt="${villa.name} thumbnail" onload="if(this.naturalHeight > this.naturalWidth) this.parentElement.classList.add('portrait-thumb')">
             </div>
         `;
     }
@@ -1227,7 +1227,7 @@ window.openQuickView = async function(villaId) {
 
     const thumbsHtml = (villa.images && villa.images.length > 0 ? villa.images : [villa.image]).map((imgUrl, idx) => `
         <div class="gallery-thumb ${idx === 0 ? 'active' : ''} quick-view-thumb" onclick="window.switchModalImage(this, '${imgUrl}')">
-            <img src="${imgUrl}" alt="thumbnail">
+            <img src="${imgUrl}" alt="thumbnail" onload="if(this.naturalHeight > this.naturalWidth) this.parentElement.classList.add('portrait-thumb')">
         </div>
     `).join('');
 

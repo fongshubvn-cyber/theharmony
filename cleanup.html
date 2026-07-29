@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanup - Xóa dữ liệu demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { background: #16213e; border-radius: 16px; padding: 40px; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        h1 { color: #e94560; margin-bottom: 8px; font-size: 1.5rem; }
+        p { color: #a8a8b3; margin-bottom: 24px; font-size: 0.95rem; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin: 8px 8px 8px 0; transition: all 0.2s; }
+        .btn-danger { background: #e94560; color: #fff; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-warning { background: #f39c12; color: #111; }
+        .btn-warning:hover { background: #e67e22; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #log { margin-top: 24px; background: #0f3460; border-radius: 10px; padding: 16px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
+        .log-success { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .log-info { color: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Cleanup - Xóa dữ liệu demo</h1>
+        <p>Công cụ xoá tất cả Toplist Địa Điểm và Villa demo khỏi database Supabase. <strong>Hành động này không thể hoàn tác!</strong></p>
+        
+        <button class="btn btn-warning" id="btn-delete-destinations" onclick="deleteAllDestinations()">
+            🗺️ Xóa tất cả Toplist Địa Điểm
+        </button>
+        <button class="btn btn-danger" id="btn-delete-villas" onclick="deleteAllVillas()">
+            🏠 Xóa tất cả Villa Demo
+        </button>
+        <button class="btn btn-danger" id="btn-delete-all" onclick="deleteAll()">
+            ⚡ Xóa TẤT CẢ (Destinations + Villas)
+        </button>
+
+        <div id="log"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://gdovffnqnctthmyfrnye.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdkb3ZmZm5xbmN0dGhteWZybnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NDY1NzAsImV4cCI6MjEwMDUyMjU3MH0.jEke1EqO_knC30T-5e4mUaq6CajGnI2aNOF7CDQDc4Q";
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const logEl = document.getElementById('log');
+
+        function log(msg, type = 'info') {
+            const span = document.createElement('span');
+            span.className = `log-${type}`;
+            span.textContent = msg + '\n';
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function deleteAllDestinations() {
+            const btn = document.getElementById('btn-delete-destinations');
+            btn.disabled = true;
+            log('🔍 Đang lấy danh sách Toplist Địa Điểm...', 'info');
+
+            const { data, error } = await client.from('destinations').select('id, title');
+            if (error) {
+                log('❌ Lỗi lấy danh sách: ' + error.message, 'error');
+                btn.disabled = false;
+                return;
+            }
+
+            log(`📋 Tìm thấy ${data.length} địa điểm. Bắt đầu xoá...`, 'info');
+
+            let success = 0;
+            for (const dest of data) {
+                const { error: delErr } = await client.from('destinations').delete().eq('id', dest.id);
+                if (delErr) {
+                    log(`❌ Lỗi xoá "${dest.title}": ${delErr.message}`, 'error');
+                } else {
+                    success++;
+                    log(`✅ Đã xoá: ${dest.title}`, 'success');
+                }
+            }
+
+            log(`\n🎉 Hoàn tất! Đã xoá ${success}/${data.length} địa điểm.`, 'success');
+            btn.disabled = false;
+        }
+
+        async function deleteAllVillas() {
+            const btn = document.getElementById('btn-delete-villas');
+            btn.disabled = true;
+            log('🔍 Đang lấy danh sách Villa...', 'info');
+
+            const { data, error } = await client.from('villas').select('id, name');
+            if (error) {
+                log('❌ Lỗi lấy danh sách: ' + error.message, 'error');
+                btn.disabled = false;
+                return;
+            }
+
+            log(`📋 Tìm thấy ${data.length} villa. Bắt đầu xoá...`, 'info');
+
+            let success = 0;
+            for (const villa of data) {
+                const { error: delErr } = await client.from('villas').delete().eq('id', villa.id);
+                if (delErr) {
+                    log(`❌ Lỗi xoá "${villa.name}": ${delErr.message}`, 'error');
+                } else {
+                    success++;
+                    log(`✅ Đã xoá: ${villa.name}`, 'success');
+                }
+            }
+
+            log(`\n🎉 Hoàn tất! Đã xoá ${success}/${data.length} villa.`, 'success');
+            btn.disabled = false;
+        }
+
+        async function deleteAll() {
+            if (!confirm('Bạn có chắc chắn muốn xoá TẤT CẢ dữ liệu Toplist Địa Điểm và Villa? Hành động này KHÔNG THỂ hoàn tác!')) return;
+            log('⚡ BẮT ĐẦU XOÁ TẤT CẢ DỮ LIỆU...\n', 'info');
+            await deleteAllDestinations();
+            log('\n---\n', 'info');
+            await deleteAllVillas();
+            log('\n✨ ĐÃ XOÁ XONG TẤT CẢ! Bạn có thể đóng trang này.', 'success');
+        }
+    </script>
+</body>
+</html>
