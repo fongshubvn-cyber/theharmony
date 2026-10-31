@@ -2,8 +2,13 @@
 window.HARMONY_CONFIG = {
   BRAND: "The Harmony",
   LOGO_URL: "",                 // VD: "assets/logo.png" – để trống sẽ hiện chữ "The Harmony"
-  HOTLINE: "0900 000 000",      // số hiển thị
-  ZALO: "0900000000",           // số Zalo (không dấu cách)
+  HOTLINE: "0854 604 339",      // số chính hiển thị (Nghi)
+  ZALO: "0854604339",           // số Zalo chính (không dấu cách)
+  // Nút Zalo nổi góc màn hình: bấm vào hiện các số dưới đây (số đầu tiên = số chính)
+  CONTACTS: [
+    { name: "Nghi", role: "Số chính · tư vấn & đặt phòng", phone: "0854 604 339", zalo: "0854604339" },
+    { name: "Phong", role: "Quản lý", phone: "0908 667 207", zalo: "0908667207" },
+  ],
   SITE_URL: "",                 // VD: "https://theharmony.vn/" – dùng cho ảnh chia sẻ Zalo/Facebook
 
   // Lấy ở Supabase > Project Settings > API. Để trống = chạy chế độ DEMO

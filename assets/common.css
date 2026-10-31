@@ -267,6 +267,20 @@ table.vcal td.c.booked,table.vcal td.c.blocked,table.vcal td.c.na{font-size:13px
 .swr{display:flex;gap:8px;flex-wrap:wrap}
 .sw{width:30px;height:30px;border-radius:999px;border:3px solid #fff;box-shadow:0 0 0 1.5px #d6dde8;cursor:pointer;padding:0}
 .sw.on{box-shadow:0 0 0 2.5px var(--ink)}
+#zfab{position:fixed;right:16px;bottom:16px;z-index:45;display:flex;flex-direction:column;align-items:flex-end;gap:10px;transition:bottom .2s}
+#zfab .zbt{width:60px;height:60px;border-radius:999px;border:0;background:#0068ff;color:#fff;font:800 15px/1 inherit;font-family:inherit;box-shadow:0 8px 22px rgba(0,104,255,.38);cursor:pointer;position:relative}
+#zfab .zbt::after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(0,104,255,.35);animation:zpulse 2.2s infinite}
+@keyframes zpulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.25);opacity:0}}
+#zfab .zpop{display:none;width:min(320px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(15,23,42,.22);padding:12px}
+#zfab.open .zpop{display:block}
+#zfab.open .zbt::after{animation:none;opacity:0}
+#zfab .zh{font-weight:800;font-size:15px;margin:2px 4px 8px}
+#zfab .zc{display:flex;align-items:center;gap:8px;padding:10px 6px;border-top:1px solid var(--line)}
+#zfab .zn{flex:1;min-width:0;font-size:15px}#zfab .zn .muted{font-size:13px}
+#zfab .zm{font-size:11px;font-weight:800;color:#0068ff;background:#e8f0ff;border-radius:999px;padding:2px 8px;vertical-align:1px}
+#zfab .zbtn,#zfab .zcall{text-decoration:none;font-weight:800;font-size:14px;border-radius:999px;padding:9px 14px;white-space:nowrap}
+#zfab .zbtn{background:#0068ff;color:#fff}#zfab .zcall{background:#eef2f7;color:var(--ink)}
+@media print{#zfab{display:none}}
 .sw.wheel{position:relative;display:inline-block;background:conic-gradient(#e5484d,#f5a524,#f5e524,#30a46c,#12a594,#2f6fed,#8e4ec6,#e93d82,#e5484d);overflow:hidden}
 .sw.wheel i{position:absolute;inset:6px;border-radius:999px;background:transparent}
 .sw.wheel.on i{box-shadow:0 0 0 2px #fff}

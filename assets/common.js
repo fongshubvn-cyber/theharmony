@@ -113,7 +113,41 @@ function keepFocus(fn) { const a = document.activeElement, id = a && a.id, pos =
   if (id) { const e = document.getElementById(id); if (e) { e.focus(); try { e.setSelectionRange(pos, pos); } catch {} } } }
 
 /** Header: khách thấy nút Đăng nhập; admin thấy thanh chuyển tới mọi trang + Đăng xuất */
+/* ===== Nút Zalo nổi: bấm vào chọn 1 trong các số liên hệ (CFG.CONTACTS) ===== */
+function contactList() {
+  const list = (CFG.CONTACTS || []).filter(c => c && (c.zalo || c.phone));
+  return list.length ? list : (CFG.ZALO ? [{ name: CFG.BRAND || "The Harmony", phone: CFG.HOTLINE, zalo: CFG.ZALO }] : []);
+}
+function zaloFab() {
+  if (document.getElementById("zfab") || !contactList().length) return;
+  const digits = s => String(s || "").replace(/[^\d+]/g, "");
+  const wrap = document.createElement("div"); wrap.id = "zfab";
+  wrap.innerHTML = `<div class="zpop" role="dialog" aria-label="Liên hệ Zalo"><div class="zh">Nhắn Zalo cho The Harmony</div>
+    ${contactList().map((c, i) => `<div class="zc"><div class="zn"><b>${esc(c.name || "")}</b>${i === 0 ? ` <span class="zm">Số chính</span>` : ""}<div class="muted">${esc(c.phone || c.zalo)}${c.role && i ? " · " + esc(c.role) : ""}</div></div>
+      <a class="zbtn" data-zdirect href="https://zalo.me/${esc(digits(c.zalo || c.phone))}" target="_blank" rel="noopener">Zalo</a>
+      <a class="zcall" href="tel:${esc(digits(c.phone || c.zalo))}" aria-label="Gọi ${esc(c.name || "")}">Gọi</a></div>`).join("")}</div>
+    <button type="button" class="zbt" aria-label="Liên hệ Zalo"><span>Zalo</span></button>`;
+  document.body.appendChild(wrap);
+  const open = v => { wrap.classList.toggle("open", v ?? !wrap.classList.contains("open")); lift(); };
+  wrap.querySelector(".zbt").onclick = e => { e.stopPropagation(); open(); };
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest('a[href^="https://zalo.me/"]');
+    if (a && !a.hasAttribute("data-zdirect")) { e.preventDefault(); open(true); return; }
+    if (!wrap.contains(e.target)) open(false);
+  }, true);
+  // nâng nút lên khi có thanh cố định ở đáy (nút đặt phòng trên điện thoại, thanh chọn ngày của đối tác)
+  const lift = () => { let h = 0; document.querySelectorAll(".mcta, #bar").forEach(el => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    if (cs.display !== "none" && cs.visibility !== "hidden" && r.height && r.top < innerHeight - 4 && r.bottom >= innerHeight - 4) h = Math.max(h, innerHeight - r.top); });
+    wrap.style.bottom = (h + 16) + "px";
+    // đang mở hộp thoại thì ẩn nút (tránh che nút Gửi), trừ khi đang chọn số Zalo
+    const modalOpen = !!document.querySelector(".ov.show");
+    wrap.style.display = modalOpen && !wrap.classList.contains("open") ? "none" : "";
+    wrap.style.zIndex = modalOpen ? 58 : ""; };
+  addEventListener("scroll", lift, { passive: true }); addEventListener("resize", lift); setInterval(lift, 600); lift();
+}
+
 async function mountSwitch(current) {
+  if (current !== "admin") zaloFab();
   const el = document.getElementById("roleSw"); if (!el) return;
   let me = null; try { me = await api.me(); } catch (e) {}
   if (me?.role !== "admin") {

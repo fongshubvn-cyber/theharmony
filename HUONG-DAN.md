@@ -30,6 +30,10 @@ tài khoản quản trị demo `admin@theharmony.vn` / `Harmony@2026`, dữ li�
 
 **5. Đưa lên website:** chép cả thư mục (giữ nguyên cấu trúc, **bỏ thư mục `demo/`**) vào website The Harmony. Mở tên miền, khách vào thẳng trang Villa (tìm căn, xem ngày trống).
 
+## Số liên hệ & nút Zalo nổi (trong `config.js`)
+- `HOTLINE` / `ZALO`: số chính (hiện ở đầu trang, nút báo giá).
+- `CONTACTS`: danh sách số hiện khi bấm **nút Zalo tròn góc phải màn hình** (số đầu tiên = số chính). Mỗi số có nút *Zalo* và *Gọi*. Mọi nút "Zalo" khác trên web cũng mở danh sách này.
+
 ## Nội dung trang chủ (trong `config.js`)
 - `PROOF`: điểm đánh giá, số lượt đánh giá, số khách đã phục vụ, số năm hoạt động. **Chỉ điền số thật**; ô trống tự ẩn.
 - `TESTIMONIALS`: 2–3 đánh giá thật của khách (chép từ Google/Facebook, có sự đồng ý của khách). Để trống thì mục này tự ẩn.
