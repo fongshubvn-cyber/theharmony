@@ -64,15 +64,28 @@ async function syncOne(db: any, src: any) {
   }
 }
 
+function jwtRole(auth: string): string {
+  try {
+    const p = auth.replace(/^Bearer\s+/i, "").split(".")[1];
+    if (!p) return "";
+    const b = p.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(p.length / 4) * 4, "=");
+    return JSON.parse(atob(b)).role || "";
+  } catch { return ""; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
     const auth = req.headers.get("Authorization") || "";
-    const isCron = auth === `Bearer ${SERVICE}`;
+    // Lịch tự động: chấp nhận khoá service_role (chữ ký JWT đã được cổng Supabase kiểm tra trước khi tới đây)
+    const role = jwtRole(auth);
+    const isCron = auth === `Bearer ${SERVICE}` || role === "service_role";
     if (!isCron) {
       const user = createClient(URL_, ANON, { global: { headers: { Authorization: auth } } });
       const { data, error } = await user.rpc("is_admin");
-      if (error || data !== true) return json({ error: "Chỉ tài khoản quản trị được dùng chức năng này" }, 403);
+      if (error || data !== true) return json({ error: role === "anon"
+        ? "Khoá dán trong cron.sql là khoá anon – cần thay bằng khoá service_role"
+        : "Chỉ tài khoản quản trị được dùng chức năng này" }, 403);
     }
     const body = await req.json().catch(() => ({}));
     const db = createClient(URL_, SERVICE);

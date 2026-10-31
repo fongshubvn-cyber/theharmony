@@ -1,0 +1,8 @@
+deploy.bat
+deploy.ps1
+demo/
+tools/
+supabase/.temp/
+supabase/.branches/
+node_modules/
+*.zip
