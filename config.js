@@ -27,6 +27,14 @@ window.HARMONY_CONFIG = {
   TESTIMONIALS: [
     // { name: "Chị Lan", from: "TP.HCM", group: "Gia đình 12 người", villa: "My Villa Đống Đa", stars: 5, text: "…", source: "Google" },
   ],
+  // Chính sách hiện ở trang Giới thiệu – anh sửa lại cho đúng thực tế
+  POLICIES: [
+    { t: "Đặt cọc & thanh toán", d: ["Đặt cọc 50% tổng tiền để giữ căn.", "Phần còn lại thanh toán khi nhận phòng.", "Báo giá gửi qua Zalo ghi rõ tổng tiền, tiền cọc và phụ thu (nếu có)."] },
+    { t: "Nhận & trả phòng", d: ["Nhận phòng từ 14:00, trả phòng trước 12:00.", "Nhận sớm / trả muộn vui lòng báo trước để được sắp xếp."] },
+    { t: "Huỷ & đổi ngày", d: ["Chính sách huỷ tuỳ từng căn và thời điểm (ngày thường, cuối tuần, lễ Tết).", "Điều kiện huỷ được ghi rõ trong báo giá trước khi đặt cọc."] },
+    { t: "Số khách & phụ thu", d: ["Mỗi căn có số khách tiêu chuẩn và số khách tối đa.", "Khách vượt tiêu chuẩn (trong giới hạn tối đa) có phụ thu, báo trước khi đặt."] },
+    { t: "Nội quy chung", d: ["Giữ yên lặng sau 22:00, tôn trọng hàng xóm.", "Không hút thuốc trong nhà.", "Giữ gìn tài sản; hư hỏng do khách gây ra sẽ được bồi thường theo thực tế."] },
+  ],
   // Câu hỏi thường gặp – anh kiểm tra lại cho đúng chính sách thực tế
   FAQ: [
     { q: "Đặt villa như thế nào?", a: "Chọn căn bạn thích, bấm “Nhận báo giá” hoặc nhắn Zalo ngày nhận/trả phòng và số khách. Chúng tôi gửi báo giá chính thức và các căn còn trống." },
