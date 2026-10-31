@@ -15,7 +15,7 @@ select cron.schedule(
   '* * * * *',
   $$
   select net.http_post(
-    url     := 'https://<PROJECT_REF>.supabase.co/functions/v1/sync-sheets',
+    url     := 'https://reyytwoivafzyvszrdwb.supabase.co/functions/v1/sync-sheets',
     headers := jsonb_build_object('Authorization', 'Bearer <SERVICE_ROLE_KEY>', 'Content-Type', 'application/json'),
     body    := '{"action":"sync"}'::jsonb
   );
