@@ -76,8 +76,10 @@
 
     /* căn (công khai) */
     api.listVillas = async () => { await ready; return all(() => sb.from("villas").select("*").order("sort").order("name")); };
-    api.saveVilla = async v => { await ready; const row = { ...v }; delete row.created_at; if (!row.id) delete row.id;
-      return ok(await sb.from("villas").upsert(row).select().single()); };
+    // Có id → chỉ cập nhật các cột gửi lên; chưa có id → thêm mới (tránh lỗi "null value in column" khi lưu một phần)
+    const saveRow = async (table, r) => { const row = { ...r }; delete row.created_at; const id = row.id; delete row.id;
+      return ok(await (id ? sb.from(table).update(row).eq("id", id) : sb.from(table).insert(row)).select().single()); };
+    api.saveVilla = async v => { await ready; return saveRow("villas", v); };
     api.deleteVilla = async id => { await ready; ok(await sb.from("villas").delete().eq("id", id)); };
     api.uploadPhoto = async (villaId, file) => { await ready;
       const path = `${villaId || "new"}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
@@ -117,13 +119,13 @@
     api.listRequests = async () => { await ready; return all(() => sb.from("booking_requests").select("*, villas(name), share_links(name,phone)").order("created_at", { ascending: false })); };
     api.updateRequest = async (id, status) => { await ready; ok(await sb.from("booking_requests").update({ status }).eq("id", id)); };
     api.listLinks = async () => { await ready; return all(() => sb.from("share_links").select("*").order("created_at", { ascending: false })); };
-    api.saveLink = async l => { await ready; const row = { ...l }; if (!row.id) delete row.id; return ok(await sb.from("share_links").upsert(row).select().single()); };
+    api.saveLink = async l => { await ready; return saveRow("share_links", l); };
     api.deleteLink = async id => { await ready; ok(await sb.from("share_links").delete().eq("id", id)); };
     /* nguồn Google Sheet */
     const fn = async body => { await ready; const { data, error } = await sb.functions.invoke("sync-sheets", { body });
       if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (e) {} throw new Error(m); } if (data?.error) throw new Error(data.error); return data; };
     api.listSources = async () => { await ready; return all(() => sb.from("sheet_sources").select("*").order("created_at")); };
-    api.saveSource = async s => { await ready; const row = { ...s }; if (!row.id) delete row.id; return ok(await sb.from("sheet_sources").upsert(row).select().single()); };
+    api.saveSource = async s => { await ready; return saveRow("sheet_sources", s); };
     api.deleteSource = async id => { await ready; ok(await sb.from("sheet_sources").delete().eq("id", id)); };
     api.previewSource = (sheet_url, config) => fn({ action: "preview", sheet_url, config });
     api.syncSource = async id => (await fn({ action: "sync", source_id: id })).results?.[0];

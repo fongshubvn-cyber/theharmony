@@ -60,20 +60,15 @@ Nếu chủ nhà đổi bố cục (mất cột đã ghép), nguồn chuyển sa
 Lịch & giá của căn đã ghép do Sheet quyết định – đừng sửa tay trong tab Lịch & giá (sẽ bị ghi đè ở lần đồng bộ sau).
 
 ### Cài đặt máy chủ đồng bộ (1 lần)
-1. Cài Supabase CLI (https://supabase.com/docs/guides/cli) → trong thư mục này chạy:
-   `supabase login` → `supabase link --project-ref <PROJECT_REF>` → `supabase functions deploy sync-sheets`
-   (thư mục `supabase/functions/` đã có sẵn mã; file `_shared/sheet-sync.js` là bản sao của `assets/sheet-sync.js`).
-2. Mở `supabase/cron.sql`, thay `<PROJECT_REF>` và `<SERVICE_ROLE_KEY>`, chạy trong SQL Editor → tự đồng bộ **15 phút/lần**.
-   Khoá service_role chỉ dán vào SQL Editor của Supabase, **không** dán vào `config.js` hay web.
+1. Supabase → **Project Settings → API Keys → Publishable and secret API keys** → tạo **secret key** (`sb_secret_…`) → trong cửa sổ lệnh chạy:
+   `npx supabase secrets set HARMONY_SECRET_KEY=sb_secret_...` (khoá chỉ nằm trên Supabase, **không** ghi vào file nào).
+2. Bấm đúp **deploy.bat** → tự gửi chương trình `sync-sheets` lên Supabase (lần đầu cần `npx supabase login` và `npx supabase link --project-ref <mã project>`).
+3. Mở `supabase/cron.sql` → dán vào **SQL Editor** → **Run** → tự đồng bộ **mỗi 1 phút**. File này **không chứa khoá nào**.
 
-## Màu người chốt
-- Ngày đã book hiện **vòng màu ✕** thay cho con số. Mỗi màu là một người chốt.
-- Quản trị đánh dấu "Đã book": mặc định **đỏ**; chọn màu + tên người chốt ở thanh dưới (VD Nam chốt → Xanh dương).
-- Ngoài 9 màu có sẵn còn có **vòng màu** (nút cầu vồng cuối hàng) để chọn bất kỳ màu nào.
-- Link đối tác: anh đặt màu gợi ý khi tạo link. **Lần đầu đối tác gửi yêu cầu book, màu họ chọn được khoá cố định vào link đó đến hết vòng đời** (biểu tượng 🔒). Sau đó cả đối tác lẫn quản trị đều không đổi được – database cũng chặn việc đổi.
-- Bấm *Xác nhận* yêu cầu thì lịch hiện đúng màu của link.
-- Nguồn Google Sheet: chọn màu riêng cho ngày kín của nguồn đó.
-- Khách chỉ thấy vòng màu, không thấy tên người chốt; đối tác không thấy tên đối tác khác.
+## Cập nhật website: bấm đúp `deploy.bat`
+- Tự đẩy mọi thay đổi lên GitHub, tự đánh số phiên bản để trình duyệt tải bản mới, tự gửi lại chương trình đồng bộ lên Supabase khi nó thay đổi.
+- **Tự chặn** nếu thấy khoá bí mật (service_role / sb_secret) trong bất kỳ file nào.
+- Cần cài Git: https://git-scm.com/download/win (lần đầu đẩy lên sẽ hiện cửa sổ đăng nhập GitHub).
 
 ## Cập nhật database
 Mỗi khi nhận bản mới, chạy lại toàn bộ `supabase/schema.sql` trong SQL Editor (chạy lại nhiều lần không mất dữ liệu). Bản này thêm cột `color_locked` (khoá màu theo link) và hàm `public_availability` để khách xem ngày trống.

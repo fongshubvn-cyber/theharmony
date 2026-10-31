@@ -3,7 +3,9 @@
 //  Đọc Google Sheet của các chủ villa → cập nhật lịch (đã book / giá / khoá)
 //  - action "preview": đọc thử 1 link (admin)        → trả nhãn cột, thống kê, màu
 //  - action "sync"   : đồng bộ 1 nguồn hoặc tất cả   → ghi bảng calendar
-//  Gọi bởi: trang quản trị (JWT admin) hoặc lịch tự động (service role key)
+//  Gọi bởi: trang quản trị (JWT admin) hoặc lịch tự động (pg_cron – KHÔNG cần khoá)
+//  Deploy: npx supabase functions deploy sync-sheets --no-verify-jwt --use-api
+//  Khoá quản trị đặt bằng: npx supabase secrets set HARMONY_SECRET_KEY=sb_secret_...
 // =====================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import "../_shared/sheet-sync.js";
@@ -11,8 +13,8 @@ import "../_shared/sheet-sync.js";
 const SS = (globalThis as any).SheetSync;
 
 const URL_ = Deno.env.get("SUPABASE_URL")!;
-const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+// Ưu tiên khoá secret mới (sb_secret_…) đặt bằng "supabase secrets set"; không có thì dùng khoá cũ do Supabase cấp sẵn
+const SERVICE = Deno.env.get("HARMONY_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type" };
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
@@ -64,31 +66,24 @@ async function syncOne(db: any, src: any) {
   }
 }
 
-function jwtRole(auth: string): string {
-  try {
-    const p = auth.replace(/^Bearer\s+/i, "").split(".")[1];
-    if (!p) return "";
-    const b = p.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(p.length / 4) * 4, "=");
-    return JSON.parse(atob(b)).role || "";
-  } catch { return ""; }
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
-    const auth = req.headers.get("Authorization") || "";
-    // Lịch tự động: chấp nhận khoá service_role (chữ ký JWT đã được cổng Supabase kiểm tra trước khi tới đây)
-    const role = jwtRole(auth);
-    const isCron = auth === `Bearer ${SERVICE}` || role === "service_role";
-    if (!isCron) {
-      const user = createClient(URL_, ANON, { global: { headers: { Authorization: auth } } });
-      const { data, error } = await user.rpc("is_admin");
-      if (error || data !== true) return json({ error: role === "anon"
-        ? "Khoá dán trong cron.sql là khoá anon – cần thay bằng khoá service_role"
-        : "Chỉ tài khoản quản trị được dùng chức năng này" }, 403);
-    }
     const body = await req.json().catch(() => ({}));
-    const db = createClient(URL_, SERVICE);
+    const db = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+    // "Đồng bộ tất cả" không cần đăng nhập (chỉ đọc lại Sheet công khai rồi ghi lịch) – giới hạn tối đa 1 lần / 40 giây
+    const publicSync = body.action === "sync" && !body.source_id && !body.sheet_url;
+    let admin = false;
+    const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    if (jwt.split(".").length === 3) {
+      const { data: u } = await db.auth.getUser(jwt);
+      if (u?.user) { const { data: pr } = await db.from("profiles").select("role").eq("id", u.user.id).maybeSingle(); admin = pr?.role === "admin"; }
+    }
+    if (!admin && !publicSync) return json({ error: "Chỉ tài khoản quản trị được dùng chức năng này" }, 403);
+    if (!admin) {
+      const { data: last } = await db.from("sheet_sync_runs").select("at").order("at", { ascending: false }).limit(1).maybeSingle();
+      if (last && Date.now() - new Date(last.at).getTime() < 40000) return json({ results: [], skipped: "vừa đồng bộ" });
+    }
 
     if (body.action === "preview") {
       const read = await SS.readSource({ sheet_url: body.sheet_url, bookedColors: body.config?.booked_colors, bookedWords: body.config?.booked_words }, fetchText);
