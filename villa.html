@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tìm villa trống – The Harmony Đà Lạt</title>
+<meta name="description" content="Tìm villa nguyên căn còn trống tại Đà Lạt theo ngày và số khách. Xem ảnh, số phòng, quy định và lịch trống. Nhắn Zalo nhận báo giá.">
+<meta property="og:title" content="Tìm villa trống tại Đà Lạt – The Harmony"><meta property="og:image" content="assets/og.jpg"><meta name="theme-color" content="#1a56db">
+<link rel="stylesheet" href="assets/common.css">
+<style>
+/* thanh tìm kiếm */
+.sbox{background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px;margin-bottom:14px;box-shadow:0 8px 24px rgba(26,86,219,.07)}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 130px auto;gap:10px;align-items:end}
+.sgrid label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.sgrid .btn{height:46px}
+.s2{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.s2 input{flex:2;min-width:180px}.s2 select{flex:1;min-width:130px}
+.s2 .ftog2{display:none}
+.nights{font-size:13px;color:var(--brand);font-weight:600;margin-top:6px;min-height:18px}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
+.rhead .count{margin:0}
+.sw{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none}
+.sw input{width:auto;accent-color:var(--brand)}
+/* thẻ */
+.card{position:relative}
+.card img.cv{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:#e6ecf5}
+.av{position:absolute;top:10px;left:10px;border-radius:999px;padding:4px 11px;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.av.free{background:#e7f8ee;color:#127a3e}.av.busy{background:#fde2e1;color:#b42318}.av.unknown{background:#fff4dc;color:#92600a}
+.card.busy{opacity:.62}
+.avtxt{font-size:13px;font-weight:600}
+.avtxt.free{color:#127a3e}.avtxt.busy{color:#b42318}.avtxt.unknown{color:#92600a}
+/* lịch trống trong chi tiết căn – kiểu trang đặt phòng */
+.acal{margin-top:20px}
+.acal .ttl{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.acal .ttl h4{margin:0;font-size:19px}
+.acal .ttl .sub{color:var(--muted);font-size:14px}
+.acal .dates{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #c9d3e1;border-radius:14px;overflow:hidden;margin-bottom:14px}
+.acal .dates > div{padding:10px 14px;cursor:default}
+.acal .dates > div + div{border-left:1.5px solid #c9d3e1}
+.acal .dates small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.acal .dates b{font-size:15px;font-weight:600}
+.acal .dates .on{box-shadow:inset 0 0 0 2px var(--ink);border-radius:12px}
+.acal .dates .ph{color:#98a2b3;font-weight:500}
+.acal .months{display:grid;grid-template-columns:repeat(var(--mcols,1),1fr);gap:28px;position:relative}
+.acal .mh{display:flex;justify-content:center;align-items:center;height:40px;font-weight:700;font-size:16px;margin-bottom:6px;text-transform:capitalize}
+.acal .nav{position:absolute;top:0;width:38px;height:38px;border-radius:999px;border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--ink);display:grid;place-items:center}
+.acal .nav:hover{background:#f1f4f9}
+.acal .nav:disabled{opacity:.25;cursor:default;background:transparent}
+.acal .nav.prev{left:0}.acal .nav.next{right:0}
+.acal .g{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px}
+.acal .w{font-size:12px;color:var(--muted);font-weight:600;text-align:center;padding:6px 0}
+.acal .d{position:relative;height:44px;display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none}
+.acal .d span{position:relative;z-index:1;width:42px;height:42px;border-radius:999px;display:grid;place-items:center;transition:background .12s}
+@media(hover:hover){.acal .d.free:hover span{box-shadow:inset 0 0 0 1.5px var(--ink)}}
+.acal .d.busy{cursor:not-allowed}
+.acal .d.busy span{width:34px;height:34px;color:#fff;font-weight:800;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.acal .d.unknown{color:#c4cad4;cursor:not-allowed}
+.acal .d.past{color:#d5dae2;cursor:default}
+.acal .d.today span::after{content:"";position:absolute;bottom:6px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:999px;background:var(--brand)}
+.acal .d.mid::before,.acal .d.s::before,.acal .d.e::before{content:"";position:absolute;top:1px;bottom:1px;background:#e8f0fe}
+.acal .d.mid::before{left:0;right:0}
+.acal .d.s.hasE::before{left:50%;right:0}
+.acal .d.e::before{left:0;right:50%}
+.acal .d.s:not(.hasE)::before{display:none}
+.acal .d.s span,.acal .d.e span{background:var(--brand);color:#fff}
+.acal .d.mid{color:var(--brand-d)}
+.acal .ft{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--muted)}
+.acal .ft .lgd{display:flex;gap:14px;align-items:center}
+.acal .ft .lgd .xm{width:18px;height:18px;font-size:9px;vertical-align:-4px;margin-right:4px}
+.acal .ft a{color:var(--ink);font-weight:700;text-decoration:underline;cursor:pointer}
+.acal .stat{display:inline-block;background:#e7f8ee;color:#127a3e;border-radius:999px;padding:3px 10px;font-weight:700;font-size:13px}
+@media(max-width:640px){.acal .d{height:42px}.acal .d span{width:38px;height:38px}.acal .months{gap:18px}}
+.mcta{display:none}
+@media(max-width:820px){
+  .mcta{display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+  .mcta .btn{flex:1;min-height:48px}body{padding-bottom:76px}.top .hide-m{display:none}
+}
+@media(max-width:640px){
+  .sbox{padding:12px;border-radius:18px}
+  .sgrid{grid-template-columns:1fr 1fr;gap:8px}
+  .sgrid .gq{grid-column:1/2}.sgrid .btn{grid-column:2/3;height:46px;width:100%}
+  .s2{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .s2 .ftog2{display:inline-flex}
+  .s2 select{display:none}
+  .sbox.open .s2 select{display:block}
+  .s2 select{grid-column:span 1}
+  .sbox.open .s2{grid-template-columns:1fr 1fr}
+  .sbox.open .s2 input{grid-column:1/-1}
+  .sbox.open .s2 .ftog2{grid-column:1/-1}
+  .av{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div id="hdr"></div>
+<main class="wrap" id="app"><div class="empty">Đang tải danh sách căn…</div></main>
+<footer class="wrap" style="text-align:center;padding:30px 20px 40px;color:var(--muted);font-size:13px">© The Harmony · Villa nguyên căn Đà Lạt · <a href="gioi-thieu.html#faqSec" style="color:var(--muted)">Câu hỏi thường gặp</a> · <a href="admin.html" style="color:var(--muted)">Quản trị</a></footer>
+<div class="mcta"><a class="btn p zl" target="_blank" rel="noopener">Nhận báo giá qua Zalo</a></div>
+<script src="config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/common.js"></script>
+<script>
+/* TRANG KHÁCH – chỉ xem thông tin căn + ngày trống/kín. KHÔNG bao giờ tải giá. */
+const PER = 24;
+let villas = [], av = null, avRange = ["", ""];
+const f = { page: 1, ci: "", co: "", guests: "", q: "", area: "", br: "", showBusy: false, _open: false };
+$("#hdr").innerHTML = header("Villa nguyên căn Đà Lạt", `<a class="pill ghost hide-m" href="gioi-thieu.html" style="text-decoration:none">Giới thiệu</a><a class="pill zl hide-m" target="_blank" rel="noopener">Zalo ${esc(CFG.HOTLINE)}</a>`);
+mountSwitch("guest");
+const ZL = "https://zalo.me/" + encodeURIComponent(CFG.ZALO || ""); $$(".zl").forEach(a => (a.href = ZL));
+
+/* nhận tìm kiếm từ trang chủ (?ci=&co=&g= hoặc sessionStorage) */
+(function () {
+  let s = {}; try { s = JSON.parse(sessionStorage.getItem("harmony-search") || "{}"); sessionStorage.removeItem("harmony-search"); } catch (e) {}
+  const q = new URLSearchParams(location.search);
+  f.ci = q.get("ci") || s.ci || ""; f.co = q.get("co") || s.co || ""; f.guests = q.get("g") || s.g || "";
+  const valid = x => { if (!/^\d{4}-\d{2}-\d{2}$/.test(x)) return false; const d = new Date(x + "T00:00:00"); return !isNaN(d) && api.iso(d) === x; };
+  if (!valid(f.ci) || f.ci < today()) f.ci = "";
+  if (!valid(f.co) || f.co <= f.ci) f.co = f.ci ? api.addDays(f.ci, 1) : "";
+  if (!/^\d{1,3}$/.test(f.guests)) f.guests = "";
+})();
+const nightsOf = () => (f.ci && f.co && f.co > f.ci) ? api.dateRange(f.ci, f.co) : [];
+
+async function ensureAv(from, to) {
+  if (av && from >= avRange[0] && to <= avRange[1]) return;
+  const a = avRange[0] && avRange[0] < from ? avRange[0] : from, b = avRange[1] > to ? avRange[1] : to;
+  av = await api.availability(a, b); avRange = [a, b];
+}
+
+/* ---------- báo giá (3 ô) ---------- */
+function quote(v, ci = "", co = "") {
+  const m = modal(`<div class="bd"><h2>Nhận báo giá</h2><div class="muted" style="margin-bottom:14px">${esc(v.name)} · tối đa ${v.max_guests} khách</div>
+    <form class="form" id="qf"><div class="row"><div><label>Ngày nhận phòng</label><input type="date" id="qi" min="${today()}" value="${ci}" required></div>
+      <div><label>Ngày trả phòng</label><input type="date" id="qo" min="${today()}" value="${co}" required></div></div>
+      <div class="row"><div><label>Số khách</label><input type="number" min="1" max="${v.max_guests || 99}" id="qg" placeholder="VD: 10" inputmode="numeric" value="${esc(f.guests)}" required></div></div>
+      <p id="qerr" style="color:var(--bookedInk);margin:0 0 6px;display:none"></p>
+      <div class="cta"><button class="btn p">Tạo tin nhắn báo giá</button></div></form></div>`);
+  $("#qi", m).onchange = () => { $("#qo", m).min = api.addDays($("#qi", m).value, 1); if ($("#qo", m).value <= $("#qi", m).value) $("#qo", m).value = api.addDays($("#qi", m).value, 1); };
+  $("#qf", m).onsubmit = async e => {
+    e.preventDefault(); const g = id => $(id, m).value.trim(), er = $("#qerr", m);
+    if (g("#qo") <= g("#qi")) { er.textContent = "Ngày trả phòng phải sau ngày nhận phòng."; er.style.display = "block"; return; }
+    const nights = api.dateRange(g("#qi"), g("#qo"));
+    await ensureAv(nights[0], api.addDays(nights[nights.length - 1], 1));
+    const stt = api.stayStatus(av, v.id, nights);
+    if (stt === "busy") { er.textContent = "Căn này đã kín một số đêm trong khoảng bạn chọn. Hãy chọn ngày khác hoặc xem căn khác."; er.style.display = "block"; return; }
+    copyBox("Gửi tin nhắn qua Zalo", `Chào ${CFG.BRAND}, mình muốn nhận báo giá:\n• Căn: ${v.name}${v.code ? " (" + v.code + ")" : ""}\n• Nhận phòng: ${dmy(g("#qi"))}\n• Trả phòng: ${dmy(g("#qo"))} (${nights.length} đêm)\n• Số khách: ${g("#qg")}`,
+      "Bấm “Sao chép nội dung”, rồi “Mở Zalo” và dán vào khung chat. Chúng tôi sẽ gửi báo giá chính thức cho bạn.");
+  };
+}
+
+/* ---------- lịch trống trong chi tiết căn ---------- */
+function availCal(v, box) {
+  const t0 = today(), minMonth = t0.slice(0, 7);
+  const addM = (ym, n) => { const d = new Date(ym + "-01T00:00:00"); d.setMonth(d.getMonth() + n); return api.iso(d).slice(0, 7); };
+  const left = monthDays(minMonth).filter(d => d >= t0).length;
+  let month = f.ci ? f.ci.slice(0, 7) : left < 7 ? addM(minMonth, 1) : minMonth, sel = { ci: f.ci, co: f.co };
+  const fmtLong = d => { if (!d) return ""; const x = new Date(d + "T00:00:00"); return `${["CN", "T2", "T3", "T4", "T5", "T6", "T7"][x.getDay()]}, ${dmy(d)}`; };
+  const draw = async () => {
+    const nM = box.clientWidth > 620 ? 2 : 1, months = Array.from({ length: nM }, (_, i) => addM(month, i));
+    const first = months[0] + "-01", lastDays = monthDays(months[nM - 1]);
+    await ensureAv(first, api.addDays(lastDays[lastDays.length - 1], 1));
+    const ns = sel.ci && sel.co ? api.dateRange(sel.ci, sel.co).length : 0;
+    // số ngày trống còn lại trong tháng đầu
+    await ensureAv(t0, api.addDays(t0, 30));
+    const next30 = api.dateRange(t0, api.addDays(t0, 30)), freeCnt = next30.filter(d => api.availStatus(av, v.id, d) === "free").length;
+    const monthHtml = ym => {
+      const days = monthDays(ym), lead = (new Date(days[0] + "T00:00:00").getDay() + 6) % 7;
+      const cell = d => {
+        const n = +d.slice(8);
+        if (d < t0) return `<div class="d past"><span>${n}</span></div>`;
+        const s = api.availStatus(av, v.id, d);
+        const cls = [s, d === t0 ? "today" : "", d === sel.ci ? "s" + (sel.co ? " hasE" : "") : "", d === sel.co ? "e" : "", sel.ci && sel.co && d > sel.ci && d < sel.co ? "mid" : ""].join(" ");
+        if (s === "busy") return `<div class="d busy" data-d="${d}" title="${dmy(d)} – Đã kín"><span style="background:${esc(api.availColor(av, v.id, d) || api.DEFAULT_COLOR)}">✕</span></div>`;
+        return `<div class="d ${cls}" data-d="${d}" title="${s === "free" ? "Còn trống" : "Chưa mở lịch – nhắn Zalo để hỏi"}"><span>${n}</span></div>`;
+      };
+      const name = `Tháng ${+ym.slice(5)} · ${ym.slice(0, 4)}`;
+      return `<div><div class="mh">${name}</div><div class="g">${["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map(w => `<div class="w">${w}</div>`).join("")}${"<div></div>".repeat(lead)}${days.map(cell).join("")}</div></div>`;
+    };
+    box.innerHTML = `
+      <div class="ttl"><div><h4>${ns ? `${ns} đêm tại ${esc(v.name)}` : "Chọn ngày lưu trú"}</h4>
+        <div class="sub">${ns ? `${dmy(sel.ci)} → ${dmy(sel.co)}` : "Chạm ngày nhận phòng, rồi ngày trả phòng"}</div></div>
+        <span class="stat" style="${freeCnt < 8 ? "background:#fff4dc;color:#92600a" : ""}">${freeCnt}/30 ngày tới còn trống</span></div>
+      <div class="dates"><div class="${!sel.ci || sel.co ? "" : ""} ${!sel.ci ? "on" : ""}"><small>Nhận phòng</small><b class="${sel.ci ? "" : "ph"}">${sel.ci ? fmtLong(sel.ci) : "Thêm ngày"}</b></div>
+        <div class="${sel.ci && !sel.co ? "on" : ""}"><small>Trả phòng</small><b class="${sel.co ? "" : "ph"}">${sel.co ? fmtLong(sel.co) : "Thêm ngày"}</b></div></div>
+      <div class="months" style="--mcols:${nM}">
+        <button class="nav prev" data-m="-1" ${month <= minMonth ? "disabled" : ""} aria-label="Tháng trước">‹</button>
+        <button class="nav next" data-m="1" aria-label="Tháng sau">›</button>
+        ${months.map(monthHtml).join("")}</div>
+      <div class="ft"><div class="lgd"><span><b style="color:var(--ink)">12</b> Còn trống</span><span>${xMark("#e5484d")}Đã kín</span><span style="color:#c4cad4">12 Chưa mở lịch</span></div>
+        ${sel.ci ? `<a id="clr">Xoá ngày</a>` : ""}</div>`;
+    box.querySelectorAll("[data-m]").forEach(b => (b.onclick = () => { month = addM(month, +b.dataset.m); draw(); }));
+    const clr = box.querySelector("#clr"); if (clr) clr.onclick = () => { sel = { ci: "", co: "" }; draw(); updCta(); };
+    box.querySelectorAll(".d[data-d]").forEach(el => (el.onclick = () => {
+      const d = el.dataset.d, s = api.availStatus(av, v.id, d);
+      if (!sel.ci || sel.co || d <= sel.ci) {
+        if (s !== "free") return toast(s === "busy" ? "Ngày này đã kín" : "Ngày này chưa mở lịch – nhắn Zalo để hỏi");
+        sel = { ci: d, co: "" };
+      } else {
+        const st = api.stayStatus(av, v.id, api.dateRange(sel.ci, d));
+        if (st === "busy") return toast("Có đêm đã kín trong khoảng này – chọn lại ngày");
+        sel.co = d;
+      }
+      draw(); updCta();
+    }));
+  };
+  const updCta = () => { const b = $("#qbtn"); if (b) b.textContent = sel.ci && sel.co ? `Nhận báo giá ${api.dateRange(sel.ci, sel.co).length} đêm này` : "Nhận báo giá căn này"; };
+  box._sel = () => sel;
+  draw(); updCta();
+}
+
+function openVilla(v) {
+  villaDetail(v, { extra: `<div class="acal" id="acal"></div>`,
+    cta: `<button class="btn p" id="qbtn" style="font-size:17px;padding:14px 24px">Nhận báo giá căn này</button>
+    <a href="${ZL}" target="_blank" rel="noopener" style="align-self:center;font-weight:700">hoặc nhắn Zalo ${esc(CFG.HOTLINE)}</a>
+    <p class="muted" style="width:100%;margin:6px 0 0;font-size:14px">Giá thay đổi theo ngày và số khách, báo giá chính thức qua Zalo.</p>` });
+  const box = $("#acal"); availCal(v, box);
+  $("#qbtn").onclick = () => { const s = box._sel(); quote(v, s.ci, s.co); };
+}
+
+/* ---------- danh sách + tìm kiếm ---------- */
+function searchBox() {
+  const ns = nightsOf();
+  return `<div class="sbox ${f._open ? "open" : ""}">
+    <form class="sgrid" id="sf">
+      <div><label for="sci">Nhận phòng</label><input type="date" id="sci" min="${today()}" value="${f.ci}"></div>
+      <div><label for="sco">Trả phòng</label><input type="date" id="sco" min="${f.ci ? api.addDays(f.ci, 1) : today()}" value="${f.co}"></div>
+      <div class="gq"><label for="fg">Số khách</label><input type="number" id="fg" min="1" inputmode="numeric" placeholder="VD: 12" value="${esc(f.guests)}"></div>
+      <button class="btn p" id="sgo">Tìm villa trống</button>
+    </form>
+    <div class="nights">${ns.length ? `${ns.length} đêm · ${dmy(f.ci)} → ${dmy(f.co)}` : f.ci ? "Chọn ngày trả phòng" : ""}</div>
+    <div class="s2">
+      <input id="fq" type="search" placeholder="Tìm tên / mã căn" value="${esc(f.q)}">
+      <button type="button" class="btn s ftog2" id="ftog2">Bộ lọc${(f.area ? 1 : 0) + (f.br ? 1 : 0) ? ` (${(f.area ? 1 : 0) + (f.br ? 1 : 0)})` : ""}</button>
+      <select id="farea"><option value="">Mọi khu vực</option>${areasOf(villas).map(a => `<option ${a === f.area ? "selected" : ""}>${esc(a)}</option>`).join("")}</select>
+      <select id="fbr"><option value="">Phòng ngủ: bất kỳ</option>${[2, 3, 4, 5, 6, 8, 10].map(n => `<option value="${n}" ${+f.br === n ? "selected" : ""}>Từ ${n} phòng ngủ</option>`).join("")}</select>
+    </div></div>`;
+}
+async function render() {
+  const ns = nightsOf();
+  if (ns.length) await ensureAv(ns[0], api.addDays(ns[ns.length - 1], 1));
+  let list = filterVillas(villas, f).map(v => ({ v, s: ns.length ? api.stayStatus(av, v.id, ns) : "" }));
+  const nFree = list.filter(x => x.s === "free").length;
+  if (ns.length) { const rank = { free: 0, unknown: 1, busy: 2 }; list.sort((a, b) => rank[a.s] - rank[b.s]); if (!f.showBusy) list = list.filter(x => x.s !== "busy"); }
+  const page = list.slice((f.page - 1) * PER, f.page * PER);
+  const L = { free: "Còn trống", busy: "Đã kín", unknown: "Cần kiểm tra" };
+  keepFocus(() => {
+    $("#app").innerHTML = `
+      <h1 style="font-size:30px;margin:4px 0 4px">Tìm villa trống tại Đà Lạt</h1>
+      <p class="muted" style="margin:0 0 14px">Chọn ngày đi và số khách để xem căn còn trống. Bấm vào căn để xem ảnh, quy định và lịch trống.</p>
+      ${searchBox()}
+      <div class="rhead"><p class="count">${ns.length ? `<b style="color:#127a3e">${nFree} căn còn trống</b> · ${list.length} căn hiển thị` : `${list.length} căn – chọn ngày để xem căn còn trống`}</p>
+        ${ns.length ? `<label class="sw"><input type="checkbox" id="sb" ${f.showBusy ? "checked" : ""}> Hiện cả căn đã kín</label>` : ""}</div>
+      ${page.length ? `<div class="grid">${page.map(({ v, s }) => `<div class="card ${s === "busy" ? "busy" : ""}" data-v="${v.id}">
+        ${photo(v) ? `<img class="cv" src="${esc(photo(v))}" alt="${esc(v.name)}" loading="lazy">` : `<div class="img"></div>`}
+        ${s ? `<span class="av ${s}">${L[s]}</span>` : ""}
+        <div class="b"><h3>${esc(v.name)}</h3><div class="muted" style="font-size:14px">${esc(v.area || "")}</div>
+        <div class="chips">${v.bedrooms ? `<span class="chip">${v.bedrooms} phòng ngủ</span>` : ""}${v.toilets ? `<span class="chip">${v.toilets} WC</span>` : ""}${v.max_guests ? `<span class="chip">Tối đa ${v.max_guests} khách</span>` : ""}</div>
+        ${s ? `<div class="avtxt ${s}">${s === "free" ? `Trống ${ns.length} đêm ${dm(f.ci)} → ${dm(f.co)}` : s === "busy" ? "Đã kín một số đêm – xem lịch để chọn ngày khác" : "Chưa mở lịch – nhắn Zalo để kiểm tra"}</div>` : ""}
+        <div style="margin-top:auto;padding-top:6px;color:var(--brand);font-weight:700">${s === "free" ? "Xem ảnh & nhận báo giá →" : "Xem ảnh & lịch trống →"}</div></div></div>`).join("")}</div>`
+        : `<div class="empty">${ns.length ? "Không còn căn trống phù hợp trong ngày bạn chọn. Thử đổi ngày, bớt bộ lọc, hoặc nhắn Zalo để được gợi ý." : "Không có căn phù hợp. Thử bỏ bớt bộ lọc nhé."}</div>`}
+      ${pager(list.length, PER, f.page, p => { f.page = p; render(); scrollTo(0, 0); })}`;
+  });
+  $$("[data-v]").forEach(c => (c.onclick = () => openVilla(villas.find(v => v.id === c.dataset.v))));
+  bindFilters(f, render);
+  const ci = $("#sci"), co = $("#sco");
+  ci.onchange = () => { f.ci = ci.value; if (f.co && f.co <= f.ci) f.co = ""; if (f.ci && !f.co) { f.co = api.addDays(f.ci, 1); } f.page = 1; render(); };
+  co.onchange = () => { f.co = co.value; f.page = 1; render(); };
+  $("#sf").onsubmit = e => { e.preventDefault(); if (!f.ci) return ci.focus?.(); f.page = 1; render(); };
+  const sb = $("#sb"); if (sb) sb.onchange = () => { f.showBusy = sb.checked; f.page = 1; render(); };
+  $("#ftog2").onclick = () => { f._open = !f._open; $(".sbox").classList.toggle("open", f._open); };
+}
+(async () => {
+  try { await api.init(); villas = (await api.listVillas()).filter(v => v.active !== false); await render();
+    const h = decodeURIComponent(location.hash.slice(1)); const hv = h && villas.find(x => x.id === h || x.code === h); if (hv) openVilla(hv); }
+  catch (e) { $("#app").innerHTML = `<div class="empty">Không tải được dữ liệu: ${esc(e.message)}</div>`; }
+})();
+</script>
+</body>
+</html>

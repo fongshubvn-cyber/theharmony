@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Harmony – Lịch giá cho đối tác</title>
+<link rel="stylesheet" href="assets/common.css">
+</head>
+<body>
+<div id="hdr"></div>
+<main class="wrap" id="app"><div class="empty">Đang tải…</div></main>
+<div class="bar" id="bar"><div class="wrap"><div id="barSum"></div>
+  <div style="display:flex;gap:8px"><button class="btn s" id="barClear">Bỏ chọn</button><button class="btn p" id="barGo">Gửi yêu cầu book</button></div></div></div>
+<script src="config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/common.js"></script>
+<script>
+const PER_CARD = 24, PER_ROW = 30;
+let link = null, villas = [], rates = {}, cal = {}, calRange = ["", ""];
+const st = { tab: "cal", pick: [], f: { page: 1 }, ci: api.addDays(today(), 7), co: api.addDays(today(), 9), month: defaultMonth(), sel: null };
+const V = id => villas.find(v => v.id === id);
+
+function hdr() {
+  $("#hdr").innerHTML = header("Lịch giá cho đối tác", link ? `<span class="pill">${link.preview ? "Xem thử: " : "Đối tác: "}${esc(link.name)}</span>` : "");
+}
+function invalidView() {
+  $("#app").innerHTML = `<div class="login" style="text-align:center"><h2>Link không hợp lệ</h2>
+    <p class="muted">Link lịch giá này không đúng hoặc đã bị khoá. Vui lòng liên hệ The Harmony để nhận link mới.</p>
+    <div class="cta" style="justify-content:center"><a class="btn p" href="https://zalo.me/${esc(CFG.ZALO)}" target="_blank" rel="noopener">Zalo ${esc(CFG.HOTLINE)}</a><a class="btn s" href="villa.html">Xem danh sách villa</a></div></div>`;
+}
+
+/* ---------- dữ liệu ---------- */
+async function ensureCal(from, to) {
+  if (calRange[0] && from >= calRange[0] && to <= calRange[1]) return;
+  const a = calRange[0] && calRange[0] < from ? calRange[0] : from, b = calRange[1] > to ? calRange[1] : to;
+  const d = await api.partnerData(a, b); rates = d.rates; cal = d.cal; link = { ...d.link, preview: !!d.preview }; calRange = [a, b];
+}
+const eff = (vid, d) => api.effective(vid, d, rates, cal);
+
+/* ---------- gửi yêu cầu ---------- */
+function requestForm(vid, dates) {
+  const v = V(vid), ds = [...dates].sort(), co = api.addDays(ds[ds.length - 1], 1);
+  const lines = ds.map(d => ({ d, p: eff(vid, d).p || 0 })), total = lines.reduce((s, x) => s + x.p, 0);
+  const contiguous = ds.every((d, i) => !i || api.addDays(ds[i - 1], 1) === d);
+  const m = modal(`<div class="bd"><h2>Gửi yêu cầu giữ căn</h2><div class="muted">${esc(v.name)} · ${ds.length} đêm · Tổng NET <b style="color:var(--brand)">${vnd(total)}</b></div>
+    ${contiguous ? "" : `<div class="demo" style="margin-top:10px">Các đêm bạn chọn không liền nhau – mỗi đoạn sẽ được xác nhận riêng.</div>`}
+    <table class="list" style="margin:12px 0">${lines.map(x => `<tr><td>${dow(x.d)} ${dmy(x.d)}</td><td style="text-align:right">${vnd(x.p)}</td></tr>`).join("")}</table>
+    <div class="form"><div class="row"><div><label>Số khách</label><input id="rg" type="number" min="1" max="${v.max_guests}" placeholder="Tối đa ${v.max_guests}"></div>
+    <div><label>Tên khách / SĐT khách</label><input id="rc"></div></div>
+    <div><label>Ghi chú</label><textarea id="rn" placeholder="Giờ đến dự kiến, yêu cầu thêm…"></textarea></div>
+    <div style="margin-top:10px"><label>Màu đánh dấu ngày bạn chốt</label>${link.color_locked
+      ? `<div class="lockc"><i class="cdot" style="background:${esc(link.color)}"></i><div><b>Màu của bạn</b><div class="muted" style="font-size:12px">Đã gắn cố định với link này – các đêm bạn chốt luôn hiện vòng màu ✕ này.</div></div></div>`
+      : `${swatches("rcol", st.color || link.color || "#2f6fed")}<div class="muted" style="font-size:12px;margin-top:4px">Chọn 1 màu có sẵn hoặc bấm <b>vòng màu</b> cuối hàng để chọn màu riêng.${link.preview ? "" : " <b>Lưu ý:</b> màu bạn gửi lần đầu sẽ gắn cố định với link này, không đổi được về sau."}</div>`}</div></div>
+    <div class="cta"><button class="btn p" id="rs">Gửi yêu cầu</button></div>
+    <p class="muted" style="font-size:14px;margin:8px 0 0">Trạng thái chỉ có giá trị sau khi quản lý xác nhận.</p></div>`);
+  bindSwatches(m, "rcol", c => (st.color = c));
+  $("#rs", m).onclick = async () => {
+    $("#rs", m).disabled = true;
+    const r = { villa_id: vid, check_in: ds[0], check_out: co, color: link.color_locked ? link.color : (st.color || link.color || "#2f6fed"), guests: +$("#rg", m).value || null, total, contact: $("#rc", m).value, note: $("#rn", m).value + (contiguous ? "" : "\nĐêm: " + ds.map(dm).join(", ")) };
+    try {
+      await api.createRequest(r); if (!link.preview && !link.color_locked) { link.color = r.color; link.color_locked = true; } st.sel = null; renderBar(); if (st.tab === "cal") render();
+      copyBox("Đã gửi yêu cầu ✓", `YÊU CẦU GIỮ CĂN – ${CFG.BRAND}\n• Căn: ${v.name}${v.code ? " (" + v.code + ")" : ""}\n• Nhận phòng: ${dmy(ds[0])} – Trả phòng: ${dmy(co)} (${ds.length} đêm)\n${lines.map(x => "   - " + dmy(x.d) + ": " + vnd(x.p)).join("\n")}\n• Tổng NET: ${vnd(total)}\n• Số khách: ${r.guests || "…"}\n• Khách: ${r.contact || "…"}\n• Đối tác: ${link.name}${link.phone ? " – " + link.phone : ""}`,
+        "Yêu cầu đã vào hệ thống. Bạn có thể sao chép tin nhắn này gửi Zalo để quản lý xử lý nhanh hơn.");
+    } catch (e) { toast("Lỗi: " + e.message); $("#rs", m).disabled = false; }
+  };
+}
+
+/* ---------- tab: tìm căn trống ---------- */
+async function renderFind() {
+  const nights = st.co > st.ci ? api.dateRange(st.ci, st.co) : [];
+  if (nights.length) await ensureCal(st.ci, st.co);
+  const list = filterVillas(villas, st.f).map(v => {
+    const e = nights.map(d => eff(v.id, d));
+    return { v, ok: e.length && e.every(x => x.s === "open"), total: e.reduce((s, x) => s + (x.p || 0), 0), e };
+  }).filter(x => st.showAll || x.ok).sort((a, b) => (b.ok - a.ok) || a.total - b.total);
+  const page = list.slice((st.f.page - 1) * PER_CARD, st.f.page * PER_CARD);
+  keepFocus(() => {
+    $("#body").innerHTML = filterBar(villas, st.f, `
+      <div class="f"><label>Nhận phòng</label><input type="date" id="ci" value="${st.ci}"></div>
+      <div class="f"><label>Trả phòng</label><input type="date" id="co" value="${st.co}"></div>
+      <label class="muted" style="display:flex;gap:6px;align-items:center;font-size:14px;padding-bottom:10px"><input type="checkbox" id="sa" style="width:auto" ${st.showAll ? "checked" : ""}> Hiện cả căn đã kín</label>`) +
+      `<p class="count">${nights.length ? `${nights.length} đêm · ${list.filter(x => x.ok).length} căn còn trống` : "Chọn ngày trả phòng sau ngày nhận phòng"}</p>` +
+      (page.length ? `<div class="grid">${page.map(({ v, ok, total, e }) => `<div class="card" data-v="${v.id}" style="${ok ? "" : "opacity:.6"}"><div class="img" ${bgImg(photo(v))}></div>
+        <div class="b"><div class="chips">${v.code ? `<span class="chip">${esc(v.code)}</span>` : ""}<span class="chip warm">${esc(v.area || "")}</span></div>
+        <h3>${esc(v.name)}</h3><div class="chips"><span class="chip">${v.bedrooms} PN</span><span class="chip">${v.toilets} WC</span><span class="chip">Tối đa ${v.max_guests}</span></div>
+        <div style="margin-top:auto;padding-top:6px">${ok ? `<div class="price">${vnd(total)}</div><div class="muted" style="font-size:13px">NET · ${nights.length} đêm</div>`
+          : `<div style="color:var(--bookedInk);font-weight:700">${e.some(x => x.s === "na") ? "Có ngày chưa cập nhật giá" : "Không trống đủ các đêm"}</div>`}</div></div></div>`).join("")}</div>`
+        : `<div class="empty">Không có căn trống phù hợp.</div>`) + pager(list.length, PER_CARD, st.f.page, p => { st.f.page = p; render(); scrollTo(0, 0); });
+  });
+  bindFilters(st.f, render);
+  $("#ci").onchange = e => { st.ci = e.target.value; if (st.co <= st.ci) st.co = api.addDays(st.ci, 1); st.f.page = 1; render(); };
+  $("#co").onchange = e => { st.co = e.target.value; st.f.page = 1; render(); };
+  $("#sa").onchange = e => { st.showAll = e.target.checked; render(); };
+  $$("[data-v]").forEach(c => (c.onclick = () => {
+    const x = list.find(y => y.v.id === c.dataset.v);
+    villaDetail(x.v, { extraTop: x.ok ? `<div style="margin-top:10px" class="price">${vnd(x.total)} <span class="muted" style="font-size:14px">NET · ${dmy(st.ci)} → ${dmy(st.co)}</span></div>` : "",
+      cta: `${x.ok ? `<button class="btn p" id="bk">Gửi yêu cầu book ${nights.length} đêm</button>` : ""}<button class="btn s" id="cl">Thêm vào lịch giá</button>` });
+    if ($("#bk")) $("#bk").onclick = () => requestForm(x.v.id, nights);
+    $("#cl").onclick = () => { if (!addPick(x.v.id)) return; closeModal(); st.tab = "cal"; st.month = st.ci.slice(0, 7); render(); };
+  }));
+}
+
+/* ---------- tab: lịch giá – chọn 1–4 căn, xem dọc theo ngày ---------- */
+const MAX_PICK = 4;
+function savePick() { try { localStorage.setItem("harmony-pick", JSON.stringify(st.pick)); } catch (e) {} }
+function loadPick() { try { return JSON.parse(localStorage.getItem("harmony-pick") || "null"); } catch (e) { return null; } }
+function addPick(id) {
+  if (st.pick.includes(id)) return true;
+  if (st.pick.length >= MAX_PICK) { toast(`Chỉ xem tối đa ${MAX_PICK} căn cùng lúc – bỏ bớt 1 căn trước`); return false; }
+  st.pick.push(id); savePick(); return true;
+}
+function pickerModal() {
+  const pf = { page: 1 };
+  const m = modal(`<div class="bd"><h2>Chọn căn để xem lịch</h2><p class="muted" style="margin:2px 0 12px">Chọn tối đa ${MAX_PICK} căn. Đang chọn <b id="pkn">${st.pick.length}</b>/${MAX_PICK}.</p>
+    <div id="pkf"></div><div id="pkl"></div><div class="cta"><button class="btn p" id="pkok">Xem lịch</button></div></div>`);
+  const draw = () => {
+    const list = filterVillas(villas, pf), page = list.slice((pf.page - 1) * 12, pf.page * 12);
+    keepFocus(() => {
+      $("#pkf", m).innerHTML = filterBar(villas, pf);
+      $("#pkl", m).innerHTML = `<p class="count">${list.length} căn</p>` + page.map(v => { const on = st.pick.includes(v.id);
+        return `<label style="display:flex;gap:12px;align-items:center;padding:8px;border:1.5px solid ${on ? "var(--brand)" : "var(--line)"};border-radius:16px;margin-bottom:8px;cursor:pointer;background:${on ? "var(--brand2)" : "#fff"}">
+          <input type="checkbox" data-pk="${v.id}" ${on ? "checked" : ""} style="width:20px;height:20px;flex:none">
+          <span class="pkimg" ${bgImg(photo(v))}></span>
+          <span style="flex:1;min-width:0"><b>${esc(v.name)}</b><br><span class="muted" style="font-size:13px">${esc(v.code || "")} · ${esc(v.area || "")} · ${v.bedrooms} PN · tối đa ${v.max_guests} khách</span></span></label>`; }).join("")
+        + pager(list.length, 12, pf.page, p => { pf.page = p; draw(); });
+    });
+    bindFilters(pf, draw);
+    $$("[data-pk]", m).forEach(c => (c.onchange = () => {
+      if (c.checked) { if (!addPick(c.dataset.pk)) c.checked = false; }
+      else { st.pick = st.pick.filter(x => x !== c.dataset.pk); savePick(); }
+      $("#pkn", m).textContent = st.pick.length; draw();
+    }));
+  };
+  draw();
+  $("#pkok", m).onclick = () => { closeModal(); render(); };
+}
+async function renderCal() {
+  st.pick = st.pick.filter(id => V(id));
+  const days = monthDays(st.month); await ensureCal(days[0], api.addDays(days[days.length - 1], 1));
+  const cols = st.pick.map(V);
+  $("#body").innerHTML = `
+    <div class="filters calf" style="align-items:center">
+      <div class="f" style="min-width:170px"><label>Tháng</label><select id="mo">${monthOptions().map(m => `<option value="${m}" ${m === st.month ? "selected" : ""}>Tháng ${+m.slice(5)}/${m.slice(0, 4)}</option>`).join("")}</select></div>
+      <div style="flex:1;min-width:260px"><label class="muted" style="font-size:13px;font-weight:700;display:block;margin-bottom:4px">Căn đang xem (${cols.length}/${MAX_PICK})</label>
+        <div class="chips pickchips">${cols.map(v => `<span class="chip" style="font-size:14px;padding:6px 8px 6px 12px">${esc(v.name)} <button data-unpick="${v.id}" style="border:0;background:#fff;border-radius:999px;width:22px;height:22px;cursor:pointer;margin-left:4px">×</button></span>`).join("")}
+        <button class="btn p sm" id="pick">${cols.length ? "+ Chọn / đổi căn" : "+ Chọn căn để xem"}</button></div></div>
+    </div>
+    ${cols.length ? `<div class="legend"><span><i></i>Còn trống (giá NET/đêm)</span><span><i style="background:var(--special)"></i>Giá đặc biệt</span><span>${xMark("#e5484d", "", "sm")} Đã book (màu theo người chốt)</span><span><i class="cdot" style="background:${esc(link.color_locked ? link.color : (st.color || link.color || "#2f6fed"))}"></i>Màu của bạn${link.color_locked ? " 🔒" : ""}</span><span><i style="background:var(--na)"></i>Chưa cập nhật</span><span><i style="background:var(--sel)"></i>Đang chọn</span></div>
+    <p class="count">Chạm ô giá để chọn đêm, rồi bấm “Gửi yêu cầu book”. Chạm tên căn để xem ảnh, số phòng, quy định.</p>
+    <div class="calbox"><table class="vcal" style="width:100%"><thead><tr><th style="text-align:left;width:90px">Ngày</th><th style="width:56px">Thứ</th>
+      ${cols.map(v => `<th class="vh" data-v="${v.id}"><span class="vimg" ${bgImg(photo(v))}></span><span class="vn">${esc(v.name)}</span><span class="vs">${[v.bedrooms ? v.bedrooms + " PN" : "", v.toilets ? v.toilets + " WC" : "", v.max_guests ? "tối đa " + v.max_guests : ""].filter(Boolean).join(" · ")}</span></th>`).join("")}</tr></thead>
+    <tbody>${days.map(d => `<tr class="${api.isWeekend(d) ? "we" : ""}"><td class="dt">${dm(d)}<small class="dws">${dow(d)}</small></td><td class="dw">${dow(d)}</td>${cols.map(v => {
+      if (d < today()) return `<td class="c na" style="opacity:.5">—</td>`;
+      const e = eff(v.id, d), sel = st.sel && st.sel.vid === v.id && st.sel.dates.has(d);
+      if (e.s === "booked") return `<td class="c booked">${xMark(e.color || api.DEFAULT_COLOR, "Đã book", "sm")}</td>`;
+      if (e.s === "blocked") return `<td class="c blocked">Không bán</td>`;
+      if (e.s === "na") return `<td class="c na"><span class="pf">Chưa cập nhật</span><span class="pm">—</span></td>`;
+      return `<td class="c ${e.special ? "special" : ""} ${sel ? "sel" : ""}" data-c="${v.id}|${d}"><span class="pf">${vnd(e.p)}</span><span class="pm">${short(e.p)}</span></td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty" style="padding:50px 20px"><h3 style="margin-bottom:6px">Chưa chọn căn nào</h3><p style="margin:0 0 14px">Chọn 1 đến ${MAX_PICK} căn để xem lịch giá theo ngày, giống bảng giá quen thuộc.</p><button class="btn p" id="pick2">Chọn căn</button></div>`}`;
+  $("#mo").onchange = e => { st.month = e.target.value; render(); };
+  $("#pick").onclick = pickerModal; if ($("#pick2")) $("#pick2").onclick = pickerModal;
+  $$("[data-unpick]").forEach(b => (b.onclick = () => { st.pick = st.pick.filter(x => x !== b.dataset.unpick); if (st.sel && st.sel.vid === b.dataset.unpick) { st.sel = null; renderBar(); } savePick(); render(); }));
+  $$("th[data-v]").forEach(c => (c.onclick = () => villaDetail(V(c.dataset.v))));
+  $$("[data-c]").forEach(c => (c.onclick = () => {
+    const [vid, d] = c.dataset.c.split("|");
+    if (!st.sel || st.sel.vid !== vid) st.sel = { vid, dates: new Set() };
+    st.sel.dates.has(d) ? st.sel.dates.delete(d) : st.sel.dates.add(d);
+    if (!st.sel.dates.size) st.sel = null;
+    $$("td[data-c]").forEach(x => { const [v2, d2] = x.dataset.c.split("|"); x.classList.toggle("sel", !!(st.sel && st.sel.vid === v2 && st.sel.dates.has(d2))); });
+    renderBar();
+  }));
+}
+function renderBar() {
+  $("#bar").classList.toggle("show", !!st.sel);
+  if (!st.sel) return;
+  const ds = [...st.sel.dates].sort(), total = ds.reduce((s, d) => s + (eff(st.sel.vid, d).p || 0), 0);
+  $("#barSum").innerHTML = `<b>${esc(V(st.sel.vid).name)}</b> · ${ds.length} đêm (${ds.map(dm).join(", ")}) · Tổng NET <b style="color:var(--brand);font-size:20px">${vnd(total)}</b>`;
+}
+$("#barClear").onclick = () => { st.sel = null; renderBar(); $$("td.sel").forEach(x => x.classList.remove("sel")); };
+$("#barGo").onclick = () => requestForm(st.sel.vid, st.sel.dates);
+
+/* ---------- tab: yêu cầu của tôi ---------- */
+async function renderMine() {
+  const rs = await api.myRequests();
+  const L = { new: "Chờ xác nhận", confirmed: "Đã xác nhận", rejected: "Từ chối", cancelled: "Đã huỷ" };
+  $("#body").innerHTML = rs.length ? `<table class="list"><tr><th>Ngày gửi</th><th>Căn</th><th>Nhận – Trả</th><th>Khách</th><th>Tổng NET</th><th>Trạng thái</th></tr>
+    ${rs.map(r => `<tr><td>${dmy(r.created_at.slice(0, 10))}</td><td>${esc(r.villas?.name || "")}</td><td>${dmy(r.check_in)} → ${dmy(r.check_out)}</td><td>${r.guests || ""}</td><td>${vnd(r.total)}</td><td><span class="st ${r.status}">${L[r.status]}</span></td></tr>`).join("")}</table>`
+    : `<div class="empty">Bạn chưa gửi yêu cầu nào.</div>`;
+}
+
+async function render() {
+  $("#tabs").innerHTML = [["cal", "Lịch giá"], ["find", "Tìm căn trống theo ngày"], ["mine", "Yêu cầu của tôi"]]
+    .map(([k, l]) => `<button class="tab ${st.tab === k ? "on" : ""}" data-tab="${k}">${l}</button>`).join("");
+  $$("[data-tab]").forEach(b => (b.onclick = () => { if (st.tab !== b.dataset.tab) { st.tab = b.dataset.tab; st.f.page = 1; render(); } }));
+  try { await ({ find: renderFind, cal: renderCal, mine: renderMine })[st.tab](); }
+  catch (e) { $("#body").innerHTML = `<div class="empty">Lỗi tải dữ liệu: ${esc(e.message)}</div>`; }
+}
+
+async function boot() {
+  const m0 = today().slice(0, 7) + "-01";
+  try { await ensureCal(m0, api.addDays(m0, 62)); }
+  catch (e) { hdr(); mountSwitch("partner"); return e.message === "LINK_INVALID" ? invalidView() : ($("#app").innerHTML = `<div class="empty">${esc(e.message)}</div>`); }
+  hdr(); mountSwitch("partner");
+  $("#app").innerHTML = `${link.preview ? `<div class="demo">Anh đang <b>xem thử</b> bằng tài khoản quản trị. Đối tác vào bằng link riêng tạo ở tab “Link đối tác”.</div>` : ""}
+    <div class="demo" style="background:#e8f0fe;border-color:#c7dafc;color:var(--brand-d)">Xin chào <b>${esc(link.name)}</b>. Giá hiển thị là <b>giá NET</b>, chưa gồm hoa hồng. Trạng thái chỉ có giá trị sau khi quản lý xác nhận. Vui lòng không chia sẻ link này.</div>
+    <div class="tabs" id="tabs"></div><div id="body"></div>`;
+  villas = (await api.listVillas()).filter(v => v.active !== false);
+  st.pick = (loadPick() || villas.slice(0, MAX_PICK).map(v => v.id)).filter(id => V(id)).slice(0, MAX_PICK);
+  render();
+}
+addEventListener("hashchange", () => location.reload());
+(async () => { try { await api.init(); boot(); } catch (e) { $("#app").innerHTML = `<div class="empty">${esc(e.message)}</div>`; } })();
+</script>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The Harmony – Quản trị</title>
+<link rel="stylesheet" href="assets/common.css">
+</head>
+<body>
+<div id="hdr"></div>
+<main class="wrap" id="app"><div class="empty">Đang tải…</div></main>
+<div class="bar" id="bar"><div class="wrap"><div id="barSum"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input id="bp" type="number" step="100000" placeholder="Giá (đ)" style="width:140px">
+    <button class="btn p sm" data-act="price">Đặt giá riêng</button>
+    <span style="display:inline-flex;gap:6px;align-items:center;border:1.5px solid var(--line);border-radius:999px;padding:3px 6px 3px 10px;background:#fff"><i class="cdot" id="bcolDot" style="background:#e5484d;margin:0"></i>
+      <select id="bcol" style="border:0;padding:4px;width:auto;font-size:14px"></select>
+      <input id="bby" placeholder="Người chốt" style="border:0;border-left:1px solid var(--line);border-radius:0;padding:4px 8px;width:110px;font-size:14px"></span>
+    <button class="btn w sm" data-act="booked">Đã book</button>
+    <button class="btn s sm" data-act="blocked">Khoá</button>
+    <button class="btn s sm" data-act="reset">Về giá gốc</button>
+    <button class="btn s sm" id="barClear">Bỏ chọn</button></div></div></div>
+<datalist id="areas"></datalist>
+<script src="config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/common.js"></script>
+<script src="assets/sheet-sync.js"></script>
+<script src="demo/sheet-snapshot.js" onerror="this.remove()"></script>
+<script src="assets/bookmarklet.js"></script>
+<script>
+const PER = 30;
+let me = null, villas = [], rates = {}, cal = {}, sources = [];
+const st = { tab: "villas", f: { page: 1 }, month: defaultMonth(), sel: new Set(), reqFilter: "new" };
+const V = id => villas.find(v => v.id === id);
+const lines = s => String(s || "").split(/\n/).map(x => x.trim()).filter(Boolean);
+const commas = s => String(s || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean);
+
+function hdr() {
+  $("#hdr").innerHTML = header("Trang quản trị", me ? `${api.demo ? "" : `<button class="pill ghost" id="pw">Đổi mật khẩu</button>`}<button class="pill ghost" id="out">Đăng xuất</button>` : "");
+  const o = $("#out"); if (o) o.onclick = async () => { await api.signOut(); location.href = "villa.html"; };
+  const p = $("#pw"); if (p) p.onclick = () => {
+    const m = modal(`<div class="bd"><h2>Đổi mật khẩu</h2><form class="form" id="pf2" style="margin-top:12px"><div class="row"><div><label>Mật khẩu mới (ít nhất 8 ký tự)</label><input type="password" id="np" minlength="8" required></div>
+      <div><label>Nhập lại</label><input type="password" id="np2" minlength="8" required></div></div><div class="cta"><button class="btn p">Lưu mật khẩu</button></div></form></div>`);
+    $("#pf2", m).onsubmit = async e => { e.preventDefault(); if ($("#np", m).value !== $("#np2", m).value) return toast("Hai mật khẩu chưa khớp");
+      try { await api.changePassword($("#np", m).value); closeModal(); toast("Đã đổi mật khẩu"); } catch (err) { toast(err.message); } };
+  };
+}
+function loginView(mode = "in", msg = "") {
+  const up = mode === "up";
+  $("#app").innerHTML = `<div class="login"><h2>${up ? "Tạo tài khoản quản trị" : "Đăng nhập quản trị"}</h2>
+    <p class="muted" style="margin:2px 0 10px">${up ? "Tài khoản đầu tiên được tạo sẽ là tài khoản quản trị." : "Chỉ dành cho quản lý The Harmony."}</p>
+    ${api.demo ? `<div class="demo">Bản demo – tài khoản: <b>${esc(api.demoAdmin.email)}</b><br>Mật khẩu: <b>${esc(api.demoAdmin.password)}</b></div>` : ""}
+    ${msg ? `<div class="demo" style="background:#fbe9e7;border-color:#efc2bc;color:var(--bookedInk)">${esc(msg)}</div>` : ""}
+    <form id="lf">${up ? `<div class="f"><label>Họ tên</label><input id="ln" required></div>` : ""}
+    <div class="f"><label>Email</label><input id="le" type="email" autocomplete="username" required></div>
+    <div class="f"><label>Mật khẩu</label><input id="lw" type="password" autocomplete="${up ? "new-password" : "current-password"}" minlength="${up ? 8 : 6}" required></div>
+    <div class="cta"><button class="btn p" style="flex:1">${up ? "Tạo tài khoản" : "Đăng nhập"}</button></div></form>
+    ${api.demo ? "" : `<p style="text-align:center;margin:14px 0 0"><a href="#" id="sw">${up ? "Đã có tài khoản? Đăng nhập" : "Lần đầu cài đặt? Tạo tài khoản quản trị"}</a></p>`}</div>`;
+  if ($("#sw")) $("#sw").onclick = e => { e.preventDefault(); loginView(up ? "in" : "up"); };
+  $("#lf").onsubmit = async e => { e.preventDefault();
+    try { me = up ? await api.signUp($("#le").value, $("#lw").value, { full_name: $("#ln").value }) : await api.signIn($("#le").value, $("#lw").value);
+      if (!me) return loginView("in", "Đã tạo tài khoản. Kiểm tra email để xác nhận, sau đó đăng nhập.");
+      boot(); } catch (err) { loginView(mode, /Invalid login/i.test(err.message) ? "Sai email hoặc mật khẩu" : err.message); } };
+}
+async function reload() { [villas, rates, sources] = await Promise.all([api.listVillas(), api.getRates(), api.listSources().catch(() => [])]); $("#areas").innerHTML = areasOf(villas).map(a => `<option value="${esc(a)}">`).join(""); }
+
+/* ================= CĂN ================= */
+function villaForm(v0) {
+  const v = v0 ? JSON.parse(JSON.stringify(v0)) : { name: "", bedrooms: 3, toilets: 3, std_guests: 6, max_guests: 8, amenities: [], rules: [], photos: [], active: true, sort: villas.length };
+  const r = (v.id && rates[v.id]) || {};
+  const m = modal(`<div class="bd"><h2>${v0?.id ? "Sửa căn" : "Thêm căn mới"}</h2><p class="muted" style="margin:2px 0 14px">Thông tin căn hiện cho cả khách và đối tác. Giá chỉ đối tác thấy.</p>
+  <form class="form" id="vf">
+    <div class="row"><div><label>Mã căn</label><input name="code" value="${esc(v.code || "")}" placeholder="VD: TH-001"></div>
+      <div style="grid-column:span 2"><label>Tên căn *</label><input name="name" required value="${esc(v.name)}"></div></div>
+    <div class="row"><div><label>Khu vực</label><input name="area" list="areas" value="${esc(v.area || "")}" placeholder="VD: Hồ Tuyền Lâm"></div>
+      <div style="grid-column:span 2"><label>Địa chỉ</label><input name="address" value="${esc(v.address || "")}"></div></div>
+    <div class="row"><div><label>Phòng ngủ</label><input name="bedrooms" type="number" min="0" value="${v.bedrooms}"></div><div><label>Toilet</label><input name="toilets" type="number" min="0" value="${v.toilets}"></div>
+      <div><label>Khách tiêu chuẩn</label><input name="std_guests" type="number" min="0" value="${v.std_guests}"></div><div><label>Khách tối đa</label><input name="max_guests" type="number" min="0" value="${v.max_guests}"></div></div>
+    <h4 style="margin:14px 0 8px">Giá NET gốc (chỉ đối tác thấy)</h4>
+    <div class="row"><div><label>T2 – T5 (đ/đêm)</label><input name="weekday" type="number" step="100000" value="${r.weekday || ""}"></div>
+      <div><label>T6, T7, CN (đ/đêm)</label><input name="weekend" type="number" step="100000" value="${r.weekend || ""}"></div>
+      <div><label>Mở bán đến ngày</label><input name="open_until" type="date" value="${r.open_until || ""}"></div></div>
+    <h4 style="margin:14px 0 8px">Album ảnh <span class="muted" style="font-size:13px">(ảnh đầu tiên là ảnh bìa)</span></h4>
+    <div class="photos" id="phs"></div>
+    <div class="row" style="margin-top:12px"><div><label>Tiện ích (cách nhau dấu phẩy)</label><textarea name="amenities">${esc(v.amenities.join(", "))}</textarea></div>
+      <div><label>Quy định căn (mỗi dòng 1 quy định)</label><textarea name="rules">${esc(v.rules.join("\n"))}</textarea></div></div>
+    <div><label>Mô tả ngắn</label><textarea name="description" style="min-height:60px">${esc(v.description || "")}</textarea></div>
+    <div class="row" style="margin-top:10px;align-items:center"><label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" name="active" style="width:auto" ${v.active !== false ? "checked" : ""}> Hiển thị trên web</label>
+      <div><label>Thứ tự hiển thị</label><input name="sort" type="number" value="${v.sort || 0}"></div></div>
+    <div class="cta"><button class="btn p" id="vs">Lưu căn</button>${v0?.id ? `<button type="button" class="btn s" id="vd">Nhân bản</button><button type="button" class="btn w" id="vx">Xoá căn</button>` : ""}</div>
+  </form></div>`);
+  const drawPh = () => {
+    $("#phs", m).innerHTML = v.photos.map((p, i) => `<div class="ph"><img src="${esc(p)}">${i ? `<button type="button" class="l" data-l="${i}" title="Đưa lên trước">◀</button>` : ""}<button type="button" data-rm="${i}" title="Xoá">×</button></div>`).join("")
+      + `<label class="add">+ Thêm ảnh<input type="file" accept="image/*" multiple hidden id="pf"></label>`;
+    $$("[data-rm]", m).forEach(b => (b.onclick = () => { v.photos.splice(+b.dataset.rm, 1); drawPh(); }));
+    $$("[data-l]", m).forEach(b => (b.onclick = () => { const i = +b.dataset.l; [v.photos[i - 1], v.photos[i]] = [v.photos[i], v.photos[i - 1]]; drawPh(); }));
+    $("#pf", m).onchange = async e => { for (const file of e.target.files) { toast("Đang tải ảnh " + file.name + "…");
+      try { v.photos.push(await api.uploadPhoto(v.id, await shrink(file))); drawPh(); } catch (err) { toast("Lỗi tải ảnh: " + err.message); } } };
+  };
+  drawPh();
+  $("#vf", m).onsubmit = async e => {
+    e.preventDefault(); const fd = new FormData(e.target), g = k => fd.get(k);
+    const row = { ...(v.id ? { id: v.id } : {}), code: g("code").trim() || null, name: g("name").trim(), area: g("area").trim(), address: g("address").trim(),
+      bedrooms: +g("bedrooms"), toilets: +g("toilets"), std_guests: +g("std_guests"), max_guests: +g("max_guests"),
+      amenities: commas(g("amenities")), rules: lines(g("rules")), description: g("description").trim(), photos: v.photos, active: !!g("active"), sort: +g("sort") };
+    $("#vs", m).disabled = true;
+    try { const saved = await api.saveVilla(row);
+      await api.saveRate({ villa_id: saved.id, weekday: +g("weekday") || null, weekend: +g("weekend") || null, open_until: g("open_until") || null });
+      await reload(); closeModal(); toast("Đã lưu " + row.name); render(); }
+    catch (err) { toast("Lỗi: " + err.message); $("#vs", m).disabled = false; }
+  };
+  if ($("#vd", m)) $("#vd", m).onclick = () => { const c = { ...v, id: undefined, code: (v.code || "") + "-copy", name: v.name + " (bản sao)" }; delete c.id; villaForm(c); setTimeout(() => { const f = $("#vf"); f.weekday.value = r.weekday || ""; f.weekend.value = r.weekend || ""; f.open_until.value = r.open_until || ""; }); };
+  if ($("#vx", m)) $("#vx", m).onclick = async () => { if ($("#vx", m).dataset.ok) { await api.deleteVilla(v.id); await reload(); closeModal(); render(); toast("Đã xoá"); }
+    else { $("#vx", m).dataset.ok = 1; $("#vx", m).textContent = "Bấm lần nữa để xoá vĩnh viễn"; } };
+}
+/** thu nhỏ ảnh trước khi tải lên (cạnh dài 1600px) */
+function shrink(file) {
+  return new Promise(res => { const img = new Image(); img.onload = () => { const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    if (k === 1 && file.size < 900e3) return res(file);
+    const c = document.createElement("canvas"); c.width = img.width * k; c.height = img.height * k; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(b => res(new File([b], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" })), "image/jpeg", .85); };
+    img.onerror = () => res(file); img.src = URL.createObjectURL(file); });
+}
+function renderVillas() {
+  const list = filterVillas(villas, st.f), rows = list.slice((st.f.page - 1) * PER, st.f.page * PER);
+  keepFocus(() => {
+    $("#body").innerHTML = filterBar(villas, st.f, `<button class="btn p" id="add">+ Thêm căn</button>`) + `<p class="count">${list.length} / ${villas.length} căn</p>
+    <div style="overflow:auto"><table class="list"><tr><th></th><th>Mã</th><th>Tên căn</th><th>Khu vực</th><th>PN / WC / Khách</th><th>Giá T2–T5</th><th>Giá T6–CN</th><th>Mở bán đến</th><th>Hiển thị</th><th></th></tr>
+    ${rows.map(v => { const r = rates[v.id] || {}; return `<tr><td>${photo(v) ? `<img src="${esc(photo(v))}" alt="">` : `<div style="width:64px;height:44px;border-radius:8px;background:#e1e8f2"></div>`}</td><td>${esc(v.code || "")}</td><td><b>${esc(v.name)}</b>${v.source_id ? `<br><span class="st partner" title="Lịch & giá tự cập nhật từ Google Sheet">⟳ ${esc((sources.find(s => s.id === v.source_id) || {}).name || "Google Sheet")}</span>` : ""}</td><td>${esc(v.area || "")}</td>
+      <td>${v.bedrooms} / ${v.toilets} / ${v.max_guests}</td><td>${v.source_id ? "Theo Sheet" : r.weekday ? vnd(r.weekday) : "—"}</td><td>${v.source_id ? "Theo Sheet" : r.weekend ? vnd(r.weekend) : "—"}</td><td>${dmy(r.open_until) || "—"}</td>
+      <td>${v.active !== false ? `<span class="st confirmed">Hiện</span>` : `<span class="st rejected">Ẩn</span>`}</td><td><button class="btn s sm" data-e="${v.id}">Sửa</button></td></tr>`; }).join("")}</table></div>` +
+    pager(list.length, PER, st.f.page, p => { st.f.page = p; render(); });
+  });
+  bindFilters(st.f, render);
+  $("#add").onclick = () => villaForm();
+  $$("[data-e]").forEach(b => (b.onclick = () => villaForm(V(b.dataset.e))));
+}
+
+/* ================= LỊCH & GIÁ ================= */
+/** Chú thích màu người chốt trong tháng đang xem */
+function bookLegend(rows, days) {
+  const m = {};
+  rows.forEach(v => days.forEach(d => { const e = eff(v.id, d); if (e.s === "booked") { const k = e.color || api.DEFAULT_COLOR; (m[k] = m[k] || { n: 0, by: new Set() }).n++; if (e.by) m[k].by.add(e.by); } }));
+  const items = Object.entries(m);
+  return items.length ? items.map(([c, x]) => `<span>${xMark(c, "", "sm")} ${esc([...x.by].join(", ") || colorName(c))} (${x.n})</span>`).join("") : `<span>${xMark(api.DEFAULT_COLOR, "", "sm")} Đã book</span>`;
+}
+function initBarColor() {
+  const s = $("#bcol"); if (!s || s.options.length) return;
+  s.innerHTML = BOOK_COLORS.map(([c, n]) => `<option value="${c}">${n}</option>`).join("");
+  s.value = api.DEFAULT_COLOR; s.onchange = () => ($("#bcolDot").style.background = s.value);
+}
+const eff = (vid, d) => api.effective(vid, d, rates, cal);
+async function renderCal() {
+  const days = monthDays(st.month); cal = await api.getCalendar(days[0], api.addDays(days[days.length - 1], 1));
+  const list = filterVillas(villas, st.f), rows = list.slice((st.f.page - 1) * PER, st.f.page * PER);
+  keepFocus(() => {
+    $("#body").innerHTML = filterBar(villas, st.f, `<div class="f"><label>Tháng</label><select id="mo">${monthOptions(14, 2).map(m => `<option value="${m}" ${m === st.month ? "selected" : ""}>Tháng ${+m.slice(5)}/${m.slice(0, 4)}</option>`).join("")}</select></div>
+      <button class="btn p" id="bulk">Cập nhật hàng loạt</button>`) +
+    `<div class="legend"><span><i></i>Giá gốc</span><span><i style="background:var(--special)"></i>Giá riêng</span>${bookLegend(rows, days)}<span><i style="background:var(--blocked)"></i>Khoá</span><span><i style="background:var(--na)"></i>Chưa có giá</span><span><i style="background:var(--sel)"></i>Đang chọn</span></div>
+    <p class="count">Bấm ô để chọn (chọn được nhiều căn, nhiều ngày) · bấm tiêu đề ngày để chọn cả cột · bấm tên căn để chọn cả hàng</p>
+    <div class="calbox"><table class="cal"><thead><tr><th class="v">Căn (${list.length})</th>${days.map(d => `<th class="${api.isWeekend(d) ? "we" : ""}" data-col="${d}" style="cursor:pointer">${dow(d)}<br>${dm(d)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(v => `<tr><td class="v"><div class="nm" data-row="${v.id}">${esc(v.name)}</div><div class="sub">${esc(v.code || "")} · ${esc(v.area || "")}</div></td>${days.map(d => {
+      const e = eff(v.id, d), k = v.id + "|" + d, cls = st.sel.has(k) ? "sel" : "";
+      if (e.s === "booked") return `<td class="c booked ${cls}" data-c="${k}">${xMark(e.color || api.DEFAULT_COLOR, "Đã book" + (e.by ? " – " + e.by : ""), "sm")}</td>`;
+      if (e.s === "blocked") return `<td class="c blocked ${cls}" data-c="${k}">Khoá</td>`;
+      if (e.s === "na") return `<td class="c na ${cls}" data-c="${k}" style="cursor:pointer">—</td>`;
+      return `<td class="c ${e.special ? "special" : ""} ${cls}" data-c="${k}" title="${vnd(e.p)}">${short(e.p)}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>` +
+    pager(list.length, PER, st.f.page, p => { st.f.page = p; render(); });
+  });
+  bindFilters(st.f, render);
+  $("#mo").onchange = e => { st.month = e.target.value; st.sel.clear(); render(); };
+  $("#bulk").onclick = () => bulkForm(list);
+  const tog = (k, on) => { on ?? (on = !st.sel.has(k)); on ? st.sel.add(k) : st.sel.delete(k); const td = $(`[data-c="${k}"]`); if (td) td.classList.toggle("sel", on); };
+  $$("[data-c]").forEach(c => (c.onclick = () => { tog(c.dataset.c); renderBar(); }));
+  $$("[data-col]").forEach(h => (h.onclick = () => { const ks = rows.map(v => v.id + "|" + h.dataset.col), on = !ks.every(k => st.sel.has(k)); ks.forEach(k => tog(k, on)); renderBar(); }));
+  $$("[data-row]").forEach(h => (h.onclick = () => { const ks = days.map(d => h.dataset.row + "|" + d), on = !ks.every(k => st.sel.has(k)); ks.forEach(k => tog(k, on)); renderBar(); }));
+  renderBar();
+}
+function renderBar() {
+  const n = st.sel.size; $("#bar").classList.toggle("show", n > 0 && st.tab === "cal");
+  const vs = new Set([...st.sel].map(k => k.split("|")[0]));
+  $("#barSum").innerHTML = `Đã chọn <b>${n}</b> ô · ${vs.size} căn`;
+}
+async function applySel(act) {
+  const groups = {}; [...st.sel].forEach(k => { const [v, d] = k.split("|"); (groups[v] = groups[v] || []).push(d); });
+  const price = +$("#bp").value;
+  if (act === "price" && !price) return toast("Nhập giá trước khi bấm Đặt giá riêng");
+  for (const [v, ds] of Object.entries(groups)) {
+    if (act === "reset") await api.clearCalendar([v], ds);
+    else await api.setCalendar([v], ds, act === "price" ? { price, status: "open" } : act === "booked" ? { status: "booked", color: $("#bcol").value, booked_by: $("#bby").value.trim() || (me && me.full_name) || "Quản trị" } : { status: act });
+  }
+  st.sel.clear(); toast("Đã cập nhật"); render();
+}
+$$("[data-act]").forEach(b => (b.onclick = () => applySel(b.dataset.act).catch(e => toast("Lỗi: " + e.message))));
+$("#barClear").onclick = () => { st.sel.clear(); $$("td.sel").forEach(x => x.classList.remove("sel")); renderBar(); };
+
+function bulkForm(list) {
+  const m = modal(`<div class="bd"><h2>Cập nhật hàng loạt</h2><p class="muted">Áp dụng cho <b>${list.length} căn</b> đang lọc (đổi bộ lọc ở trang trước để chọn nhóm căn khác).</p>
+    <div class="form"><div class="row"><div><label>Từ ngày</label><input type="date" id="b1" value="${st.month}-01"></div><div><label>Đến ngày (gồm cả ngày này)</label><input type="date" id="b2" value="${monthDays(st.month).pop()}"></div></div>
+    <label>Áp dụng cho các thứ</label><div class="chips" id="bw" style="margin-bottom:10px">${[1, 2, 3, 4, 5, 6, 0].map(i => `<label class="chip" style="cursor:pointer"><input type="checkbox" value="${i}" checked style="width:auto;margin-right:4px">${DOW[i]}</label>`).join("")}</div>
+    <div class="row"><div><label>Thao tác</label><select id="ba"><option value="price">Đặt giá riêng</option><option value="pct">Tăng/giảm % so với giá gốc</option><option value="booked">Đánh dấu Đã book</option><option value="blocked">Khoá (không bán)</option><option value="reset">Về giá gốc</option><option value="open_until">Gia hạn "Mở bán đến" = ngày cuối</option></select></div>
+    <div><label id="bvl">Giá (đ/đêm)</label><input type="number" id="bv" placeholder="VD: 12000000"></div></div></div>
+    <div class="cta"><button class="btn p" id="bgo">Áp dụng</button></div></div>`);
+  $("#ba", m).onchange = e => { $("#bvl", m).textContent = e.target.value === "pct" ? "Phần trăm (VD: 30 hoặc -10)" : "Giá (đ/đêm)"; $("#bv", m).disabled = !["price", "pct"].includes(e.target.value); };
+  $("#bgo", m).onclick = async () => {
+    const wd = $$("#bw input:checked", m).map(x => +x.value), a = $("#ba", m).value, val = +$("#bv", m).value;
+    const d1 = $("#b1", m).value, d2 = $("#b2", m).value; if (!d1 || !d2 || d2 < d1) return toast("Kiểm tra lại khoảng ngày");
+    const dates = api.dateRange(d1, api.addDays(d2, 1)).filter(d => wd.includes(new Date(d + "T00:00:00").getDay()));
+    const ids = list.map(v => v.id);
+    if (["price", "pct"].includes(a) && !val) return toast("Nhập giá trị");
+    $("#bgo", m).disabled = true; $("#bgo", m).textContent = "Đang cập nhật…";
+    try {
+      if (a === "price") await api.setCalendar(ids, dates, { price: val, status: "open" });
+      else if (a === "pct") for (const id of ids) { const r = rates[id]; if (!r) continue;
+        const pr = we => Math.round((we ? r.weekend || r.weekday : r.weekday || r.weekend) * (1 + val / 100) / 1e5) * 1e5;
+        const W = dates.filter(api.isWeekend), N = dates.filter(d => !api.isWeekend(d));
+        if (W.length) await api.setCalendar([id], W, { price: pr(true), status: "open" });
+        if (N.length) await api.setCalendar([id], N, { price: pr(false), status: "open" }); }
+      else if (a === "reset") await api.clearCalendar(ids, dates);
+      else if (a === "open_until") for (const id of ids) await api.saveRate({ ...(rates[id] || { villa_id: id }), open_until: d2 });
+      else await api.setCalendar(ids, dates, a === "booked" ? { status: "booked", color: api.DEFAULT_COLOR, booked_by: (me && me.full_name) || "Quản trị" } : { status: a });
+      await reload(); closeModal(); toast(`Đã cập nhật ${ids.length} căn × ${dates.length} ngày`); render();
+    } catch (e) { toast("Lỗi: " + e.message); $("#bgo", m).disabled = false; }
+  };
+}
+
+/* ================= YÊU CẦU BOOK ================= */
+const RL = { new: "Chờ xác nhận", confirmed: "Đã xác nhận", rejected: "Từ chối", cancelled: "Đã huỷ" };
+async function renderReq() {
+  const all = await api.listRequests(), rs = all.filter(r => !st.reqFilter || r.status === st.reqFilter);
+  $("#body").innerHTML = `<div class="tabs">${[["new", "Chờ xác nhận"], ["confirmed", "Đã xác nhận"], ["rejected", "Từ chối"], ["", "Tất cả"]].map(([k, l]) =>
+    `<button class="tab ${st.reqFilter === k ? "on" : ""}" data-rf="${k}">${l} (${all.filter(r => !k || r.status === k).length})</button>`).join("")}</div>` +
+    (rs.length ? `<div style="overflow:auto"><table class="list"><tr><th>Ngày gửi</th><th>Đối tác</th><th>Căn</th><th>Nhận → Trả</th><th>Khách</th><th>Tổng NET</th><th>Ghi chú</th><th>Trạng thái</th><th></th></tr>
+    ${rs.map(r => `<tr><td>${dmy(r.created_at.slice(0, 10))}</td><td><i class="cdot" style="background:${esc(r.color || r.share_links?.color || api.DEFAULT_COLOR)}"></i><b>${esc(r.share_links?.name || (r.link_id ? "(link đã xoá)" : "Quản trị"))}</b><div class="muted" style="font-size:13px">${esc(r.share_links?.phone || "")}</div></td>
+      <td>${esc(r.villas?.name || "")}</td><td>${dmy(r.check_in)} → ${dmy(r.check_out)}</td><td>${r.guests || ""}<div class="muted" style="font-size:13px">${esc(r.contact || "")}</div></td><td>${vnd(r.total)}</td>
+      <td style="max-width:220px;white-space:pre-wrap;font-size:13px">${esc(r.note || "")}</td><td><span class="st ${r.status}">${RL[r.status]}</span></td>
+      <td style="white-space:nowrap">${r.status === "new" ? `<button class="btn p sm" data-ok="${r.id}">Xác nhận</button> <button class="btn w sm" data-no="${r.id}">Từ chối</button>` : ""}</td></tr>`).join("")}</table></div>`
+    : `<div class="empty">Không có yêu cầu nào.</div>`);
+  $$("[data-rf]").forEach(b => (b.onclick = () => { st.reqFilter = b.dataset.rf; render(); }));
+  $$("[data-ok]").forEach(b => (b.onclick = async () => { const r = rs.find(x => x.id === b.dataset.ok);
+    await api.updateRequest(r.id, "confirmed"); await api.setCalendar([r.villa_id], api.dateRange(r.check_in, r.check_out), { status: "booked", color: r.color || r.share_links?.color || api.DEFAULT_COLOR, booked_by: r.share_links?.name || "Quản trị" });
+    toast("Đã xác nhận – lịch đã chuyển sang Đã book"); render(); }));
+  $$("[data-no]").forEach(b => (b.onclick = async () => { await api.updateRequest(b.dataset.no, "rejected"); toast("Đã từ chối"); render(); }));
+}
+
+/* ================= LINK CHIA SẺ CHO ĐỐI TÁC ================= */
+function linkForm(l0) {
+  const l = l0 || {};
+  const m = modal(`<div class="bd"><h2>${l.id ? "Sửa link đối tác" : "Tạo link cho đối tác"}</h2>
+    <p class="muted" style="margin:2px 0 12px">Mỗi đối tác một link riêng. Ai có link sẽ xem được lịch giá NET và gửi yêu cầu book. Khoá link bất cứ lúc nào.</p>
+    <form class="form" id="lkf"><div class="row"><div><label>Tên đối tác / sale *</label><input name="name" required value="${esc(l.name || "")}" placeholder="VD: Đà Lạt Travel"></div>
+      <div><label>Số điện thoại</label><input name="phone" value="${esc(l.phone || "")}"></div></div>
+      <div><label>Ghi chú (chỉ anh thấy)</label><input name="note" value="${esc(l.note || "")}"></div>
+      <div style="margin-top:10px"><label>Màu của đối tác này (ngày họ chốt hiện vòng màu ✕)</label>${l.color_locked
+        ? `<div class="lockc"><i class="cdot" style="background:${esc(l.color)}"></i><div><b>Đã khoá</b><div class="muted" style="font-size:12px">Đối tác đã xác nhận màu này ở lần gửi yêu cầu đầu tiên – màu đi theo link đến hết vòng đời.</div></div></div>`
+        : `${swatches("lcol", l.color || "#2f6fed")}<div class="muted" style="font-size:12px;margin-top:4px">Màu gợi ý. Đối tác có thể đổi khi gửi yêu cầu lần đầu – sau đó màu bị khoá theo link.</div>`}</div>
+      <div class="cta"><button class="btn p">${l.id ? "Lưu" : "Tạo link"}</button></div></form></div>`);
+  let lcol = l.color || "#2f6fed"; bindSwatches(m, "lcol", c => (lcol = c));
+  $("#lkf", m).onsubmit = async e => { e.preventDefault(); const fd = new FormData(e.target);
+    try { const saved = await api.saveLink({ ...(l.id ? { id: l.id } : {}), name: fd.get("name").trim(), phone: fd.get("phone").trim(), note: fd.get("note").trim(), ...(l.color_locked ? {} : { color: lcol }) });
+      if (!l.id) showLink(saved); else { closeModal(); toast("Đã lưu"); } render(); } catch (err) { toast("Lỗi: " + err.message); } };
+}
+function showLink(l) {
+  const url = api.linkUrl(l.token);
+  const m = modal(`<div class="bd"><h2>Link cho ${esc(l.name)}</h2><p class="muted">Gửi link này cho đối tác qua Zalo. Ai có link đều xem được giá, nên chỉ gửi đúng người.</p>
+    <input id="lu" readonly value="${esc(url)}" style="font-size:14px">
+    <div class="cta"><button class="btn p" id="lc">Sao chép link</button><a class="btn s" href="${esc(url)}" target="_blank" rel="noopener">Mở thử</a></div>
+    <p class="muted" style="font-size:13px;margin:12px 0 0">Mẫu tin nhắn: “Chào ${esc(l.name)}, đây là link lịch giá NET villa The Harmony dành riêng cho bạn: ${esc(url)}”</p></div>`);
+  $("#lc", m).onclick = async () => { try { await navigator.clipboard.writeText(url); toast("Đã sao chép link"); } catch { $("#lu", m).select(); toast("Bôi đen rồi sao chép"); } };
+}
+async function renderLinks() {
+  const ls = await api.listLinks(), reqs = await api.listRequests();
+  const ago = s => s ? dmy(s.slice(0, 10)) : "Chưa mở";
+  $("#body").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <p class="muted" style="margin:0">Đối tác không cần tài khoản: anh tạo link riêng cho từng người. Khoá link là người đó không vào được nữa.</p>
+      <button class="btn p" id="nl">+ Tạo link mới</button></div>` +
+    (ls.length ? `<div style="overflow:auto"><table class="list"><tr><th>Đối tác</th><th>SĐT</th><th>Ghi chú</th><th>Lần mở gần nhất</th><th>Yêu cầu</th><th>Trạng thái</th><th></th></tr>
+    ${ls.map(l => `<tr><td><i class="cdot" style="background:${esc(l.color || "#2f6fed")}"></i><b>${esc(l.name)}</b>${l.color_locked ? ` <span title="Màu đã khoá theo link">🔒</span>` : ""}</td><td>${esc(l.phone || "")}</td><td class="muted">${esc(l.note || "")}</td><td>${ago(l.last_used_at)}</td>
+      <td>${reqs.filter(r => r.link_id === l.id).length}</td>
+      <td>${l.active ? `<span class="st confirmed">Đang mở</span>` : `<span class="st rejected">Đã khoá</span>`}</td>
+      <td style="white-space:nowrap"><button class="btn p sm" data-cp="${l.id}">Lấy link</button> <button class="btn s sm" data-ed="${l.id}">Sửa</button>
+        <button class="btn ${l.active ? "w" : "s"} sm" data-tg="${l.id}">${l.active ? "Khoá" : "Mở lại"}</button> <button class="btn w sm" data-del="${l.id}" title="Xoá hẳn">×</button></td></tr>`).join("")}</table></div>`
+    : `<div class="empty">Chưa có link nào. Bấm “Tạo link mới” để tạo link cho đối tác đầu tiên.</div>`);
+  const L = id => ls.find(x => x.id === id);
+  $("#nl").onclick = () => linkForm();
+  $$("[data-cp]").forEach(b => (b.onclick = () => showLink(L(b.dataset.cp))));
+  $$("[data-ed]").forEach(b => (b.onclick = () => linkForm(L(b.dataset.ed))));
+  $$("[data-tg]").forEach(b => (b.onclick = async () => { const l = L(b.dataset.tg); await api.saveLink({ id: l.id, active: !l.active }); toast(l.active ? "Đã khoá link" : "Đã mở lại link"); render(); }));
+  $$("[data-del]").forEach(b => (b.onclick = async () => { if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "Bấm lần nữa để xoá"; return; }
+    await api.deleteLink(b.dataset.del); toast("Đã xoá link"); render(); }));
+}
+
+/* ================= NGUỒN GOOGLE SHEET ================= */
+const prettyLabel = (label, srcName) => /^Cột [A-Z]$/.test(label) ? srcName : label.split(" › ").map(p => p.replace(/\(\s*(\d+)\s*\)/g, "($1)")
+  .replace(/\S+/g, w => w === w.toUpperCase() && /[A-ZÀ-Ỹ]{2}/.test(w) ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(" – ");
+const ST_L = { ok: ["confirmed", "Đang đồng bộ tốt"], warning: ["new", "Cần kiểm tra"], error: ["rejected", "Lỗi"] };
+async function renderSources() {
+  $("#body").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <p class="muted" style="margin:0;max-width:720px">Lịch & giá của các căn ghép với Google Sheet của chủ nhà sẽ <b>tự cập nhật 15 phút/lần</b>. Ô tô đỏ trên Sheet = đã có khách. Nếu chủ nhà đổi bố cục Sheet, hệ thống dừng nguồn đó và báo tại đây.</p>
+      <button class="btn p" id="ns">+ Thêm nguồn Sheet</button></div>` +
+    (sources.length ? `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">${sources.map(s => { const n = villas.filter(v => v.source_id === s.id).length, L = ST_L[s.last_status];
+      return `<div class="card" style="cursor:default"><div class="b">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>${esc(s.name)}</h3>${s.active === false ? `<span class="st rejected">Tạm dừng</span>` : L ? `<span class="st ${L[0]}">${L[1]}</span>` : `<span class="st new">Chưa đồng bộ</span>`}</div>
+        <a href="${esc(s.sheet_url)}" target="_blank" rel="noopener" style="font-size:13px;word-break:break-all">Mở Google Sheet ↗</a>
+        <div class="chips"><span class="chip">${n} căn đã ghép</span>${s.config?.markup?.value ? `<span class="chip warm">Cộng ${s.config.markup.type === "percent" ? s.config.markup.value + "%" : vnd(s.config.markup.value)}</span>` : ""}</div>
+        <div class="muted" style="font-size:13px">${s.last_sync_at ? "Lần cuối: " + new Date(s.last_sync_at).toLocaleString("vi-VN") : "Chưa đồng bộ lần nào"}</div>
+        ${s.last_message ? `<div style="font-size:13px;background:${s.last_status === "error" ? "#fdecea" : s.last_status === "warning" ? "#fff4dc" : "#f2f6fd"};border-radius:10px;padding:8px 10px">${esc(s.last_message)}</div>` : ""}
+        <div class="cta" style="margin-top:6px"><button class="btn p sm" data-sync="${s.id}">⟳ Đồng bộ ngay</button><button class="btn s sm" data-edit="${s.id}">Sửa ghép cột</button>
+          <button class="btn s sm" data-tgl="${s.id}">${s.active === false ? "Bật lại" : "Tạm dừng"}</button><button class="btn w sm" data-del="${s.id}">Xoá</button></div></div></div>`; }).join("")}</div>`
+      : `<div class="empty">Chưa có nguồn nào. Bấm “+ Thêm nguồn Sheet”, dán link Google Sheet của chủ nhà (chế độ “ai có link đều xem được”).</div>`);
+  const S_ = id => sources.find(x => x.id === id);
+  $("#ns").onclick = () => sourceWizard();
+  $$("[data-edit]").forEach(b => (b.onclick = () => sourceWizard(S_(b.dataset.edit))));
+  $$("[data-sync]").forEach(b => (b.onclick = async () => { b.disabled = true; b.textContent = "Đang đồng bộ…";
+    try { const r = await api.syncSource(b.dataset.sync); toast(r.status === "error" ? "Lỗi: " + r.message : "Đã đồng bộ " + r.rows + " ngày"); } catch (e) { toast("Lỗi: " + e.message); }
+    await reload(); render(); }));
+  $$("[data-tgl]").forEach(b => (b.onclick = async () => { const s = S_(b.dataset.tgl); await api.saveSource({ id: s.id, active: s.active === false }); await reload(); render(); }));
+  $$("[data-del]").forEach(b => (b.onclick = async () => { if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "Bấm lần nữa để xoá"; return; }
+    for (const v of villas.filter(v => v.source_id === b.dataset.del)) await api.saveVilla({ id: v.id, source_id: null, source_key: null });
+    await api.deleteSource(b.dataset.del); await reload(); render(); toast("Đã xoá nguồn (các căn vẫn giữ nguyên)"); }));
+}
+
+function sourceWizard(src) {
+  const cfg = JSON.parse(JSON.stringify(src?.config || {}));
+  let read = null;
+  const m = modal(`<div class="bd"><h2>${src ? "Sửa nguồn Google Sheet" : "Thêm nguồn Google Sheet"}</h2>
+    <p class="muted" style="margin:2px 0 12px">Sheet cần để chế độ <b>“Bất kỳ ai có đường liên kết đều xem được”</b>. Hệ thống đọc cả chữ và <b>màu ô</b>.</p>
+    <div class="form"><div class="row"><div><label>Tên nguồn (chủ nhà)</label><input id="sn" value="${esc(src?.name || "")}" placeholder="VD: Út Hoàng"></div></div>
+      <div><label>Link Google Sheet</label><input id="su" value="${esc(src?.sheet_url || "")}" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+      <div class="cta"><button class="btn p" id="sread">Đọc thử Sheet</button></div></div>
+    <div id="sres"></div></div>`);
+  const draw = () => {
+    if (!read) return;
+    const t0 = today(), days = api.dateRange(t0, api.addDays(t0, 21));
+    const guess = l => { const v = villas.find(v => v.source_key === l.key && (!src || v.source_id === src.id)) || villas.find(v => SheetSync.norm(v.name) === SheetSync.norm(prettyLabel(l.label, $("#sn", m).value))); return v ? v.id : ""; };
+    cfg.mapping = cfg.mapping || {};
+    read.labels.forEach(l => { if (!(l.key in cfg.mapping)) cfg.mapping[l.key] = guess(l) || "__new__"; });
+    const opts = sel => `<option value="" ${!sel ? "selected" : ""}>— Bỏ qua cột này —</option><option value="__new__" ${sel === "__new__" ? "selected" : ""}>+ Tạo căn mới</option>` +
+      villas.map(v => `<option value="${v.id}" ${sel === v.id ? "selected" : ""}>${esc(v.name)}${v.source_id && (!src || v.source_id !== src.id) ? " (đang ghép nguồn khác)" : ""}</option>`).join("");
+    const dot = c => `<span title="${c ? (c.s === "booked" ? "Đã có khách" : c.s === "open" ? vnd(c.p) : c.s === "blocked" ? "Khoá" : "Trống ô") : "—"}" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin:1px;background:${!c ? "#eef1f5" : c.s === "booked" ? "#e5484d" : c.s === "open" ? "#3dbb6f" : c.s === "blocked" ? "#98a2b3" : "#eef1f5"}"></span>`;
+    const missing = Object.entries(cfg.mapping).filter(([k, v]) => v && !read.labels.some(l => l.key === k));
+    $("#sres", m).innerHTML = `${api.demo ? `<p class="muted" style="font-size:13px;margin:12px 0 0">Giả lập · dữ liệu đọc lúc ${read.snapshot_at ? new Date(read.snapshot_at).toLocaleString("vi-VN") : "—"} · <a href="#" id="bmAgain">Đọc lại bằng nút trên Chrome</a></p>` : ""}
+      <h4 style="margin:18px 0 6px">1. Các tab đã đọc</h4>
+      <div class="chips">${read.tabs.map(t => `<span class="chip ${t.error ? "warm" : ""}" title="${esc(t.error || "")}">${esc(t.tab)}${t.month ? " · " + t.month.slice(5) + "/" + t.month.slice(0, 4) : ""}${t.error ? " – chưa có dữ liệu" : ` – ${t.columns} cột`}</span>`).join("")}</div>
+      <h4 style="margin:16px 0 6px">2. Màu ô nghĩa là “đã có khách”</h4>
+      ${read.colors.length ? `<div class="chips">${read.colors.map(c => `<label class="chip" style="cursor:pointer;background:#fff;border:1px solid var(--line);color:var(--ink)"><input type="checkbox" data-col="${c.hex}" style="width:auto;margin-right:6px" ${(cfg.booked_colors ? cfg.booked_colors.includes(c.hex) : c.red) ? "checked" : ""}><i style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${c.hex};margin-right:6px;vertical-align:-2px"></i>${c.hex} · ${c.n} ô</label>`).join("")}</div>
+        <p class="muted" style="font-size:13px;margin:6px 0 0">Mặc định: ô màu đỏ = đã có khách. Ô ghi chữ (VD “Sơn nhà”) = khoá. Ô có giá = còn trống.</p>` : `<p class="muted" style="margin:0">Chưa thấy ô tô màu nào trong các ngày sắp tới.</p>`}
+      ${missing.length ? `<div class="demo" style="background:#fdecea;border-color:#f3c2bd;color:var(--bookedInk);margin-top:12px">Không còn thấy cột: <b>${missing.map(([k]) => esc(k)).join(", ")}</b> – chủ nhà có thể đã đổi tên/bố cục. Hãy ghép lại cột mới bên dưới.</div>` : ""}
+      <h4 style="margin:16px 0 6px">3. Ghép cột trên Sheet → căn trên web</h4>
+      <div style="display:grid;gap:10px">${read.labels.map(l => `<div style="border:1px solid var(--line);border-radius:16px;padding:12px">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><b>${esc(l.label)}</b>
+          <span class="muted" style="font-size:13px">${l.stats.open} ngày trống · <b style="color:#b42318">${l.stats.booked} đã kín</b>${l.stats.blocked ? ` · ${l.stats.blocked} khoá` : ""}${l.stats.min ? ` · ${vnd(l.stats.min)}${l.stats.max !== l.stats.min ? " – " + vnd(l.stats.max) : ""}` : ""}</span></div>
+        <div style="margin:8px 0;line-height:0" title="21 ngày tới: xanh = trống, đỏ = đã kín, xám = khoá/chưa có">${days.map(d => dot((read.data[l.key] || {})[d])).join("")}</div>
+        <select data-map="${esc(l.key)}">${opts(cfg.mapping[l.key])}</select></div>`).join("")}</div>
+      <h4 style="margin:16px 0 6px">4. Màu vòng ✕ cho ngày kín từ nguồn này</h4>${swatches("scol", cfg.booked_color || "#e5484d")}
+      <h4 style="margin:16px 0 6px">5. Cộng thêm vào giá cho đối tác của anh</h4>
+      <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="mkt"><option value="">Không cộng (giữ giá Sheet)</option><option value="percent" ${cfg.markup?.type === "percent" ? "selected" : ""}>Cộng theo %</option><option value="fixed" ${cfg.markup?.type === "fixed" ? "selected" : ""}>Cộng số tiền / đêm</option></select>
+        <input id="mkv" type="number" inputmode="numeric" placeholder="VD: 10 hoặc 200000" value="${cfg.markup?.value || ""}"></div>
+      <p class="muted" style="font-size:13px;margin:6px 0 0">Đối tác thấy giá sau khi cộng. Khách không bao giờ thấy giá.</p>
+      <div class="cta"><button class="btn p" id="ssave">Lưu & đồng bộ ngay</button></div>`;
+    $$("[data-map]", m).forEach(s => (s.onchange = () => (cfg.mapping[s.dataset.map] = s.value)));
+    bindSwatches(m, "scol", c => (cfg.booked_color = c));
+    if ($("#bmAgain", m)) $("#bmAgain", m).onclick = e => { e.preventDefault(); bmPanel($("#su", m).value); };
+    $$("[data-col]", m).forEach(c => (c.onchange = () => (cfg.booked_colors = $$("[data-col]:checked", m).map(x => x.dataset.col))));
+    $("#ssave", m).onclick = save;
+  };
+  const doRead = async () => {
+    const url = $("#su", m).value.trim(); if (!url) return toast("Dán link Google Sheet trước");
+    $("#sres", m).innerHTML = `<div class="empty" style="margin-top:14px">Đang đọc Sheet…</div>`;
+    try { read = await api.previewSource(url, cfg); draw(); }
+    catch (e) { if (e.need || e.message === "NEED_BOOKMARKLET") return bmPanel(url);
+      $("#sres", m).innerHTML = `<div class="demo" style="background:#fdecea;border-color:#f3c2bd;color:var(--bookedInk);margin-top:14px">${esc(e.message)}</div>`; }
+  };
+  /* Giả lập máy chủ: đọc Sheet bằng nút dấu trang trên Chrome của anh, rồi dán vào đây */
+  const bmPanel = url => {
+    const sheetUrl = SheetSync.sheetId(url) ? `https://docs.google.com/spreadsheets/d/${SheetSync.sheetId(url)}/edit` : "";
+    $("#sres", m).innerHTML = `<div style="margin-top:16px;border:2px dashed #c7dafc;border-radius:18px;padding:16px;background:#f5f9ff">
+      <b style="font-size:16px">Chế độ giả lập: đọc Sheet bằng Chrome của anh</b>
+      <p class="muted" style="margin:6px 0 12px;font-size:14px">Bản demo chưa có máy chủ Supabase nên nhờ trình duyệt đọc hộ. Khi chạy thật, bước này tự động 15 phút/lần.</p>
+      <ol style="margin:0;padding-left:20px;display:grid;gap:10px">
+        <li><b>Cài nút (1 lần):</b> kéo nút này lên <u>thanh dấu trang</u> của Chrome (Ctrl+Shift+B để hiện thanh):<br>
+          <a id="bmLink" class="btn s sm" style="margin-top:6px;cursor:grab" title="Kéo lên thanh dấu trang">📥 Đọc Sheet cho The Harmony</a>
+          <button type="button" class="btn s sm" id="bmCopy" style="margin-top:6px">Sao chép mã nút</button>
+          <div class="muted" style="font-size:12px;margin-top:4px">Không kéo được? Bấm “Sao chép mã nút” → Chrome: Ctrl+D tạo dấu trang → Sửa → dán vào ô URL.</div></li>
+        <li><b>Mở Sheet</b> ${sheetUrl ? `<a href="${esc(sheetUrl)}" target="_blank" rel="noopener">${esc(sheetUrl.slice(0, 60))}… ↗</a>` : "trên Chrome"} rồi bấm dấu trang <b>📥 Đọc Sheet cho The Harmony</b>. Đợi vài giây tới khi hiện “✓ Đã đọc… Đã SAO CHÉP”.</li>
+        <li><b>Quay lại đây, dán vào ô dưới</b> (Ctrl+V):
+          <textarea id="bmPaste" placeholder="Dán dữ liệu ở đây (bắt đầu bằng HARMONY-SHEET:…)" style="min-height:70px;margin-top:6px"></textarea>
+          <button type="button" class="btn p" id="bmUse" style="margin-top:8px">Dùng dữ liệu này</button></li>
+      </ol></div>`;
+    const href = window.HARMONY_BOOKMARKLET || "";
+    const bl = $("#bmLink", m); bl.setAttribute("href", href);
+    bl.onclick = e => { e.preventDefault(); toast("Kéo nút này lên thanh dấu trang Chrome – không bấm ở đây"); };
+    $("#bmCopy", m).onclick = async () => { try { await navigator.clipboard.writeText(href); toast("Đã sao chép mã nút"); } catch { toast("Không sao chép được – hãy kéo nút lên thanh dấu trang"); } };
+    $("#bmUse", m).onclick = () => {
+      try { read = api.importSheetData($("#bmPaste", m).value);
+        if (!$("#su", m).value.trim()) $("#su", m).value = `https://docs.google.com/spreadsheets/d/${read.id}/edit`;
+        if (!$("#sn", m).value.trim() && read.title) $("#sn", m).value = read.title.replace(/[^\p{L}\p{N}' \-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 40);
+        toast("Đã nhận dữ liệu Sheet"); draw(); }
+      catch (e) { toast(e.message); }
+    };
+  };
+  const save = async () => {
+    const name = $("#sn", m).value.trim(), url = $("#su", m).value.trim();
+    if (!name) return toast("Nhập tên nguồn");
+    $("#ssave", m).disabled = true; $("#ssave", m).textContent = "Đang lưu…";
+    try {
+      cfg.markup = $("#mkt", m).value ? { type: $("#mkt", m).value, value: +$("#mkv", m).value || 0 } : null;
+      let s = await api.saveSource({ ...(src ? { id: src.id } : {}), name, sheet_url: url, config: cfg });
+      const mapping = {};
+      for (const l of read.labels) {
+        let vid = cfg.mapping[l.key];
+        if (vid === "__new__") {
+          const nv = await api.saveVilla({ name: prettyLabel(l.label, name), area: "", address: "", bedrooms: 0, toilets: 0, std_guests: l.stats.pax || 0, max_guests: l.stats.pax || 0,
+            amenities: [], rules: [], photos: [], description: "", active: true, sort: 500, source_id: s.id, source_key: l.key });
+          vid = nv.id;
+        } else if (vid) await api.saveVilla({ id: vid, source_id: s.id, source_key: l.key });
+        if (vid) mapping[l.key] = vid;
+      }
+      for (const v of villas.filter(v => v.source_id === s.id && !Object.values(mapping).includes(v.id))) await api.saveVilla({ id: v.id, source_id: null, source_key: null });
+      s = await api.saveSource({ id: s.id, config: { ...cfg, mapping } });
+      const r = await api.syncSource(s.id);
+      await reload(); closeModal(); render();
+      toast(r && r.status !== "error" ? `Đã đồng bộ ${r.rows} ngày` : "Đã lưu – đồng bộ lỗi: " + (r?.message || ""));
+    } catch (e) { toast("Lỗi: " + e.message); $("#ssave", m).disabled = false; $("#ssave", m).textContent = "Lưu & đồng bộ ngay"; }
+  };
+  $("#sread", m).onclick = doRead;
+  if (src) doRead();
+}
+
+async function render() {
+  $("#tabs").innerHTML = [["villas", "Danh sách căn"], ["cal", "Lịch & giá"], ["req", "Yêu cầu book"], ["links", "Link đối tác"], ["sheets", "Nguồn Google Sheet"]]
+    .map(([k, l]) => `<button class="tab ${st.tab === k ? "on" : ""}" data-tab="${k}">${l}</button>`).join("");
+  $$("[data-tab]").forEach(b => (b.onclick = () => { if (st.tab !== b.dataset.tab) { st.tab = b.dataset.tab; st.f.page = 1; render(); } }));
+  renderBar();
+  try { await ({ villas: renderVillas, cal: renderCal, req: renderReq, links: renderLinks, sheets: renderSources })[st.tab](); }
+  catch (e) { $("#body").innerHTML = `<div class="empty">Lỗi: ${esc(e.message)}</div>`; }
+}
+async function boot() {
+  hdr(); mountSwitch("admin"); initBarColor();
+  if (!me) return loginView();
+  if (me.role !== "admin") { $("#app").innerHTML = `<div class="login"><h2>Chưa có quyền quản trị</h2><p class="muted">Tài khoản ${esc(me.email)} không phải tài khoản quản trị.</p><p><button class="btn s" id="out2">Đăng xuất</button></p></div>`;
+    $("#out2").onclick = async () => { await api.signOut(); location.reload(); }; return; }
+  $("#app").innerHTML = demoNote(`<a href="#" id="rst">Khôi phục dữ liệu mẫu</a>.`) + `<div class="tabs" id="tabs"></div><div id="body"></div>`;
+  const rst = $("#rst"); if (rst) rst.onclick = async e => { e.preventDefault(); api.resetDemo(); await reload(); render(); toast("Đã khôi phục dữ liệu mẫu"); };
+  await reload(); render();
+}
+(async () => { try { await api.init(); me = await api.me(); boot(); } catch (e) { $("#app").innerHTML = `<div class="empty">${esc(e.message)}</div>`; } })();
+</script>
+</body>
+</html>
