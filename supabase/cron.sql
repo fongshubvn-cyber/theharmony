@@ -12,7 +12,7 @@ select cron.unschedule('harmony-sync-sheets') where exists (select 1 from cron.j
 
 select cron.schedule(
   'harmony-sync-sheets',
-  '*/15 * * * *',
+  '* * * * *',
   $$
   select net.http_post(
     url     := 'https://<PROJECT_REF>.supabase.co/functions/v1/sync-sheets',
