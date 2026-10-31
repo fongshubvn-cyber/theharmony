@@ -16,7 +16,7 @@ select cron.schedule(
   $$
   select net.http_post(
     url     := 'https://reyytwoivafzyvszrdwb.supabase.co/functions/v1/sync-sheets',
-    headers := jsonb_build_object('Authorization', 'Bearer <SERVICE_ROLE_KEY>', 'Content-Type', 'application/json'),
+    headers := jsonb_build_object('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJleXl0d29pdmFmenl2c3pyZHdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzQwNzIxMSwiZXhwIjoyMTA4OTgzMjExfQ.-Ns39VOO-qeEs0W08zeFhkzQ1u5anJIK2xXA3CA61B4', 'Content-Type', 'application/json'),
     body    := '{"action":"sync"}'::jsonb
   );
   $$
