@@ -99,6 +99,68 @@
     if (/^\d{1,2}$/.test(t) && +t >= 1 && +t <= 31) return `${month}-${t.padStart(2, "0")}`;
     return null;
   };
+  const INFO_RE = /\d\s*(?:pn|wc|vs)\b|phòng\s*(?:ngủ|đơn|đôi)|\b(?:đơn|đôi)\b.*\b(?:wc|vs|toilet)|tiêu chuẩn|sức chứa|max\s*\d|tối đa|phụ thu|đậu|📍|địa chỉ|cơ cấu|kết cấu/i;
+
+  /* ---------- Đọc thông tin căn từ đoạn mô tả của chủ nhà ---------- */
+  const NUMW = { "một": 1, "mot": 1, "hai": 2, "ba": 3, "bốn": 4, "bon": 4, "tư": 4, "năm": 5, "nam": 5, "sáu": 6, "sau": 6, "bảy": 7, "bay": 7, "tám": 8, "tam": 8, "chín": 9, "chin": 9, "mười": 10, "muoi": 10 };
+  const numOf = s => /^\d+$/.test(s) ? +s : (NUMW[s] || null);
+  const NUM = "(\\d{1,2}|một|hai|ba|bốn|tư|năm|sáu|bảy|tám|chín|mười)";
+  /** text → { bedrooms, toilets, std_guests, max_guests, surcharge, parking, address, rules:[] } (chỉ có trường đọc được) */
+  SS.extractFacts = raw => {
+    const text = String(raw || "").normalize("NFKC"), l = text.toLowerCase().replace(/\s+/g, " ");
+    const f = {}; let m;
+    // phòng ngủ: "Tổng 3 phòng ngủ" > "4PN" / "3 phòng ngủ" > đếm "2 đơn 1 đôi"
+    if ((m = l.match(new RegExp("tổng\\s*(?:cộng\\s*)?" + NUM + "\\s*(?:pn|phòng ngủ|phòng)\\b")))) f.bedrooms = numOf(m[1]);
+    else if ((m = l.match(new RegExp(NUM + "\\s*(?:pn|phòng ngủ)(?!\\s*(?:đơn|đôi))\\b")))) f.bedrooms = numOf(m[1]);
+    else {
+      let n = 0, hit = false;
+      for (const x of l.matchAll(new RegExp(NUM + "\\s*(?:phòng\\s*(?:ngủ\\s*)?)?(?:đơn|đôi)\\b", "g"))) { const v = numOf(x[1]); if (v && v < 20) { n += v; hit = true; } }
+      if (hit) f.bedrooms = n;
+    }
+    // WC: "Tổng … 2 WC" > lần ghi đầu tiên
+    if ((m = l.match(new RegExp("tổng[^.]{0,30}?" + NUM + "\\s*(?:wc|vs|toilet|nhà vệ sinh)\\b")))) f.toilets = numOf(m[1]);
+    else if ((m = l.match(new RegExp(NUM + "\\s*(?:wc|vs|toilet|nhà vệ sinh|phòng tắm)\\b")))) f.toilets = numOf(m[1]);
+    // tiêu chuẩn / tối đa
+    if ((m = l.match(/tiêu chuẩn\s*:?\s*(\d{1,2})(?:\s*(?:-|–|đến)\s*(\d{1,2}))?\s*(?:pax|khách|kh|người|ng)?(?:\s*(?:-|–)\s*(\d{1,2})\s*(?:pax|khách|kh|người))?/))) {
+      f.std_guests = +m[1]; if (m[2] || m[3]) f.max_guests = +(m[3] || m[2]); }
+    if ((m = l.match(/(?:max|tối đa|sức chứa)[^\d]{0,14}(\d{1,2})\s*(?:-\s*(\d{1,2})\s*)?(?:pax|khách|kh|người|nl|ng)/))) f.max_guests = Math.max(f.max_guests || 0, +(m[2] || m[1]));
+    if (f.max_guests && f.std_guests && f.max_guests < f.std_guests) delete f.max_guests;
+    // phụ thu mỗi người
+    if ((m = l.match(/phụ thu[^\d]{0,20}(\d{2,3}(?:[.,]\d{3})?)\s*(k|đ|vnd|000)?\s*\/\s*(?:1\s*)?(?:người|khách|kh|pax|ng)/))) {
+      let v = +m[1].replace(/[.,]/g, ""); if (v < 1000) v *= 1000; if (v >= 20000 && v <= 2000000) f.surcharge = v; }
+    // đậu xe
+    const sent = text.split(/[\n.;🌼🔥•⁃]+/).map(s => s.trim()).filter(Boolean);
+    const CAR = /(ô ?tô|oto|xe hơi|xe \d+\s*(?:chỗ|c)\b|\d+\s*-\s*\d+\s*(?:chỗ|c)\b|đậu xe|đỗ xe)/i;
+    const park = sent.find(s => CAR.test(s) && /đậu|đỗ|bãi/i.test(s));
+    if (park) { const part = park.split(/,(?![^(]*\))/).map(s => s.trim()).filter(s => CAR.test(s) || /^(và|hoặc|hay)\b|bãi/i.test(s));
+      f.parking = (part.join(", ") || park).replace(/^[-–+*\s]+/, "").replace(/^(có\s+)/i, "Có ").slice(0, 90); f.parking = f.parking[0].toUpperCase() + f.parking.slice(1); }
+    // địa chỉ
+    if ((m = text.match(/📍\s*([^\n"]{6,100})/)) || (m = text.match(/(?:địa chỉ|đ\/c)\s*:?\s*([^\n"]{6,100})/i))) f.address = m[1].replace(/\s+/g, " ").trim().replace(/[,.\s]+$/, "");
+    // quy định: câu có "không …" về ồn / karaoke / hút thuốc / thú cưng / giờ
+    const rules = sent.filter(s => /(không|ko|cấm)\s*(nhận|hát|gây ồn|hút|mang|cho|sử dụng|tổ chức|được)|karaoke|loa kéo|giờ yên tĩnh|sau\s*\d{1,2}h/i.test(s) && s.length <= 140)
+      .map(s => s.replace(/^[-–+*"\s]+|["\s]+$/g, "").replace(/^(lưu ý|note|ghi chú)\s*:?\s*/i, "")).map(s => s[0].toUpperCase() + s.slice(1));
+    if (rules.length) f.rules = [...new Set(rules)].slice(0, 4);
+    return f;
+  };
+
+  /** Tab thông tin (VD "Thông Tin Căn"): mỗi dòng 1 căn – cột "Tên" + các cột mô tả → [{name, text}] */
+  SS.parseInfoTab = grid => {
+    const out = [];
+    const hr = grid.findIndex(row => (row || []).some(c => c && /^(tên|tên căn|tên villa|tên home|căn)\s*:?$/i.test(c.t.trim())));
+    if (hr < 0) return out;
+    const head = grid[hr].map(c => (c && c.t || "").trim());
+    const nc = head.findIndex(h => /^(tên|tên căn|tên villa|tên home|căn)\s*:?$/i.test(h));
+    for (let r = hr + 1; r < grid.length; r++) {
+      const row = grid[r] || []; const name = row[nc] && !row[nc].span ? row[nc].t.replace(/\s+/g, " ").trim() : "";
+      if (!name) continue;
+      const text = row.map((c, i) => i !== nc && c && !c.span && c.t.trim() ? (head[i] && !/hình|ảnh|định vị|link|map/i.test(head[i]) ? head[i] + ": " : "") + c.t.trim() : "")
+        .filter(x => x && !/^https?:/.test(x.split(": ").pop())).join("\n");
+      if (text) out.push({ name, text: text.slice(0, 2000) });
+    }
+    return out;
+  };
+  const slug = s => norm(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "");
+
   const NOTE_RE = /sale|lưu ý|zalo|giá|pax|khách|công khai|hình ảnh|liên hệ|sức chứa|note|ghi chú|thông tin|phụ thu|nâng max|\d{6,}|\d{3,4}[ .-]\d{3}[ .-]\d{3}/i;
 
   /** Phân tích 1 tab → { month, columns:[{key,label,col}], cells:{key:{date:{s,p,pax,raw,bg}}} }
@@ -119,6 +181,10 @@
     // bỏ cột ngày "phụ" nằm sát cột ngày khác có cùng dòng (VD cột Thứ bị nhận nhầm)
     if (!dateCols.length) return { month, error: "Không tìm thấy cột ngày", columns: [], cells: {} };
     const blockOf = c => { let b = null; dateCols.forEach(dc => { if (dc.col < c && (!b || dc.col > b.col)) b = dc; }); return b; };
+    const usefulCol = (blk, c) => { const vals = blk.rows.map(({ r }) => grid[r] && grid[r][c]).filter(Boolean);
+      if (vals.filter(x => x.span).length >= blk.rows.length * 0.7) return false;
+      return vals.filter(x => SS.parsePrice(x.t) || isBookedBg(x.bg) || words.some(w => norm(x.t).includes(w))).length >= blk.rows.length * 0.5; };
+    const dataColsIn = blk => { const nb = dateCols.filter(d => d.col > blk.col).map(d => d.col).sort((a, b) => a - b)[0] ?? W; let n = 0; for (let c = blk.col + 1; c < nb; c++) if (usefulCol(blk, c)) n++; return n; };
     // 2) cột dữ liệu: thuộc khối của cột ngày gần nhất bên trái
     const columns = [], cells = {}, used = {};
     for (let c = 0; c < W; c++) {
@@ -146,7 +212,16 @@
       if (used[norm(label)]) label += ` (cột ${String.fromCharCode(65 + c)})`;
       used[norm(label)] = 1;
       const key = norm(label);
-      columns.push({ key, label, col: c, dateCol: blk.col });
+      // đoạn mô tả căn (số phòng, WC, tiêu chuẩn…): ô phía trên cột này trước, rồi phần tiêu đề của cả khối
+      const info = [];
+      const addInfo = tx => { tx = String(tx || "").replace(/[ \t]+/g, " ").trim(); if (tx.length >= 12 && INFO_RE.test(tx) && !info.includes(tx)) info.push(tx.slice(0, 1200)); };
+      const rEnd = blk.rows[blk.rows.length - 1].r, below = [];
+      for (let r = rEnd + 1; r <= rEnd + 25 && r < grid.length; r++) below.push(r);
+      const zone = [...Array(r0).keys(), ...below];
+      zone.forEach(r => { const cell = grid[r] && grid[r][c]; if (cell) addInfo(cell.t); });
+      if (columns.filter(x => x.dateCol === blk.col).length === 0 && dataColsIn(blk) === 1)
+        zone.forEach(r => { for (let cc = blk.col; cc < nextBlk; cc++) { const cell = grid[r] && grid[r][cc]; if (cell && !cell.span) addInfo(cell.t); } });
+      columns.push({ key, label, col: c, dateCol: blk.col, info });
       cells[key] = {};
       blk.rows.forEach(({ r, d }) => {
         const cell = grid[r] && grid[r][c]; const tx = cell ? cell.t : "", bg = cell ? cell.bg : "";
@@ -172,8 +247,9 @@
   SS.merge = (tabResults, fromDate) => {
     const labels = {}, data = {};
     tabResults.forEach(t => (t.columns || []).forEach(c => {
-      labels[c.key] = labels[c.key] || { key: c.key, label: c.label, months: [] };
+      labels[c.key] = labels[c.key] || { key: c.key, label: c.label, months: [], info: [] };
       labels[c.key].months.push(t.month);
+      (c.info || []).forEach(x => { if (!labels[c.key].info.includes(x) && labels[c.key].info.length < 6) labels[c.key].info.push(x); });
       data[c.key] = data[c.key] || {};
       Object.entries(t.cells[c.key] || {}).forEach(([d, v]) => { if (!fromDate || d >= fromDate) data[c.key][d] = v; });
     }));
@@ -202,14 +278,36 @@
     const single = tabs.length === 1 || src.layout === "single";
     const picked = tabs.map(t => ({ ...t, month: SS.tabMonth(t.name, now) }))
       .filter(t => single || (t.month && t.month >= cur && (!src.months_ahead || t.month <= addMonths(cur, src.months_ahead))));
-    const results = [];
+    const results = [], infoRows = [];
+    for (const t of tabs.filter(t => !picked.includes(t) && /thông tin|thong tin|info|giới thiệu|cơ cấu|danh sách căn/i.test(t.name)).slice(0, 2)) {
+      try { infoRows.push(...SS.parseInfoTab(SS.parseGrid(await fetchText(`${base}/sheet?headers=false&gid=${t.gid}`)))); } catch (e) { /* bỏ qua */ }
+    }
     for (const t of picked) {
       const html = await fetchText(`${base}/sheet?headers=false&gid=${t.gid}`);
       const r = SS.analyze(SS.parseGrid(html), t.month || cur, src);
       results.push({ tab: t.name, gid: t.gid, ...r });
     }
     const today = now.toISOString().slice(0, 10);
-    return { id, tabs: results.map(r => ({ tab: r.tab, month: r.month, columns: (r.columns || []).length, keys: (r.columns || []).map(c => c.key), error: r.error || ((r.columns || []).length ? "" : "Tab chưa có dữ liệu (chủ nhà chưa cập nhật)") })), ...SS.merge(results, today) };
+    const merged = SS.merge(results, today);
+    SS.attachInfo(merged.labels, infoRows);
+    return { id, tabs: results.map(r => ({ tab: r.tab, month: r.month, columns: (r.columns || []).length, keys: (r.columns || []).map(c => c.key), error: r.error || ((r.columns || []).length ? "" : "Tab chưa có dữ liệu (chủ nhà chưa cập nhật)") })), ...merged };
+  };
+  /** Gắn dòng của tab thông tin vào cột cùng tên, rồi tính facts cho mỗi căn */
+  SS.attachInfo = (labels, infoRows = []) => {
+    labels.forEach(l => {
+      const ls = slug(l.label), first = slug(l.label.split("›")[0]);
+      const row = infoRows.find(x => { const s = slug(x.name); return s && (ls.includes(s) || s.includes(first) || first.includes(s)); });
+      l.info = l.info || [];
+      if (row && !l.info.includes(row.text)) l.info.unshift(row.text);
+      // đoạn ghi được nhiều thông tin nhất lên trước (chủ nhà hay sửa mô tả ở tab tháng mới)
+      const score = tx => Object.keys(SS.extractFacts(tx)).length;
+      l.info = l.info.map((tx, i) => ({ tx, i, s: score(tx) })).sort((a, b) => b.s - a.s || b.i - a.i).map(x => x.tx);
+      const facts = {};
+      l.info.forEach(tx => { const f = SS.extractFacts(tx); Object.entries(f).forEach(([k, v]) => { if (facts[k] == null) facts[k] = v; }); });
+      if (!facts.std_guests && l.stats && l.stats.pax) facts.std_guests = l.stats.pax;
+      l.facts = facts;
+    });
+    return labels;
   };
   const addMonths = (ym, n) => { const [y, m] = ym.split("-").map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.toISOString().slice(0, 7); };
 

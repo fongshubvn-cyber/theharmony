@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>The Harmony – Quản trị</title>
-<link rel="stylesheet" href="assets/common.css?v=202610311028">
+<link rel="stylesheet" href="assets/common.css?v=202610311053">
 </head>
 <body>
 <div id="hdr"></div>
@@ -21,12 +21,12 @@
     <button class="btn s sm" data-act="reset">Về giá gốc</button>
     <button class="btn s sm" id="barClear">Bỏ chọn</button></div></div></div>
 <datalist id="areas"></datalist>
-<script src="config.js?v=202610311028"></script>
-<script src="assets/api.js?v=202610311028"></script>
-<script src="assets/common.js?v=202610311028"></script>
-<script src="assets/sheet-sync.js?v=202610311028"></script>
+<script src="config.js?v=202610311053"></script>
+<script src="assets/api.js?v=202610311053"></script>
+<script src="assets/common.js?v=202610311053"></script>
+<script src="assets/sheet-sync.js?v=202610311053"></script>
 <script src="demo/sheet-snapshot.js" onerror="this.remove()"></script>
-<script src="assets/bookmarklet.js?v=202610311028"></script>
+<script src="assets/bookmarklet.js?v=202610311053"></script>
 <script>
 const PER = 30;
 let me = null, villas = [], rates = {}, cal = {}, sources = [];
@@ -329,6 +329,21 @@ function sourceWizard(src) {
       <div><label>Link Google Sheet</label><input id="su" value="${esc(src?.sheet_url || "")}" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
       <div class="cta"><button class="btn p" id="sread">Đọc thử Sheet</button></div></div>
     <div id="sres"></div></div>`);
+  /* Thông tin căn đọc từ đoạn mô tả trong Sheet (số phòng, WC, tiêu chuẩn…) – anh sửa được trước khi lưu */
+  cfg.facts = cfg.facts || {}; cfg.info = cfg.info || {};
+  const factsOf = l => { if (!l.facts && SheetSync.attachInfo) SheetSync.attachInfo([l]); return cfg.facts[l.key] || (cfg.facts[l.key] = { on: true, ...(l.facts || {}) }); };
+  const factBox = l => {
+    const f = factsOf(l), k = esc(l.key);
+    const has = ["bedrooms", "toilets", "std_guests", "max_guests", "surcharge", "parking", "address", "rules"].some(x => f[x] != null && f[x] !== "" && !(Array.isArray(f[x]) && !f[x].length));
+    if (!has && !(l.info || []).length) return `<div class="muted" style="font-size:13px;margin-top:8px">Sheet không ghi số phòng / WC cho căn này – anh nhập tay trong Danh sách căn.</div>`;
+    const num = (fk, lb) => `<label style="display:flex;flex-direction:column;gap:2px;font-size:12px;font-weight:700;color:var(--muted)">${lb}<input type="number" min="0" inputmode="numeric" data-fk="${k}" data-ff="${fk}" value="${f[fk] ?? ""}" style="padding:8px 10px;min-height:0"></label>`;
+    const chip = (lb, v) => v ? `<span class="chip" style="background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:500;white-space:normal;text-align:left">${lb}: ${esc(v)}</span>` : "";
+    return `<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:#f5f9ff;border:1px solid #dbe7fd">
+      <label style="display:flex;gap:8px;align-items:center;font-weight:700;font-size:14px;cursor:pointer"><input type="checkbox" data-fon="${k}" ${f.on !== false ? "checked" : ""} style="width:auto">Đọc được từ Sheet – điền vào căn (chỉ ô còn trống)</label>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">${num("bedrooms", "Phòng ngủ")}${num("toilets", "WC")}${num("std_guests", "Tiêu chuẩn")}${num("max_guests", "Tối đa")}</div>
+      <div class="chips" style="margin-top:8px">${chip("Phụ thu", f.surcharge ? vnd(f.surcharge) + "/người" : "")}${chip("Đậu xe", f.parking)}${chip("Địa chỉ", f.address)}${(f.rules || []).map(r => chip("Lưu ý", r)).join("")}</div>
+      ${(l.info || []).length ? `<details style="margin-top:6px"><summary class="muted" style="font-size:13px;cursor:pointer">Xem đoạn mô tả gốc trong Sheet</summary><div style="white-space:pre-wrap;font-size:13px;margin-top:6px;max-height:180px;overflow:auto;background:#fff;border-radius:10px;padding:8px 10px;border:1px solid var(--line)">${esc(l.info.join("\n―――\n"))}</div></details>` : ""}</div>`;
+  };
   const draw = () => {
     if (!read) return;
     const t0 = today(), days = api.dateRange(t0, api.addDays(t0, 21));
@@ -351,7 +366,7 @@ function sourceWizard(src) {
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><b>${esc(l.label)}</b>
           <span class="muted" style="font-size:13px">${l.stats.open} ngày trống · <b style="color:#b42318">${l.stats.booked} đã kín</b>${l.stats.blocked ? ` · ${l.stats.blocked} khoá` : ""}${l.stats.min ? ` · ${vnd(l.stats.min)}${l.stats.max !== l.stats.min ? " – " + vnd(l.stats.max) : ""}` : ""}</span></div>
         <div style="margin:8px 0;line-height:0" title="21 ngày tới: xanh = trống, đỏ = đã kín, xám = khoá/chưa có">${days.map(d => dot((read.data[l.key] || {})[d])).join("")}</div>
-        <select data-map="${esc(l.key)}">${opts(cfg.mapping[l.key])}</select></div>`).join("")}</div>
+        <select data-map="${esc(l.key)}">${opts(cfg.mapping[l.key])}</select>${factBox(l)}</div>`).join("")}</div>
       <h4 style="margin:16px 0 6px">4. Màu vòng ✕ cho ngày kín từ nguồn này</h4>${swatches("scol", cfg.booked_color || "#e5484d")}
       <h4 style="margin:16px 0 6px">5. Cộng thêm vào giá cho đối tác của anh</h4>
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="mkt"><option value="">Không cộng (giữ giá Sheet)</option><option value="percent" ${cfg.markup?.type === "percent" ? "selected" : ""}>Cộng theo %</option><option value="fixed" ${cfg.markup?.type === "fixed" ? "selected" : ""}>Cộng số tiền / đêm</option></select>
@@ -359,6 +374,8 @@ function sourceWizard(src) {
       <p class="muted" style="font-size:13px;margin:6px 0 0">Đối tác thấy giá sau khi cộng. Khách không bao giờ thấy giá.</p>
       <div class="cta"><button class="btn p" id="ssave">Lưu & đồng bộ ngay</button></div>`;
     $$("[data-map]", m).forEach(s => (s.onchange = () => (cfg.mapping[s.dataset.map] = s.value)));
+    $$("[data-fk]", m).forEach(i => (i.oninput = () => { const v = i.value === "" ? null : Math.max(0, +i.value); cfg.facts[i.dataset.fk][i.dataset.ff] = v; }));
+    $$("[data-fon]", m).forEach(i => (i.onchange = () => (cfg.facts[i.dataset.fon].on = i.checked)));
     bindSwatches(m, "scol", c => (cfg.booked_color = c));
     if ($("#bmAgain", m)) $("#bmAgain", m).onclick = e => { e.preventDefault(); bmPanel($("#su", m).value); };
     $$("[data-col]", m).forEach(c => (c.onchange = () => (cfg.booked_colors = $$("[data-col]:checked", m).map(x => x.dataset.col))));
@@ -407,17 +424,31 @@ function sourceWizard(src) {
       cfg.markup = $("#mkt", m).value ? { type: $("#mkt", m).value, value: +$("#mkv", m).value || 0 } : null;
       let s = await api.saveSource({ ...(src ? { id: src.id } : {}), name, sheet_url: url, config: cfg });
       const mapping = {};
+      // thông tin căn từ Sheet → chỉ điền vào ô còn trống (không ghi đè số liệu anh đã nhập)
+      const fill = (v, l) => {
+        const f = cfg.facts[l.key]; if (!f || f.on === false) return {};
+        const o = {}, empty = x => x == null || x === "" || x === 0 || (Array.isArray(x) && !x.length);
+        ["bedrooms", "toilets", "std_guests", "max_guests"].forEach(k => { if (f[k] && empty(v[k])) o[k] = +f[k]; });
+        if (f.address && empty(v.address)) o.address = f.address;
+        if (empty(v.rules)) { const rs = [...(f.rules || [])]; if (f.surcharge) rs.push("Có phụ thu khi vượt số khách tiêu chuẩn"); if (rs.length) o.rules = rs; }
+        if (f.parking && empty(v.amenities)) o.amenities = [f.parking.length <= 45 ? f.parking : "Chỗ đậu ô tô"];
+        const std = o.std_guests ?? v.std_guests, mx = o.max_guests ?? v.max_guests;
+        if (std && (!mx || mx < std) && !(f.max_guests && !empty(v.max_guests))) o.max_guests = std;
+        return o;
+      };
       for (const l of read.labels) {
         let vid = cfg.mapping[l.key];
+        if ((l.info || []).length) cfg.info[l.key] = l.info.slice(0, 4);
         if (vid === "__new__") {
-          const nv = await api.saveVilla({ name: prettyLabel(l.label, name), area: "", address: "", bedrooms: 0, toilets: 0, std_guests: l.stats.pax || 0, max_guests: l.stats.pax || 0,
-            amenities: [], rules: [], photos: [], description: "", active: true, sort: 500, source_id: s.id, source_key: l.key });
+          const base = { name: prettyLabel(l.label, name), area: "", address: "", bedrooms: 0, toilets: 0, std_guests: l.stats.pax || 0, max_guests: l.stats.pax || 0,
+            amenities: [], rules: [], photos: [], description: "", active: true, sort: 500, source_id: s.id, source_key: l.key };
+          const nv = await api.saveVilla({ ...base, ...fill({ ...base, std_guests: 0, max_guests: 0 }, l) });
           vid = nv.id;
-        } else if (vid) await api.saveVilla({ id: vid, source_id: s.id, source_key: l.key });
+        } else if (vid) { const v = villas.find(x => x.id === vid) || {}; await api.saveVilla({ id: vid, source_id: s.id, source_key: l.key, ...fill(v, l) }); }
         if (vid) mapping[l.key] = vid;
       }
       for (const v of villas.filter(v => v.source_id === s.id && !Object.values(mapping).includes(v.id))) await api.saveVilla({ id: v.id, source_id: null, source_key: null });
-      s = await api.saveSource({ id: s.id, config: { ...cfg, mapping } });
+      s = await api.saveSource({ id: s.id, config: { ...cfg, mapping } });   // facts + đoạn mô tả gốc lưu trong cấu hình nguồn (chỉ quản trị xem được)
       const r = await api.syncSource(s.id);
       await reload(); closeModal(); render();
       toast(r && r.status !== "error" ? `Đã đồng bộ ${r.rows} ngày` : "Đã lưu – đồng bộ lỗi: " + (r?.message || ""));
