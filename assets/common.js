@@ -123,7 +123,7 @@ function zaloFab() {
   const digits = s => String(s || "").replace(/[^\d+]/g, "");
   const wrap = document.createElement("div"); wrap.id = "zfab";
   wrap.innerHTML = `<div class="zpop" role="dialog" aria-label="Liên hệ Zalo"><div class="zh">Nhắn Zalo cho The Harmony</div>
-    ${contactList().map((c, i) => `<div class="zc"><div class="zn"><b>${esc(c.name || "")}</b>${i === 0 ? ` <span class="zm">Số chính</span>` : ""}<div class="muted">${esc(c.phone || c.zalo)}${c.role && i ? " · " + esc(c.role) : ""}</div></div>
+    ${contactList().map((c, i) => `<div class="zc"><div class="zn"><b>${esc(c.name || "")}</b>${i === 0 && contactList().length > 1 ? ` <span class="zm">Số chính</span>` : ""}<div class="muted">${esc(c.phone || c.zalo)}${c.role && (i || contactList().length === 1) ? " · " + esc(c.role) : ""}</div></div>
       <a class="zbtn" data-zdirect href="https://zalo.me/${esc(digits(c.zalo || c.phone))}" target="_blank" rel="noopener">Zalo</a>
       <a class="zcall" href="tel:${esc(digits(c.phone || c.zalo))}" aria-label="Gọi ${esc(c.name || "")}">Gọi</a></div>`).join("")}</div>
     <button type="button" class="zbt" aria-label="Liên hệ Zalo"><span>Zalo</span></button>`;

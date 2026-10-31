@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /doi-tac.html
+
+Sitemap: https://fongshubvn-cyber.github.io/theharmony/sitemap.xml
