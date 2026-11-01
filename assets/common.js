@@ -157,8 +157,22 @@ async function mountSwitch(current) {
   }
   const R = [["guest", "Villa", "villa.html"], ["home", "Giới thiệu", "gioi-thieu.html"], ["partner", "Đối tác", "doi-tac.html"], ["admin", "Quản trị", "admin.html"]];
   el.innerHTML = `<span class="rsw"><span class="rsl">Admin</span>${R.map(([k, l, h]) => k === current ? `<b>${l}</b>` : `<a href="${h}">${l}</a>`).join("")}</span>`
-    + (api.demo && current !== "partner" ? `<a class="pill ghost" href="doi-tac.html#dalattravel-demo" style="text-decoration:none;margin-left:8px">Xem thử vai đối tác</a>` : "")
+    + `<span class="asp"><button class="pill" id="asPartner" type="button">Xem như đối tác ▾</button><div class="asm" id="asMenu" hidden></div></span>`
     + (current === "admin" ? "" : `<button class="pill ghost" id="rswOut" style="margin-left:8px">Đăng xuất</button>`);
+  /* Admin: chọn 1 link đối tác để xem đúng màn hình đối tác đó thấy */
+  const ab = document.getElementById("asPartner"), am = document.getElementById("asMenu");
+  ab.onclick = async e => { e.stopPropagation();
+    if (!am.hidden) { am.hidden = true; return; }
+    am.hidden = false; am.innerHTML = `<div class="muted" style="padding:10px 12px">Đang tải…</div>`;
+    let ls = []; try { ls = (await api.listLinks()).filter(l => l.active); } catch (err) {}
+    const cur = api.token();
+    am.innerHTML = `<div class="ah">Xem đúng màn hình mà đối tác thấy</div>`
+      + (ls.length ? ls.map(l => `<a href="doi-tac.html#${encodeURIComponent(l.token)}" class="${l.token === cur ? "on" : ""}"><i class="cdot" style="background:${esc(l.color || "#2f6fed")}"></i>${esc(l.name)}</a>`).join("")
+        : `<div class="muted" style="padding:8px 12px;font-size:13px">Chưa có link đối tác đang mở. Tạo ở <a href="admin.html#links">Quản trị → Link đối tác</a>.</div>`)
+      + `<a href="doi-tac.html" class="pv ${current === "partner" && !cur ? "on" : ""}">Xem trước (chế độ quản trị, thấy tên người chốt)</a>`;
+    am.querySelectorAll("a[href^='doi-tac.html']").forEach(a => (a.onclick = () => { if (current === "partner") setTimeout(() => location.reload(), 0); }));
+  };
+  document.addEventListener("click", e => { if (!e.target.closest(".asp")) am.hidden = true; });
   const o = document.getElementById("rswOut");
   if (o) o.onclick = async () => { await api.signOut(); location.href = "villa.html"; };
 }

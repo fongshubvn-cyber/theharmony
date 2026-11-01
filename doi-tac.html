@@ -4,16 +4,16 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>The Harmony – Lịch giá cho đối tác</title>
-<link rel="stylesheet" href="assets/common.css?v=202610311201">
+<link rel="stylesheet" href="assets/common.css?v=202611011054">
 </head>
 <body>
 <div id="hdr"></div>
 <main class="wrap" id="app"><div class="empty">Đang tải…</div></main>
 <div class="bar" id="bar"><div class="wrap"><div id="barSum"></div>
   <div style="display:flex;gap:8px"><button class="btn s" id="barClear">Bỏ chọn</button><button class="btn p" id="barGo">Gửi yêu cầu book</button></div></div></div>
-<script src="config.js?v=202610311201"></script>
-<script src="assets/api.js?v=202610311201"></script>
-<script src="assets/common.js?v=202610311201"></script>
+<script src="config.js?v=202611011054"></script>
+<script src="assets/api.js?v=202611011054"></script>
+<script src="assets/common.js?v=202611011054"></script>
 <script>
 const PER_CARD = 24, PER_ROW = 30;
 let link = null, villas = [], rates = {}, cal = {}, calRange = ["", ""];
@@ -202,7 +202,7 @@ async function boot() {
   catch (e) { hdr(); mountSwitch("partner"); return e.message === "LINK_INVALID" ? invalidView() : ($("#app").innerHTML = `<div class="empty">${esc(e.message)}</div>`); }
   hdr(); mountSwitch("partner");
   $("#app").innerHTML = `${link.preview ? `<div class="demo">Anh đang <b>xem thử</b> bằng tài khoản quản trị. Đối tác vào bằng link riêng tạo ở tab “Link đối tác”.</div>` : ""}
-    <div class="demo" style="background:#e8f0fe;border-color:#c7dafc;color:var(--brand-d)">Xin chào <b>${esc(link.name)}</b>. Giá hiển thị là <b>giá NET</b>, chưa gồm hoa hồng. Trạng thái chỉ có giá trị sau khi quản lý xác nhận. Vui lòng không chia sẻ link này.</div>
+    <div class="demo" style="background:#fbf8e8;border-color:#e6dfb0;color:var(--ink)">Xin chào <b>${esc(link.name)}</b>. Giá hiển thị là <b>giá NET</b>, chưa gồm hoa hồng. Trạng thái chỉ có giá trị sau khi quản lý xác nhận. Vui lòng không chia sẻ link này.</div>
     <div class="tabs" id="tabs"></div><div id="body"></div>`;
   villas = (await api.listVillas()).filter(v => v.active !== false);
   st.pick = (loadPick() || villas.slice(0, MAX_PICK).map(v => v.id)).filter(id => V(id)).slice(0, MAX_PICK);

@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>The Harmony – Quản trị</title>
-<link rel="stylesheet" href="assets/common.css?v=202610311201">
+<link rel="stylesheet" href="assets/common.css?v=202611011054">
 </head>
 <body>
 <div id="hdr"></div>
@@ -21,16 +21,16 @@
     <button class="btn s sm" data-act="reset">Về giá gốc</button>
     <button class="btn s sm" id="barClear">Bỏ chọn</button></div></div></div>
 <datalist id="areas"></datalist>
-<script src="config.js?v=202610311201"></script>
-<script src="assets/api.js?v=202610311201"></script>
-<script src="assets/common.js?v=202610311201"></script>
-<script src="assets/sheet-sync.js?v=202610311201"></script>
+<script src="config.js?v=202611011054"></script>
+<script src="assets/api.js?v=202611011054"></script>
+<script src="assets/common.js?v=202611011054"></script>
+<script src="assets/sheet-sync.js?v=202611011054"></script>
 <script src="demo/sheet-snapshot.js" onerror="this.remove()"></script>
-<script src="assets/bookmarklet.js?v=202610311201"></script>
+<script src="assets/bookmarklet.js?v=202611011054"></script>
 <script>
 const PER = 30;
 let me = null, villas = [], rates = {}, cal = {}, sources = [];
-const st = { tab: "villas", f: { page: 1 }, month: defaultMonth(), sel: new Set(), reqFilter: "new" };
+const st = { tab: ["villas", "cal", "req", "links", "sheets"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "villas", f: { page: 1 }, month: defaultMonth(), sel: new Set(), reqFilter: "new" };
 const V = id => villas.find(v => v.id === id);
 const lines = s => String(s || "").split(/\n/).map(x => x.trim()).filter(Boolean);
 const commas = s => String(s || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean);
@@ -126,7 +126,7 @@ function renderVillas() {
   keepFocus(() => {
     $("#body").innerHTML = filterBar(villas, st.f, `<button class="btn p" id="add">+ Thêm căn</button>`) + `<p class="count">${list.length} / ${villas.length} căn</p>
     <div style="overflow:auto"><table class="list"><tr><th></th><th>Mã</th><th>Tên căn</th><th>Khu vực</th><th>PN / WC / Khách</th><th>Giá T2–T5</th><th>Giá T6–CN</th><th>Mở bán đến</th><th>Hiển thị</th><th></th></tr>
-    ${rows.map(v => { const r = rates[v.id] || {}; return `<tr><td>${photo(v) ? `<img src="${esc(photo(v))}" alt="">` : `<div style="width:64px;height:44px;border-radius:8px;background:#e1e8f2"></div>`}</td><td>${esc(v.code || "")}</td><td><b>${esc(v.name)}</b>${v.source_id ? `<br><span class="st partner" title="Lịch & giá tự cập nhật từ Google Sheet">⟳ ${esc((sources.find(s => s.id === v.source_id) || {}).name || "Google Sheet")}</span>` : ""}</td><td>${esc(v.area || "")}</td>
+    ${rows.map(v => { const r = rates[v.id] || {}; return `<tr><td>${photo(v) ? `<img src="${esc(photo(v))}" alt="">` : `<div style="width:64px;height:44px;border-radius:8px;background:#e6e1c8"></div>`}</td><td>${esc(v.code || "")}</td><td><b>${esc(v.name)}</b>${v.source_id ? `<br><span class="st partner" title="Lịch & giá tự cập nhật từ Google Sheet">⟳ ${esc((sources.find(s => s.id === v.source_id) || {}).name || "Google Sheet")}</span>` : ""}</td><td>${esc(v.area || "")}</td>
       <td>${v.bedrooms} / ${v.toilets} / ${v.max_guests}</td><td>${v.source_id ? "Theo Sheet" : r.weekday ? vnd(r.weekday) : "—"}</td><td>${v.source_id ? "Theo Sheet" : r.weekend ? vnd(r.weekend) : "—"}</td><td>${dmy(r.open_until) || "—"}</td>
       <td>${v.active !== false ? `<span class="st confirmed">Hiện</span>` : `<span class="st rejected">Ẩn</span>`}</td><td><button class="btn s sm" data-e="${v.id}">Sửa</button></td></tr>`; }).join("")}</table></div>` +
     pager(list.length, PER, st.f.page, p => { st.f.page = p; render(); });
@@ -278,7 +278,7 @@ async function renderLinks() {
     ${ls.map(l => `<tr><td><i class="cdot" style="background:${esc(l.color || "#2f6fed")}"></i><b>${esc(l.name)}</b>${l.color_locked ? ` <span title="Màu đã khoá theo link">🔒</span>` : ""}</td><td>${esc(l.phone || "")}</td><td class="muted">${esc(l.note || "")}</td><td>${ago(l.last_used_at)}</td>
       <td>${reqs.filter(r => r.link_id === l.id).length}</td>
       <td>${l.active ? `<span class="st confirmed">Đang mở</span>` : `<span class="st rejected">Đã khoá</span>`}</td>
-      <td style="white-space:nowrap"><button class="btn p sm" data-cp="${l.id}">Lấy link</button> <button class="btn s sm" data-ed="${l.id}">Sửa</button>
+      <td style="white-space:nowrap">${l.active ? `<a class="btn s sm" href="doi-tac.html#${encodeURIComponent(l.token)}" title="Xem đúng màn hình đối tác này thấy">Xem như đối tác</a> ` : ""}<button class="btn p sm" data-cp="${l.id}">Lấy link</button> <button class="btn s sm" data-ed="${l.id}">Sửa</button>
         <button class="btn ${l.active ? "w" : "s"} sm" data-tg="${l.id}">${l.active ? "Khoá" : "Mở lại"}</button> <button class="btn w sm" data-del="${l.id}" title="Xoá hẳn">×</button></td></tr>`).join("")}</table></div>`
     : `<div class="empty">Chưa có link nào. Bấm “Tạo link mới” để tạo link cho đối tác đầu tiên.</div>`);
   const L = id => ls.find(x => x.id === id);
@@ -338,7 +338,7 @@ function sourceWizard(src) {
     if (!has && !(l.info || []).length) return `<div class="muted" style="font-size:13px;margin-top:8px">Sheet không ghi số phòng / WC cho căn này – anh nhập tay trong Danh sách căn.</div>`;
     const num = (fk, lb) => `<label style="display:flex;flex-direction:column;gap:2px;font-size:12px;font-weight:700;color:var(--muted)">${lb}<input type="number" min="0" inputmode="numeric" data-fk="${k}" data-ff="${fk}" value="${f[fk] ?? ""}" style="padding:8px 10px;min-height:0"></label>`;
     const chip = (lb, v) => v ? `<span class="chip" style="background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:500;white-space:normal;text-align:left">${lb}: ${esc(v)}</span>` : "";
-    return `<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:#f5f9ff;border:1px solid #dbe7fd">
+    return `<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:#fbf8e8;border:1px solid #e3dca0">
       <label style="display:flex;gap:8px;align-items:center;font-weight:700;font-size:14px;cursor:pointer"><input type="checkbox" data-fon="${k}" ${f.on !== false ? "checked" : ""} style="width:auto">Đọc được từ Sheet – điền vào căn (chỉ ô còn trống)</label>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">${num("bedrooms", "Phòng ngủ")}${num("toilets", "WC")}${num("std_guests", "Tiêu chuẩn")}${num("max_guests", "Tối đa")}</div>
       <div class="chips" style="margin-top:8px">${chip("Phụ thu", f.surcharge ? vnd(f.surcharge) + "/người" : "")}${chip("Đậu xe", f.parking)}${chip("Địa chỉ", f.address)}${(f.rules || []).map(r => chip("Lưu ý", r)).join("")}</div>
@@ -352,7 +352,7 @@ function sourceWizard(src) {
     read.labels.forEach(l => { if (!(l.key in cfg.mapping)) cfg.mapping[l.key] = guess(l) || "__new__"; });
     const opts = sel => `<option value="" ${!sel ? "selected" : ""}>— Bỏ qua cột này —</option><option value="__new__" ${sel === "__new__" ? "selected" : ""}>+ Tạo căn mới</option>` +
       villas.map(v => `<option value="${v.id}" ${sel === v.id ? "selected" : ""}>${esc(v.name)}${v.source_id && (!src || v.source_id !== src.id) ? " (đang ghép nguồn khác)" : ""}</option>`).join("");
-    const dot = c => `<span title="${c ? (c.s === "booked" ? "Đã có khách" : c.s === "open" ? vnd(c.p) : c.s === "blocked" ? "Khoá" : "Trống ô") : "—"}" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin:1px;background:${!c ? "#eef1f5" : c.s === "booked" ? "#e5484d" : c.s === "open" ? "#3dbb6f" : c.s === "blocked" ? "#98a2b3" : "#eef1f5"}"></span>`;
+    const dot = c => `<span title="${c ? (c.s === "booked" ? "Đã có khách" : c.s === "open" ? vnd(c.p) : c.s === "blocked" ? "Khoá" : "Trống ô") : "—"}" style="display:inline-block;width:12px;height:12px;border-radius:3px;margin:1px;background:${!c ? "#eeeadb" : c.s === "booked" ? "#e5484d" : c.s === "open" ? "#3dbb6f" : c.s === "blocked" ? "#98a2b3" : "#eeeadb"}"></span>`;
     const missing = Object.entries(cfg.mapping).filter(([k, v]) => v && !read.labels.some(l => l.key === k));
     $("#sres", m).innerHTML = `${api.demo ? `<p class="muted" style="font-size:13px;margin:12px 0 0">Giả lập · dữ liệu đọc lúc ${read.snapshot_at ? new Date(read.snapshot_at).toLocaleString("vi-VN") : "—"} · <a href="#" id="bmAgain">Đọc lại bằng nút trên Chrome</a></p>` : ""}
       <h4 style="margin:18px 0 6px">1. Các tab đã đọc</h4>
@@ -391,7 +391,7 @@ function sourceWizard(src) {
   /* Giả lập máy chủ: đọc Sheet bằng nút dấu trang trên Chrome của anh, rồi dán vào đây */
   const bmPanel = url => {
     const sheetUrl = SheetSync.sheetId(url) ? `https://docs.google.com/spreadsheets/d/${SheetSync.sheetId(url)}/edit` : "";
-    $("#sres", m).innerHTML = `<div style="margin-top:16px;border:2px dashed #c7dafc;border-radius:18px;padding:16px;background:#f5f9ff">
+    $("#sres", m).innerHTML = `<div style="margin-top:16px;border:2px dashed #d6cf96;border-radius:18px;padding:16px;background:#fbf8e8">
       <b style="font-size:16px">Chế độ giả lập: đọc Sheet bằng Chrome của anh</b>
       <p class="muted" style="margin:6px 0 12px;font-size:14px">Bản demo chưa có máy chủ Supabase nên nhờ trình duyệt đọc hộ. Khi chạy thật, bước này tự động 15 phút/lần.</p>
       <ol style="margin:0;padding-left:20px;display:grid;gap:10px">
