@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Min's House | The Harmony</title>
+<meta name="description" content="The Harmony giới thiệu The Min's House – villa sân vườn nguyên căn 2 phòng ngủ, 2 WC tại đường 3 Tháng 4, cách chợ Đà Lạt 1,5 km. Karaoke, máy chiếu, BBQ ngoài trời, đậu ô tô trước nhà.">
+<meta property="og:title" content="The Min's House – villa sân vườn 2 phòng ngủ giữa lòng Đà Lạt | The Harmony">
+<meta property="og:description" content="Cách chợ Đà Lạt 1,5 km, sân vườn có BBQ, karaoke và máy chiếu. Nhắn Zalo để nhận báo giá theo ngày.">
+<meta property="og:image" content="img/mat-tien.jpg">
+<link rel="icon" type="image/png" href="img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: tờ "hồ sơ căn" — số liệu căn nhà là nhân vật chính (5 · 6 · 16),
+   ảnh thật xếp theo hành trình một ngày ở villa, nền đá xám ấm như nội thất căn. */
+:root {
+    --stone: #f2f1ed;       /* nền đá sáng như sàn villa */
+    --paper: #ffffff;
+    --ink: #1c2220;
+    --muted: #5b6662;
+    --line: #dcdcd6;
+    --graphite: #343d3a;    /* xám than của sofa, tủ bếp */
+    --pine: #2d4a3e;        /* rặng thông sau nhà */
+    --brass: #b8893f;       /* tay nắm đồng ở bếp */
+    --brass-ink: #241904;
+    --font-display: "Bricolage Grotesque", "Be Vietnam Pro", system-ui, sans-serif;
+    --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --r: 14px;
+    color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --stone: #121514; --paper: #1b201e; --ink: #ecefed; --muted: #a6b0ac; --line: #2d3431;
+        --graphite: #d7ddda; --pine: #9cc3b0; --brass: #d6a95a; --brass-ink: #1f1500; color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --stone: #121514; --paper: #1b201e; --ink: #ecefed; --muted: #a6b0ac; --line: #2d3431;
+    --graphite: #d7ddda; --pine: #9cc3b0; --brass: #d6a95a; --brass-ink: #1f1500; color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { font-family: var(--font-body); background: var(--stone); color: var(--ink); line-height: 1.6; font-size: 17px; }
+img { max-width: 100%; display: block; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; letter-spacing: -0.015em; text-wrap: balance; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; border-radius: 6px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 24px; border-radius: 999px;
+       font: 600 1rem/1 var(--font-body); text-decoration: none; border: 2px solid transparent; cursor: pointer; transition: transform .15s ease, background-color .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-main { background: var(--brass); color: var(--brass-ink); }
+.btn-main:hover { background: #c99a4d; }
+.btn-line { border-color: var(--graphite); color: var(--graphite); background: transparent; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+
+/* Top bar */
+.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--stone) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+.brand b { font-family: var(--font-display); font-size: 1.15rem; display: block; line-height: 1.1; }
+.brand small { font-size: .74rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.trail { font-size: .85rem; color: var(--muted); margin-bottom: 14px; }
+.trail a { color: var(--muted); }
+.harmony { background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.harmony-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: start; }
+.harmony-logo { width: 88px; height: 88px; border-radius: 18px; margin-bottom: 18px; }
+.promises { list-style: none; display: grid; gap: 0; border-top: 2px solid var(--ink); }
+.promises li { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 2.2rem 1fr; gap: 12px; }
+.promises li > span { font-family: var(--font-display); font-weight: 800; color: var(--brass); font-size: 1.2rem; }
+.promises b { display: block; font-size: 1.05rem; }
+.promises p { color: var(--muted); font-size: .95rem; }
+.harmony .btn { margin-top: 22px; }
+/* Mini menu: Villa nguyên căn */
+.vmenu { position: relative; }
+.vmenu-btn { display: inline-flex; align-items: center; gap: 6px; font: 600 .93rem var(--font-body); color: var(--ink); background: transparent;
+    border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer; }
+.vmenu-btn:hover, .vmenu-btn[aria-expanded="true"] { border-color: var(--graphite); }
+.vmenu-btn svg { width: 14px; height: 14px; transition: transform .2s ease; }
+.vmenu-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.vmenu-count { font-size: .75rem; font-weight: 700; background: var(--brass); color: var(--brass-ink); border-radius: 999px; padding: 1px 7px; }
+.vpanel { position: absolute; top: calc(100% + 10px); left: 0; width: 380px; background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--r); box-shadow: 0 18px 40px rgba(20,26,24,.18); padding: 10px; display: none; z-index: 40; }
+.vpanel.open { display: block; }
+.vpanel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 8px 10px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.vpanel-head b { font-family: var(--font-display); font-size: 1.05rem; }
+.vpanel-head span { font-size: .8rem; color: var(--muted); }
+.vlist { list-style: none; display: grid; gap: 4px; max-height: min(60vh, 460px); overflow-y: auto; }
+.vitem { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: center; padding: 8px; border-radius: 10px; text-decoration: none; color: var(--ink); }
+.vitem:hover { background: var(--stone); }
+.vitem img { width: 76px; height: 58px; object-fit: cover; border-radius: 8px; }
+.vitem b { display: block; font-size: .98rem; }
+.vitem small { display: block; font-size: .82rem; color: var(--muted); }
+.vitem .here { display: inline-block; margin-top: 3px; font-size: .72rem; font-weight: 700; color: var(--pine); background: color-mix(in srgb, var(--pine) 12%, transparent); padding: 1px 8px; border-radius: 999px; }
+.vitem[aria-current="page"] { background: var(--stone); }
+.vpanel-foot { margin-top: 6px; padding: 10px 8px 4px; border-top: 1px solid var(--line); font-size: .86rem; color: var(--muted); }
+.vpanel-foot a { color: var(--pine); font-weight: 600; }
+.top-left { display: flex; align-items: center; gap: 18px; }
+.top-name { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; text-decoration: none; color: var(--ink); }
+.top-name span { color: var(--muted); font-weight: 500; font-family: var(--font-body); font-size: .85rem; margin-left: 6px; }
+.top nav { display: flex; align-items: center; gap: 20px; font-size: .93rem; font-weight: 500; }
+.top nav a:not(.btn) { color: var(--muted); text-decoration: none; }
+.top nav a:not(.btn):hover { color: var(--ink); }
+.top .btn { padding: 10px 18px; font-size: .92rem; }
+
+/* Hero */
+.hero { padding: 48px 0 40px; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+.kicker { display: inline-flex; gap: 8px; align-items: center; font-size: .85rem; font-weight: 600; color: var(--pine);
+          background: color-mix(in srgb, var(--pine) 10%, transparent); padding: 6px 12px; border-radius: 999px; }
+.hero h1 { font-size: clamp(2.6rem, 6vw, 4.8rem); font-weight: 800; margin: 18px 0 16px; }
+.hero h1 small { display: block; font-size: .42em; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-top: 8px; }
+.hero p.lead { font-size: 1.15rem; color: var(--muted); max-width: 33rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-photo { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 4 / 5; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; }
+.hero-photo figcaption { position: absolute; left: 14px; bottom: 14px; background: rgba(20,26,24,.72); color: #fff; font-size: .82rem;
+    padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(6px); }
+
+/* Numbers */
+.numbers { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); margin-top: 48px; }
+.num { padding: 20px 18px 18px 0; }
+.num + .num { padding-left: 18px; border-left: 1px solid var(--line); }
+.num b { display: block; font-family: var(--font-display); font-size: clamp(2.2rem, 4.4vw, 3.4rem); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.num span { display: block; margin-top: 8px; font-size: .92rem; color: var(--muted); }
+
+/* Section heads */
+section.block { padding: 84px 0; }
+.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
+.block h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); max-width: 22ch; }
+.block .intro { color: var(--muted); max-width: 40rem; margin-top: 12px; }
+.head { margin-bottom: 40px; }
+
+/* Highlights: alternating photo rows */
+.rows { display: grid; gap: 56px; }
+.row { display: grid; grid-template-columns: 1.15fr 1fr; gap: 44px; align-items: center; }
+.row:nth-child(even) .row-img { order: 2; }
+.row-img { border-radius: var(--r); overflow: hidden; aspect-ratio: 3 / 2; }
+.row-img img { width: 100%; height: 100%; object-fit: cover; }
+.row-tag { font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--pine); margin-bottom: 8px; }
+.row h3 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin-bottom: 12px; }
+.row p { color: var(--muted); max-width: 32rem; }
+.row ul { list-style: none; margin-top: 16px; display: grid; gap: 8px; }
+.row li { display: flex; gap: 10px; align-items: baseline; }
+.row li::before { content: ""; width: 8px; height: 8px; flex: none; background: var(--brass); border-radius: 2px; transform: translateY(-1px); }
+
+/* Rooms */
+.rooms { background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.room-plan { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 32px; }
+.room { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--stone); }
+.room b { font-family: var(--font-display); font-size: 1.05rem; display: block; }
+.room span { font-size: .88rem; color: var(--muted); }
+.beds { display: flex; gap: 6px; margin: 12px 0 10px; }
+.bed { height: 26px; border-radius: 5px; border: 2px solid var(--graphite); position: relative; }
+.bed::before { content: ""; position: absolute; top: 3px; left: 3px; right: 3px; height: 6px; border-radius: 3px; background: var(--graphite); opacity: .35; }
+.bed.big { width: 44px; } .bed.small { width: 30px; }
+.room-photos { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-auto-rows: 200px; gap: 10px; }
+.room-photos img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; cursor: zoom-in; }
+.room-photos img:first-child { grid-row: span 2; }
+.note { font-size: .88rem; color: var(--muted); margin-top: 14px; }
+
+/* Gallery */
+.gallery { columns: 3 260px; column-gap: 10px; }
+.gallery button { display: block; width: 100%; margin: 0 0 10px; border: 0; padding: 0; background: none; cursor: zoom-in; border-radius: 10px; overflow: hidden; break-inside: avoid; }
+.gallery img { width: 100%; transition: transform .3s ease; }
+.gallery button:hover img { transform: scale(1.03); }
+
+/* Lightbox */
+.lb { position: fixed; inset: 0; z-index: 50; background: rgba(10,12,11,.92); display: none; align-items: center; justify-content: center; padding: 56px 16px; }
+.lb.open { display: flex; }
+.lb img { max-height: 100%; max-width: 100%; border-radius: 8px; object-fit: contain; }
+.lb button { position: absolute; background: rgba(255,255,255,.14); color: #fff; border: 0; width: 46px; height: 46px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; }
+.lb .x { top: 12px; right: 12px; } .lb .p { left: 12px; top: 50%; } .lb .n { right: 12px; top: 50%; }
+.lb-count { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; color: #ddd; font-size: .9rem; }
+
+/* Location */
+.loc { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.dist { list-style: none; border-top: 2px solid var(--ink); }
+.dist li { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.dist strong { font-family: var(--font-display); font-size: 1.12rem; }
+.dist em { font-style: normal; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--pine); white-space: nowrap; }
+.addr { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; }
+.addr b { display: block; font-family: var(--font-display); font-size: 1.3rem; margin: 6px 0 14px; }
+.addr .btn { width: 100%; }
+
+/* Booking */
+.book { background: var(--graphite); color: #eef1ef; }
+:root[data-theme="dark"] .book { background: #232a27; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .book { background: #232a27; } }
+.book .eyebrow { color: #e0b569; }
+.book h2 { color: #fff; }
+.book .intro { color: rgba(238,241,239,.78); }
+.book-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: start; }
+.book-lines { list-style: none; margin-top: 28px; display: grid; gap: 14px; }
+.book-lines small { display: block; font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(238,241,239,.6); font-weight: 700; }
+.book-lines a, .book-lines strong { font-family: var(--font-display); font-size: 1.4rem; color: #fff; text-decoration: none; }
+form.quick { background: var(--paper); color: var(--ink); border-radius: var(--r); padding: 26px; display: grid; gap: 14px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-size: .85rem; font-weight: 600; }
+.field input, .field textarea { width: 100%; min-width: 0; font: 500 1rem var(--font-body); color: var(--ink); background: var(--stone); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.field textarea { min-height: 76px; resize: vertical; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips label { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; font-size: .88rem; cursor: pointer; background: var(--stone); }
+.chips input { accent-color: var(--pine); }
+.chips label:has(input:checked) { border-color: var(--pine); background: color-mix(in srgb, var(--pine) 10%, var(--stone)); }
+form.quick .btn { width: 100%; padding: 17px; font-size: 1.05rem; }
+.fit { font-size: .9rem; padding: 10px 12px; border-radius: 10px; background: var(--stone); color: var(--muted); }
+.fit.warn { background: #fdf3e2; color: #7a4f06; }
+.msg { font-size: .85rem; color: var(--muted); text-align: center; }
+.done { display: none; border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: .95rem; }
+.done.show { display: block; }
+.done pre { white-space: pre-wrap; font: .9rem/1.5 var(--font-body); color: var(--muted); background: var(--stone); padding: 10px 12px; border-radius: 8px; margin: 8px 0 12px; }
+.done .btn { width: auto; padding: 12px 18px; font-size: .95rem; }
+
+/* FAQ */
+.faq { max-width: 800px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; padding: 20px 40px 20px 0; font-weight: 600; font-size: 1.05rem; position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 4px; top: 14px; font-size: 1.6rem; font-weight: 400; color: var(--brass); }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { padding-bottom: 20px; color: var(--muted); max-width: 65ch; }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0 110px; font-size: .9rem; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+footer b { color: var(--ink); }
+.float { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 30; display: none; box-shadow: 0 10px 28px rgba(0,0,0,.25); }
+
+@media (max-width: 960px) {
+    .hero-grid, .loc, .book-grid, .harmony-grid { grid-template-columns: 1fr; gap: 32px; }
+    .hero-photo { aspect-ratio: 4 / 3; order: -1; }
+    .numbers { grid-template-columns: repeat(3, 1fr); }
+    .num:nth-child(4) { padding-left: 0; border-left: 0; }
+    .num:nth-child(n+4) { border-top: 1px solid var(--line); }
+    .row { grid-template-columns: 1fr; gap: 20px; }
+    .row:nth-child(even) .row-img { order: 0; }
+    .room-plan { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+    body { font-size: 16px; }
+    .top nav, .brand small, .brand b { display: none; }
+    .top-left { gap: 10px; }
+    .vmenu { position: static; }
+    .vpanel { left: 12px; right: 12px; width: auto; top: calc(100% + 6px); }
+    .hero { padding-top: 20px; }
+    .cta .btn { flex: 1 1 100%; }
+    .numbers { grid-template-columns: 1fr 1fr; }
+    .num, .num + .num { padding: 16px 12px 14px 0; border-left: 0; }
+    .num:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--line); }
+    .num:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .num:last-child { grid-column: 1 / -1; padding-left: 0; border-left: 0; }
+    section.block { padding: 60px 0; }
+    .room-plan { grid-template-columns: 1fr 1fr; }
+    .room-photos { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
+    .room-photos img:first-child { grid-column: 1 / -1; grid-row: span 2; }
+    .two { grid-template-columns: 1fr; }
+    form.quick { padding: 20px; }
+    .float { display: flex; }
+}
+.numbers-4 { grid-template-columns: repeat(4, 1fr); }
+.room-plan-3 { grid-template-columns: repeat(3, minmax(0, 220px)); }
+.video-wrap { border-radius: var(--r); overflow: hidden; background: #000; aspect-ratio: 16 / 9; max-width: 960px; }
+.video-wrap video { width: 100%; height: 100%; display: block; }
+@media (max-width: 960px) { .numbers-4 { grid-template-columns: 1fr 1fr; } .numbers-4 .num:nth-child(3) { padding-left: 0; border-left: 0; } .numbers-4 .num:nth-child(n+3) { border-top: 1px solid var(--line); } .numbers-4 .num:nth-child(4) { padding-left: 18px; border-left: 1px solid var(--line); } }
+@media (max-width: 640px) { .numbers-4 .num:last-child { grid-column: auto; padding-left: 14px; border-left: 1px solid var(--line); } .room-plan-3 { grid-template-columns: 1fr 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+    <div class="wrap">
+        <div class="top-left">
+            <a class="brand" href="../../" aria-label="The Harmony – trang chủ">
+                <img src="img/logo.png" alt="">
+                <span><b>The Harmony</b><small>Villa & Homestay Đà Lạt</small></span>
+            </a>
+            <div class="vmenu">
+                <button class="vmenu-btn" id="vmenu-btn" type="button" aria-expanded="false" aria-controls="vpanel">
+                    Villa nguyên căn <span class="vmenu-count" id="vmenu-count">1</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="vpanel" id="vpanel">
+                    <div class="vpanel-head"><b>Villa nguyên căn</b><span id="vpanel-sub"></span></div>
+                    <ul class="vlist" id="vlist"></ul>
+                    <p class="vpanel-foot">Chưa thấy căn hợp? <a href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo để được gợi ý</a></p>
+                </div>
+            </div>
+        </div>
+        <nav aria-label="Điều hướng">
+            <a href="#phong">Phòng ngủ</a>
+            <a href="#anh">Ảnh</a>
+            <a href="#vi-tri">Vị trí</a>
+            <a href="#the-harmony">Về The Harmony</a>
+            <a class="btn btn-main" href="#dat-phong">Kiểm tra lịch trống</a>
+        </nav>
+    </div>
+</header>
+
+<main id="top">
+    <!-- HERO -->
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-grid">
+                <div>
+                    <p class="trail"><a href="../../">The Harmony</a> › <a href="../../#villa">Villa nguyên căn</a> › Đường 3 Tháng 4, Đà Lạt</p>
+                    <span class="kicker">The Harmony giới thiệu · 2 phòng ngủ · gia đình & nhóm nhỏ</span>
+                    <h1>The Min's House<small>Villa sân vườn giữa lòng Đà Lạt, cách chợ chỉ 1,5 km.</small></h1>
+                    <p class="lead">2 phòng ngủ, 2 WC, sân vườn có BBQ ngoài trời, karaoke và máy chiếu phim. Ô tô vào tận nơi, đậu ngay trước nhà. Giao nguyên căn, cả nhà ở riêng tư.</p>
+                    <div class="cta">
+                        <a class="btn btn-main" href="#dat-phong">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                            Chọn ngày, nhận báo giá
+                        </a>
+                        <a class="btn btn-line" href="#video">Xem video room tour</a>
+                    </div>
+                </div>
+                <figure class="hero-photo">
+                    <img src="img/mat-tien.jpg" alt="The Min's House: nhà trắng mái phẳng, sân lát đá có bàn ăn ngoài trời và hoa">
+                    <figcaption>Ảnh thật tại villa</figcaption>
+                </figure>
+            </div>
+
+            <div class="numbers numbers-4" aria-label="Thông số nhanh">
+                <div class="num"><b>2</b><span>phòng ngủ, cửa sổ nhìn ra sân vườn</span></div>
+                <div class="num"><b>2</b><span>WC</span></div>
+                <div class="num"><b>1,5</b><span>km tới chợ Đà Lạt</span></div>
+                <div class="num"><b>5'</b><span>tới chợ đêm và các điểm tham quan</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HIGHLIGHTS -->
+    <section class="block" style="padding-top: 40px;">
+        <div class="wrap">
+            <div class="head">
+                <p class="eyebrow">Vì sao chọn căn này</p>
+                <h2>Ở ngay trung tâm mà vẫn có sân vườn của riêng mình.</h2>
+            </div>
+            <div class="rows">
+                <div class="row">
+                    <div class="row-img"><img src="img/san-vuon-toi.jpg" alt="Sân vườn lên đèn buổi tối, bàn ăn ngoài trời và lối đi lát đá" loading="lazy"></div>
+                    <div>
+                        <p class="row-tag">01 · Sân vườn riêng</p>
+                        <h3>Bữa tối ngoài sân, BBQ dưới trời Đà Lạt</h3>
+                        <p>Sân lát đá rộng, bàn ăn ngoài trời, hoa trồng quanh lối đi. Tối se lạnh cả nhà nướng BBQ ngay trong sân. Phòng nào cũng có cửa sổ nhìn ra vườn.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row-img"><img src="img/may-chieu.jpg" alt="Phòng ngủ chiếu phim lên tường bằng máy chiếu" loading="lazy"></div>
+                    <div>
+                        <p class="row-tag">02 · Tối nay làm gì?</p>
+                        <h3>Karaoke và máy chiếu phim</h3>
+                        <p>Ở nhà vẫn vui: hát karaoke với nhóm bạn, hoặc tắt đèn chiếu một bộ phim lên tường. Phòng khách rộng có thêm TV.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row-img"><img src="img/dau-xe.jpg" alt="Ô tô đậu trong sân trước nhà, lối đi có hoa" loading="lazy"></div>
+                    <div>
+                        <p class="row-tag">03 · Gần phố, dễ đậu xe</p>
+                        <h3>Ô tô vào tận nơi, đậu ngay trước nhà</h3>
+                        <p>Cách chợ Đà Lạt 1,5 km, chạy 5 phút là tới chợ đêm. Đi chơi về không phải tìm chỗ gửi xe.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row-img"><img src="img/tien-ich.jpg" alt="Kệ gỗ có bàn ủi, máy sấy tóc, loa" loading="lazy"></div>
+                    <div>
+                        <p class="row-tag">04 · Ở vài ngày vẫn tiện</p>
+                        <h3>Đồ dùng như ở nhà</h3>
+                        <ul>
+                            <li>Máy giặt, máy sấy quần áo</li>
+                            <li>Máy sấy tóc, bàn ủi, máy nước nóng lạnh</li>
+                            <li>Bếp và bàn ăn đầy đủ dụng cụ</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIDEO -->
+    <section class="block video-block" id="video" style="padding-top: 0;">
+        <div class="wrap">
+            <div class="head">
+                <p class="eyebrow">Video thật</p>
+                <h2>Đi một vòng căn nhà trong hơn 1 phút</h2>
+            </div>
+            <div class="video-wrap">
+                <video controls preload="none" playsinline poster="img/room-tour-poster.jpg">
+                    <source src="img/room-tour.mp4" type="video/mp4">
+                    Trình duyệt của bạn không phát được video này.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROOMS -->
+    <section class="block rooms" id="phong">
+        <div class="wrap">
+            <div class="head">
+                <p class="eyebrow">Chỗ ngủ</p>
+                <h2>2 phòng ngủ, có thêm nệm phụ</h2>
+                <p class="intro">Mỗi phòng một giường, cửa sổ nhìn ra sân vườn. 2 WC. Đi đông hơn, báo trước số khách để được chuẩn bị nệm phụ.</p>
+            </div>
+            <div class="room-plan room-plan-3" aria-label="Cơ cấu phòng">
+                <div class="room"><b>Phòng ngủ 1</b><div class="beds"><i class="bed big"></i></div><span>1 giường · cửa sổ ra vườn</span></div>
+                <div class="room"><b>Phòng ngủ 2</b><div class="beds"><i class="bed big"></i></div><span>1 giường · cửa sổ ra vườn</span></div>
+                <div class="room"><b>Nệm phụ</b><div class="beds"><i class="bed small"></i></div><span>Chuẩn bị theo số khách</span></div>
+            </div>
+            <div class="room-photos">
+                <img src="img/phong-ngu-1.jpg" alt="Phòng ngủ giường gỗ, kệ treo cây xanh" loading="lazy">
+                <img src="img/phong-ngu-2.jpg" alt="Phòng ngủ cửa sổ lớn, tủ kệ gỗ" loading="lazy">
+                <img src="img/phong-ngu-3.jpg" alt="Phòng ngủ có giá treo đồ và gương" loading="lazy">
+                <img src="img/phong-ngu-4.jpg" alt="Phòng ngủ có chậu cây và cửa sổ" loading="lazy">
+                <img src="img/wc.jpg" alt="Phòng tắm có vòi sen, lavabo" loading="lazy">
+            </div>
+            <p class="note">Ảnh chụp từ nhiều góc của 2 phòng ngủ. Video chi tiết từng phòng được gửi khi bạn hỏi lịch.</p>
+        </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="block" id="anh">
+        <div class="wrap">
+            <div class="head">
+                <p class="eyebrow">Ảnh thật</p>
+                <h2>Đi một vòng quanh nhà</h2>
+                <p class="intro">Bấm vào ảnh để xem lớn.</p>
+            </div>
+            <div class="gallery" id="gallery">
+                <button type="button"><img src="img/toan-canh.jpg" alt="Toàn cảnh nhà và sân nhìn từ trên cao" loading="lazy"></button>
+                <button type="button"><img src="img/phong-khach.jpg" alt="Phòng khách sofa da nâu, cửa sổ lớn" loading="lazy"></button>
+                <button type="button"><img src="img/san-vuon.jpg" alt="Hiên nhà mở cửa kính ra sân" loading="lazy"></button>
+                <button type="button"><img src="img/phong-khach-tv.jpg" alt="Phòng khách dài có TV" loading="lazy"></button>
+                <button type="button"><img src="img/ban-an.jpg" alt="Bàn ăn gỗ cạnh cửa sổ" loading="lazy"></button>
+                <button type="button"><img src="img/bep.jpg" alt="Bếp gỗ có kệ chén bát" loading="lazy"></button>
+                <button type="button"><img src="img/san-truoc.jpg" alt="Sân trước có bàn ghế gỗ, hoa đỏ" loading="lazy"></button>
+                <button type="button"><img src="img/phong-ngu-cua-so.jpg" alt="Phòng ngủ cạnh cửa sổ" loading="lazy"></button>
+                <button type="button"><img src="img/cua-kinh.jpg" alt="Cửa kính xếp mở ra phòng khách" loading="lazy"></button>
+                <button type="button"><img src="img/goc-sofa.jpg" alt="Góc sofa và bàn trà" loading="lazy"></button>
+                <button type="button"><img src="img/loi-vao.jpg" alt="Lối vào nhà và chỗ đậu ô tô" loading="lazy"></button>
+                <button type="button"><img src="img/wc-2.jpg" alt="Phòng tắm thứ hai" loading="lazy"></button>
+                <button type="button"><img src="img/hien-nha.jpg" alt="Hiên nhà và bàn ngoài trời" loading="lazy"></button>
+                <button type="button"><img src="img/phong-ngu-7.jpg" alt="Giường gỗ, gối trắng" loading="lazy"></button>
+                <button type="button"><img src="img/san-vuon-2.jpg" alt="Sân lát đá nhìn ra phố" loading="lazy"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOCATION -->
+    <section class="block" id="vi-tri" style="padding-top: 0;">
+        <div class="wrap loc">
+            <div>
+                <p class="eyebrow">Vị trí</p>
+                <h2>Ngay trung tâm, đi đâu cũng gần</h2>
+                <p class="intro" style="margin-bottom: 28px;">Nằm trên đường 3 Tháng 4, ô tô vào tận nơi. Ra chợ, chợ đêm hay các điểm tham quan trong thành phố chỉ vài phút.</p>
+                <ul class="dist">
+                    <li><strong>Chợ Đà Lạt</strong><em>1,5 km</em></li>
+                    <li><strong>Chợ đêm Đà Lạt</strong><em>~5 phút</em></li>
+                    <li><strong>Các điểm tham quan trung tâm</strong><em>vài phút</em></li>
+                </ul>
+            </div>
+            <div class="addr">
+                <p class="eyebrow">Địa chỉ</p>
+                <b>Đường 3 Tháng 4, phường Xuân Hương – Đà Lạt</b>
+                <a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&query=%C4%90%C6%B0%E1%BB%9Dng+3+Th%C3%A1ng+4+%C4%90%C3%A0+L%E1%BA%A1t" target="_blank" rel="noopener">Mở Google Maps</a>
+                <p class="note">Số nhà, hướng dẫn đường đi và cách nhận phòng được gửi qua Zalo trước ngày đến.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE HARMONY -->
+    <section class="block harmony" id="the-harmony">
+        <div class="wrap harmony-grid">
+            <div>
+                <img class="harmony-logo" src="img/logo.png" alt="Logo The Harmony">
+                <p class="eyebrow">Đặt qua The Harmony</p>
+                <h2>Một đầu mối, lo cho bạn từ lúc đặt tới lúc về</h2>
+                <p class="intro">The Harmony bán và vận hành villa, homestay nguyên căn tại Đà Lạt. The Min's House là một trong các căn chúng tôi đã đến tận nơi xem trước khi giới thiệu.</p>
+                <a class="btn btn-line" href="https://zalo.me/0854604339" target="_blank" rel="noopener" id="other-villas">Nhờ gợi ý villa khác</a>
+            </div>
+            <ol class="promises">
+                <li><span>01</span><div><b>Ảnh thật, căn thật</b><p>Ảnh và video trên trang này được quay tại chính căn nhà.</p></div></li>
+                <li><span>02</span><div><b>Giá trực tiếp, báo trọn gói</b><p>Không cộng phí sàn đặt phòng. Báo một con số đã gồm mọi khoản cho đúng ngày bạn ở.</p></div></li>
+                <li><span>03</span><div><b>Có người hỗ trợ suốt kỳ nghỉ</b><p>Hướng dẫn đường, nhận phòng, đặt thêm BBQ, xe đón, xử lý sự cố: nhắn một số Zalo duy nhất.</p></div></li>
+                <li><span>04</span><div><b>Hết lịch vẫn có phương án</b><p>Nếu ngày bạn đi căn này đã kín, chúng tôi gợi ý căn khác cùng khu, cùng số phòng.</p></div></li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- BOOKING -->
+    <section class="block book" id="dat-phong">
+        <div class="wrap book-grid">
+            <div>
+                <p class="eyebrow">Đặt phòng</p>
+                <h2>Đặt The Min's House qua The Harmony</h2>
+                <p class="intro">Gửi ngày đi, The Harmony kiểm tra lịch và báo giá qua Zalo. Giá thay đổi theo ngày thường, cuối tuần và lễ Tết. Cọc 30–50% để giữ lịch, phần còn lại thanh toán khi nhận phòng.</p>
+                <ul class="book-lines">
+                    <li><small>Zalo / Hotline</small><a href="https://zalo.me/0854604339" target="_blank" rel="noopener">0854.604.339</a></li>
+                    <li><small>Nhận / trả phòng</small><strong>14:00 / 12:00</strong></li>
+                </ul>
+            </div>
+            <form class="quick" id="quick" novalidate>
+                <div class="two">
+                    <div class="field"><label for="f-in">Ngày nhận phòng</label><input type="date" id="f-in" required></div>
+                    <div class="field"><label for="f-out">Ngày trả phòng</label><input type="date" id="f-out" required></div>
+                </div>
+                <div class="two">
+                    <div class="field"><label for="f-guests">Số khách</label><input type="number" id="f-guests" min="1" max="20" inputmode="numeric" placeholder="Ví dụ: 4"></div>
+                    <div class="field"><label for="f-name">Tên bạn</label><input type="text" id="f-name" autocomplete="name" placeholder="Anh/chị..."></div>
+                </div>
+                <p class="fit" id="fit">2 phòng ngủ, có thêm nệm phụ khi cần.</p>
+                <div class="field">
+                    <label>Bạn muốn…</label>
+                    <div class="chips">
+                        <label><input type="checkbox" value="nướng BBQ"> Nướng BBQ</label>
+                        <label><input type="checkbox" value="hát karaoke"> Hát karaoke</label>
+                        <label><input type="checkbox" value="có trẻ nhỏ"> Có trẻ nhỏ</label>
+                        <label><input type="checkbox" value="đi ô tô"> Đi ô tô</label>
+                    </div>
+                </div>
+                <div class="field"><label for="f-note">Ghi chú</label><textarea id="f-note" placeholder="Giờ đến dự kiến, cần thêm nệm, dịp sinh nhật..."></textarea></div>
+                <button class="btn btn-main" type="submit">Gửi qua Zalo</button>
+                <p class="msg" id="msg">Chưa cần cọc. The Harmony kiểm tra lịch và báo giá trước.</p>
+                <div class="done" id="done" role="status">
+                    <b>Đã sao chép nội dung.</b> Mở Zalo và dán vào ô chat:
+                    <pre id="done-text"></pre>
+                    <a class="btn btn-main" href="https://zalo.me/0854604339" target="_blank" rel="noopener">Mở Zalo 0854.604.339</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="block">
+        <div class="wrap">
+            <div class="head"><p class="eyebrow">Hỏi nhanh</p><h2>Trước khi đặt</h2></div>
+            <div class="faq">
+                <details><summary>Đi hơn 4 người có ở được không?</summary><p>Căn có 2 phòng ngủ và nệm phụ. Bạn báo số khách khi hỏi lịch, The Harmony xác nhận có xếp đủ chỗ ngủ không, hoặc gợi ý căn rộng hơn.</p></details>
+                <details><summary>Ô tô đậu ở đâu?</summary><p>Ô tô vào tận nơi và đậu ngay trước nhà.</p></details>
+                <details><summary>Có được nấu ăn, nướng BBQ không?</summary><p>Có. Bếp và bàn ăn đầy đủ dụng cụ, sân BBQ ngoài trời ngay trong vườn.</p></details>
+                <details><summary>Chính sách cọc và huỷ?</summary><p>Cọc 30–50% để giữ lịch. Huỷ trước 14 ngày được bảo lưu cọc để đổi ngày trong 3 tháng. Huỷ trong vòng 14 ngày không hoàn cọc. Dịp lễ Tết có thể áp dụng chính sách riêng, ghi rõ khi xác nhận.</p></details>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <div><b>The Harmony</b> · Villa & Homestay nguyên căn Đà Lạt<br>Zalo / Hotline 0854.604.339 · booking@theharmony.vn</div>
+        <div>Trang này: <b>The Min's House</b><br>Đường 3 Tháng 4, phường Xuân Hương – Đà Lạt</div>
+    </div>
+</footer>
+
+
+<a class="btn btn-main float" href="#dat-phong">Kiểm tra lịch trống</a>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Xem ảnh">
+    <button class="x" type="button" aria-label="Đóng">×</button>
+    <button class="p" type="button" aria-label="Ảnh trước">‹</button>
+    <img id="lb-img" alt="">
+    <button class="n" type="button" aria-label="Ảnh sau">›</button>
+    <div class="lb-count" id="lb-count"></div>
+</div>
+
+<script>
+// Danh sách villa của The Harmony. Thêm villa mới: thêm một dòng vào đây (giống nhau trên mọi trang villa).
+var HARMONY_VILLAS = [
+    { id: "deli-an-son", name: "Deli Villa An Sơn", area: "An Sơn, gần Hồ Xuân Hương", bedrooms: 5, guests: "10–16", img: "img/menu-deli-an-son.jpg", url: "../deli-an-son/" },
+    { id: "the-mins-house", name: "The Min's House", area: "Đường 3 Tháng 4, gần chợ Đà Lạt", bedrooms: 2, guests: "4–6", img: "img/menu-the-mins-house.jpg", url: "../the-mins-house/" },
+    { id: "pham-hong-thai", name: "Villa Phạm Hồng Thái", area: "Gần Ga Đà Lạt, 500 m tới Hồ Xuân Hương", bedrooms: 5, guests: "12–16", img: "img/menu-villa-pham-hong-thai.jpg", url: "../pham-hong-thai/" }
+];
+var CURRENT_VILLA = "the-mins-house";
+
+(function () {
+    // Mini menu Villa nguyên căn
+    var vbtn = document.getElementById("vmenu-btn"), vpanel = document.getElementById("vpanel"), vlist = document.getElementById("vlist");
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    vlist.innerHTML = HARMONY_VILLAS.map(function (v) {
+        var here = v.id === CURRENT_VILLA;
+        return '<li><a class="vitem" href="' + esc(v.url) + '"' + (here ? ' aria-current="page"' : '') + '>' +
+            '<img src="' + esc(v.img) + '" alt="">' +
+            '<span><b>' + esc(v.name) + '</b><small>' + esc(v.area) + '</small><small>' + v.bedrooms + ' phòng ngủ · ' + esc(v.guests) + ' khách</small>' +
+            (here ? '<span class="here">Đang xem</span>' : '') + '</span></a></li>';
+    }).join("");
+    document.getElementById("vmenu-count").textContent = HARMONY_VILLAS.length;
+    document.getElementById("vpanel-sub").textContent = HARMONY_VILLAS.length + " căn";
+    function setMenu(open) { vpanel.classList.toggle("open", open); vbtn.setAttribute("aria-expanded", open ? "true" : "false"); }
+    vbtn.addEventListener("click", function (e) { e.stopPropagation(); setMenu(!vpanel.classList.contains("open")); });
+    vpanel.addEventListener("click", function (e) { if (e.target.closest(".vitem")) setMenu(false); e.stopPropagation(); });
+    document.addEventListener("click", function () { setMenu(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && vpanel.classList.contains("open")) { setMenu(false); vbtn.focus(); } });
+
+    // Lightbox cho ảnh gallery + ảnh phòng
+    var imgs = Array.prototype.slice.call(document.querySelectorAll("#gallery img, .room-photos img"));
+    var lb = document.getElementById("lb"), lbImg = document.getElementById("lb-img"), lbCount = document.getElementById("lb-count"), cur = 0;
+    function show(i) { cur = (i + imgs.length) % imgs.length; lbImg.src = imgs[cur].src; lbImg.alt = imgs[cur].alt; lbCount.textContent = (cur + 1) + " / " + imgs.length + " · " + imgs[cur].alt; }
+    function open(i) { show(i); lb.classList.add("open"); document.body.style.overflow = "hidden"; lb.querySelector(".x").focus(); }
+    function close() { lb.classList.remove("open"); document.body.style.overflow = ""; }
+    imgs.forEach(function (im, i) { (im.closest("button") || im).addEventListener("click", function () { open(i); }); });
+    lb.querySelector(".x").addEventListener("click", close);
+    lb.querySelector(".p").addEventListener("click", function () { show(cur - 1); });
+    lb.querySelector(".n").addEventListener("click", function () { show(cur + 1); });
+    lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+    document.addEventListener("keydown", function (e) {
+        if (!lb.classList.contains("open")) return;
+        if (e.key === "Escape") close(); if (e.key === "ArrowLeft") show(cur - 1); if (e.key === "ArrowRight") show(cur + 1);
+    });
+
+    document.getElementById("other-villas").addEventListener("click", function () {
+        copy("Chào The Harmony, mình đã xem The Min's House, nhờ gợi ý thêm villa khác. Ngày đi: ..., số khách: ...");
+    });
+
+    // Ngày
+    function key(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+    function plus(k, n) { var p = k.split("-"); return key(new Date(+p[0], +p[1] - 1, +p[2] + n)); }
+    function vn(k) { var p = k.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+    var fin = document.getElementById("f-in"), fout = document.getElementById("f-out"), today = key(new Date());
+    fin.min = today; fout.min = plus(today, 1);
+    fin.addEventListener("change", function () {
+        if (!fin.value) return;
+        fout.min = plus(fin.value, 1);
+        if (!fout.value || fout.value <= fin.value) fout.value = plus(fin.value, 1);
+    });
+
+    // Gợi ý số khách
+    var g = document.getElementById("f-guests"), fit = document.getElementById("fit");
+    g.addEventListener("input", function () {
+        var n = parseInt(g.value, 10);
+        fit.classList.remove("warn");
+        if (!n) fit.textContent = "2 phòng ngủ, có thêm nệm phụ khi cần.";
+        else if (n <= 4) fit.textContent = n + " khách: vừa 2 phòng ngủ.";
+        else if (n <= 6) fit.textContent = n + " khách: cần thêm nệm phụ, chúng tôi sẽ chuẩn bị sẵn.";
+        else { fit.textContent = n + " khách: đông hơn sức chứa của căn. Chúng tôi sẽ gợi ý căn rộng hơn."; fit.classList.add("warn"); }
+    });
+
+    function copy(t) {
+        try { if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(function () { return true; }, function () { return false; }); } catch (e) {}
+        return Promise.resolve(false);
+    }
+
+    document.getElementById("quick").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var msg = document.getElementById("msg");
+        if (!fin.value || !fout.value) { msg.textContent = "Bạn chọn giúp ngày nhận và ngày trả phòng nhé."; (fin.value ? fout : fin).focus(); return; }
+        var nights = Math.round((new Date(fout.value) - new Date(fin.value)) / 864e5);
+        var lines = ["Chào The Harmony, mình muốn hỏi lịch The Min's House:", "- Ngày: " + vn(fin.value) + " → " + vn(fout.value) + " (" + nights + " đêm)"];
+        if (g.value) lines.push("- Số khách: " + g.value);
+        var tags = Array.prototype.map.call(document.querySelectorAll(".chips input:checked"), function (c) { return c.value; });
+        if (tags.length) lines.push("- Đoàn có: " + tags.join(", "));
+        var note = document.getElementById("f-note").value.trim(); if (note) lines.push("- Ghi chú: " + note);
+        var name = document.getElementById("f-name").value.trim(); if (name) lines.push("Tên: " + name);
+        var text = lines.join("\n");
+        document.getElementById("done-text").textContent = text;
+        copy(text).then(function (ok) {
+            var done = document.getElementById("done");
+            done.querySelector("b").textContent = ok ? "Đã sao chép nội dung." : "Bạn sao chép nội dung dưới đây:";
+            done.classList.add("show"); msg.textContent = "";
+            done.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+    });
+})();
+</script>
+</body>
+</html>
