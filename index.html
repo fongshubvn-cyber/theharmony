@@ -284,6 +284,34 @@ footer b { color: var(--ink); }
 .card-cta { margin-top: auto; padding-top: 12px; font-weight: 700; color: var(--pine); }
 @media (max-width: 960px) { .cards { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .hub-hero .wrap { padding: 64px 20px 56px; } }
+
+/* Tìm kiếm villa */
+.hsearch { margin: 6px 0 22px; max-width: 640px; background: var(--paper); color: var(--ink); border-radius: 16px; padding: 14px; box-shadow: 0 18px 40px rgba(0,0,0,.25); }
+.hsearch label { display: block; font: 700 .95rem var(--font-display); padding: 2px 6px 10px; }
+.hsearch-row { display: flex; gap: 8px; }
+.hsearch input { flex: 1; min-width: 0; font: 400 1rem var(--font-body); color: var(--ink); background: var(--stone); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
+.hsearch input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+.hsearch button[type=submit] { font: 700 .98rem var(--font-body); background: var(--brass); color: var(--brass-ink); border: 0; border-radius: 10px; padding: 0 20px; cursor: pointer; }
+.qchips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 2px 2px; }
+.qchips button { font: 600 .84rem var(--font-body); color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.qchips button:hover { border-color: var(--graphite); background: var(--stone); }
+.search-status { min-height: 1.4em; margin: -8px 0 18px; color: var(--muted); }
+.search-status:empty { display: none; }
+.search-status b { color: var(--ink); }
+.search-status button { font: 600 .9rem var(--font-body); color: var(--pine); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+.card[hidden] { display: none; }
+.card-why { background: color-mix(in srgb, var(--pine) 9%, transparent); border-radius: 10px; padding: 10px 12px; display: grid; gap: 3px; font-size: .9rem; }
+.card-why b { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--pine); }
+.card-why span::before { content: "✓ "; color: var(--pine); font-weight: 700; }
+.cards-empty { border: 1px dashed var(--line); border-radius: var(--r); padding: 28px; text-align: center; color: var(--muted); }
+.cards-empty a { color: var(--pine); font-weight: 700; }
+.vsearch { padding: 0 4px 8px; }
+.vsearch input { width: 100%; font: 400 .95rem var(--font-body); color: var(--ink); background: var(--stone); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.vsearch input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+.vitem small.vwhy { color: var(--pine); font-weight: 600; }
+.vempty { padding: 14px 8px; color: var(--muted); font-size: .9rem; }
+.vempty a { color: var(--pine); font-weight: 700; }
+@media (max-width: 640px) { .hub-hero p { font-size: 1rem; margin: 12px 0 18px; } .hub-cta .btn-main { display: none; } .hsearch-row { flex-direction: column; } .hsearch button[type=submit] { padding: 12px; } }
 </style>
 </head>
 <body>
@@ -302,6 +330,7 @@ footer b { color: var(--ink); }
                 </button>
                 <div class="vpanel" id="vpanel">
                     <div class="vpanel-head"><b>Villa nguyên căn</b><span id="vpanel-sub"></span></div>
+                    <div class="vsearch"><input id="vsearch" type="search" placeholder="Tìm: 12 người, karaoke, bida…" aria-label="Tìm villa theo số người hoặc tiện ích" autocomplete="off"></div>
                     <ul class="vlist" id="vlist"></ul>
                     <p class="vpanel-foot">Chưa thấy căn hợp? <a href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo để được gợi ý</a></p>
                 </div>
@@ -321,7 +350,24 @@ footer b { color: var(--ink); }
         <div class="wrap">
             <h1>Villa nguyên căn ở Đà Lạt, chọn theo số người đi.</h1>
             <p>Từ căn 2 phòng ngủ cho gia đình nhỏ tới villa 5 phòng cho đoàn 16 khách. Ảnh thật, giá trực tiếp, một số Zalo lo từ lúc đặt tới lúc về.</p>
-            <div class="cta">
+            <form class="hsearch" id="hub-search" role="search">
+                <label for="hub-q">Đi mấy người, cần gì? Gõ vào là ra căn hợp.</label>
+                <div class="hsearch-row">
+                    <input id="hub-q" type="search" placeholder="VD: 12 người, karaoke, bida, BBQ…" autocomplete="off">
+                    <button type="submit">Tìm căn</button>
+                </div>
+                <div class="qchips" aria-label="Gợi ý tìm nhanh">
+                    <button type="button" data-q="4 người" data-replace>4 người</button>
+                    <button type="button" data-q="12 người" data-replace>12 người</button>
+                    <button type="button" data-q="16 người" data-replace>16 người</button>
+                    <button type="button" data-q="karaoke">Karaoke</button>
+                    <button type="button" data-q="bida">Bida</button>
+                    <button type="button" data-q="BBQ">BBQ</button>
+                    <button type="button" data-q="người lớn tuổi">Có ông bà đi cùng</button>
+                    <button type="button" data-q="xe 16 chỗ">Đậu xe 16 chỗ</button>
+                </div>
+            </form>
+            <div class="cta hub-cta">
                 <a class="btn btn-main" href="#villa">Xem các căn</a>
                 <a class="btn btn-line" href="https://zalo.me/0854604339" target="_blank" rel="noopener">Zalo 0854.604.339</a>
             </div>
@@ -335,8 +381,9 @@ footer b { color: var(--ink); }
                 <h2>Các căn đang nhận khách</h2>
                 <p class="intro">Bấm vào từng căn để xem ảnh, phòng ngủ, vị trí và gửi ngày đi để nhận báo giá.</p>
             </div>
-            <div class="cards">
-                <a class="card" href="villa/the-mins-house/">
+            <p class="search-status" id="search-status" aria-live="polite"></p>
+            <div class="cards" id="cards">
+                <a class="card" data-villa="the-mins-house" href="villa/the-mins-house/">
                     <img src="img/card-the-mins-house.jpg" alt="The Min's House" loading="lazy">
                     <div class="card-body">
                         <span class="card-area">Đường 3 Tháng 4 · 1,5 km tới chợ Đà Lạt</span>
@@ -346,7 +393,7 @@ footer b { color: var(--ink); }
                         <span class="card-cta">Xem căn →</span>
                     </div>
                 </a>
-                <a class="card" href="villa/deli-an-son/">
+                <a class="card" data-villa="deli-an-son" href="villa/deli-an-son/">
                     <img src="img/card-deli-an-son.jpg" alt="Deli Villa An Sơn" loading="lazy">
                     <div class="card-body">
                         <span class="card-area">KQH An Sơn · 7 phút tới chợ đêm</span>
@@ -356,7 +403,7 @@ footer b { color: var(--ink); }
                         <span class="card-cta">Xem căn →</span>
                     </div>
                 </a>
-                <a class="card" href="villa/pham-hong-thai/">
+                <a class="card" data-villa="pham-hong-thai" href="villa/pham-hong-thai/">
                     <img src="img/card-pham-hong-thai.jpg" alt="Villa Phạm Hồng Thái" loading="lazy">
                     <div class="card-body">
                         <span class="card-area">Gần Ga Đà Lạt · 500 m tới Hồ Xuân Hương</span>
@@ -367,6 +414,7 @@ footer b { color: var(--ink); }
                     </div>
                 </a>
             </div>
+            <div class="cards-empty" id="cards-empty" hidden>Chưa có căn nào khớp đủ yêu cầu này. <a href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo, The Harmony tìm căn phù hợp giúp anh chị</a>.</div>
         </div>
     </section>
 
@@ -398,34 +446,10 @@ footer b { color: var(--ink); }
 
 <a class="btn btn-main float" href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo hỏi căn trống</a>
 
+<script src="villas.js"></script>
 <script>
-var HARMONY_VILLAS = [
-    { id: "deli-an-son", name: "Deli Villa An Sơn", area: "An Sơn, gần Hồ Xuân Hương", bedrooms: 5, guests: "10–16", img: "img/menu-deli-an-son.jpg", url: "villa/deli-an-son/" },
-    { id: "the-mins-house", name: "The Min's House", area: "Đường 3 Tháng 4, gần chợ Đà Lạt", bedrooms: 2, guests: "4–6", img: "img/menu-the-mins-house.jpg", url: "villa/the-mins-house/" },
-    { id: "pham-hong-thai", name: "Villa Phạm Hồng Thái", area: "Gần Ga Đà Lạt, 500 m tới Hồ Xuân Hương", bedrooms: 5, guests: "12–16", img: "img/menu-villa-pham-hong-thai.jpg", url: "villa/pham-hong-thai/" }
-];
-var CURRENT_VILLA = "";
-
-(function () {
-    // Mini menu Villa nguyên căn
-    var vbtn = document.getElementById("vmenu-btn"), vpanel = document.getElementById("vpanel"), vlist = document.getElementById("vlist");
-    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-    vlist.innerHTML = HARMONY_VILLAS.map(function (v) {
-        var here = v.id === CURRENT_VILLA;
-        return '<li><a class="vitem" href="' + esc(v.url) + '"' + (here ? ' aria-current="page"' : '') + '>' +
-            '<img src="' + esc(v.img) + '" alt="">' +
-            '<span><b>' + esc(v.name) + '</b><small>' + esc(v.area) + '</small><small>' + v.bedrooms + ' phòng ngủ · ' + esc(v.guests) + ' khách</small>' +
-            (here ? '<span class="here">Đang xem</span>' : '') + '</span></a></li>';
-    }).join("");
-    document.getElementById("vmenu-count").textContent = HARMONY_VILLAS.length;
-    document.getElementById("vpanel-sub").textContent = HARMONY_VILLAS.length + " căn";
-    function setMenu(open) { vpanel.classList.toggle("open", open); vbtn.setAttribute("aria-expanded", open ? "true" : "false"); }
-    vbtn.addEventListener("click", function (e) { e.stopPropagation(); setMenu(!vpanel.classList.contains("open")); });
-    vpanel.addEventListener("click", function (e) { if (e.target.closest(".vitem")) setMenu(false); e.stopPropagation(); });
-    document.addEventListener("click", function () { setMenu(false); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && vpanel.classList.contains("open")) { setMenu(false); vbtn.focus(); } });
-
-})();
+Harmony.initMenu({ base: "", current: "" });
+Harmony.initHub();
 </script>
 </body>
 </html>

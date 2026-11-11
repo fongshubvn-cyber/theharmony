@@ -263,6 +263,34 @@ footer b { color: var(--ink); }
     form.quick { padding: 20px; }
     .float { display: flex; }
 }
+
+/* Tìm kiếm villa */
+.hsearch { margin-top: 30px; max-width: 640px; background: var(--paper); color: var(--ink); border-radius: 16px; padding: 14px; box-shadow: 0 18px 40px rgba(0,0,0,.25); }
+.hsearch label { display: block; font: 700 .95rem var(--font-display); padding: 2px 6px 10px; }
+.hsearch-row { display: flex; gap: 8px; }
+.hsearch input { flex: 1; min-width: 0; font: 400 1rem var(--font-body); color: var(--ink); background: var(--stone); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
+.hsearch input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+.hsearch button[type=submit] { font: 700 .98rem var(--font-body); background: var(--brass); color: var(--brass-ink); border: 0; border-radius: 10px; padding: 0 20px; cursor: pointer; }
+.qchips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 2px 2px; }
+.qchips button { font: 600 .84rem var(--font-body); color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.qchips button:hover { border-color: var(--graphite); background: var(--stone); }
+.search-status { min-height: 1.4em; margin: -8px 0 18px; color: var(--muted); }
+.search-status:empty { display: none; }
+.search-status b { color: var(--ink); }
+.search-status button { font: 600 .9rem var(--font-body); color: var(--pine); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+.card[hidden] { display: none; }
+.card-why { background: color-mix(in srgb, var(--pine) 9%, transparent); border-radius: 10px; padding: 10px 12px; display: grid; gap: 3px; font-size: .9rem; }
+.card-why b { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--pine); }
+.card-why span::before { content: "✓ "; color: var(--pine); font-weight: 700; }
+.cards-empty { border: 1px dashed var(--line); border-radius: var(--r); padding: 28px; text-align: center; color: var(--muted); }
+.cards-empty a { color: var(--pine); font-weight: 700; }
+.vsearch { padding: 0 4px 8px; }
+.vsearch input { width: 100%; font: 400 .95rem var(--font-body); color: var(--ink); background: var(--stone); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.vsearch input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+.vitem small.vwhy { color: var(--pine); font-weight: 600; }
+.vempty { padding: 14px 8px; color: var(--muted); font-size: .9rem; }
+.vempty a { color: var(--pine); font-weight: 700; }
+@media (max-width: 640px) { .hsearch-row { flex-direction: column; } .hsearch button[type=submit] { padding: 12px; } }
 </style>
 </head>
 <body>
@@ -281,6 +309,7 @@ footer b { color: var(--ink); }
                 </button>
                 <div class="vpanel" id="vpanel">
                     <div class="vpanel-head"><b>Villa nguyên căn</b><span id="vpanel-sub"></span></div>
+                    <div class="vsearch"><input id="vsearch" type="search" placeholder="Tìm: 12 người, karaoke, bida…" aria-label="Tìm villa theo số người hoặc tiện ích" autocomplete="off"></div>
                     <ul class="vlist" id="vlist"></ul>
                     <p class="vpanel-foot">Chưa thấy căn hợp? <a href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo để được gợi ý</a></p>
                 </div>
@@ -546,33 +575,12 @@ footer b { color: var(--ink); }
     <div class="lb-count" id="lb-count"></div>
 </div>
 
+<script src="../../villas.js"></script>
 <script>
-// Danh sách villa của The Harmony. Thêm villa mới: thêm một dòng vào đây (giống nhau trên mọi trang villa).
-var HARMONY_VILLAS = [
-    { id: "deli-an-son", name: "Deli Villa An Sơn", area: "An Sơn, gần Hồ Xuân Hương", bedrooms: 5, guests: "10–16", img: "img/menu-deli-an-son.jpg", url: "../deli-an-son/" },
-    { id: "the-mins-house", name: "The Min's House", area: "Đường 3 Tháng 4, gần chợ Đà Lạt", bedrooms: 2, guests: "4–6", img: "img/menu-the-mins-house.jpg", url: "../the-mins-house/" },
-    { id: "pham-hong-thai", name: "Villa Phạm Hồng Thái", area: "Gần Ga Đà Lạt, 500 m tới Hồ Xuân Hương", bedrooms: 5, guests: "12–16", img: "img/menu-villa-pham-hong-thai.jpg", url: "../pham-hong-thai/" }
-];
-var CURRENT_VILLA = "deli-an-son";
 
 (function () {
-    // Mini menu Villa nguyên căn
-    var vbtn = document.getElementById("vmenu-btn"), vpanel = document.getElementById("vpanel"), vlist = document.getElementById("vlist");
     function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-    vlist.innerHTML = HARMONY_VILLAS.map(function (v) {
-        var here = v.id === CURRENT_VILLA;
-        return '<li><a class="vitem" href="' + esc(v.url) + '"' + (here ? ' aria-current="page"' : '') + '>' +
-            '<img src="' + esc(v.img) + '" alt="">' +
-            '<span><b>' + esc(v.name) + '</b><small>' + esc(v.area) + '</small><small>' + v.bedrooms + ' phòng ngủ · ' + esc(v.guests) + ' khách</small>' +
-            (here ? '<span class="here">Đang xem</span>' : '') + '</span></a></li>';
-    }).join("");
-    document.getElementById("vmenu-count").textContent = HARMONY_VILLAS.length;
-    document.getElementById("vpanel-sub").textContent = HARMONY_VILLAS.length + " căn";
-    function setMenu(open) { vpanel.classList.toggle("open", open); vbtn.setAttribute("aria-expanded", open ? "true" : "false"); }
-    vbtn.addEventListener("click", function (e) { e.stopPropagation(); setMenu(!vpanel.classList.contains("open")); });
-    vpanel.addEventListener("click", function (e) { if (e.target.closest(".vitem")) setMenu(false); e.stopPropagation(); });
-    document.addEventListener("click", function () { setMenu(false); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && vpanel.classList.contains("open")) { setMenu(false); vbtn.focus(); } });
+    Harmony.initMenu({ base: "../../", current: "deli-an-son" });
 
     // Lightbox cho ảnh gallery + ảnh phòng
     var imgs = Array.prototype.slice.call(document.querySelectorAll("#gallery img, .room-photos img"));
