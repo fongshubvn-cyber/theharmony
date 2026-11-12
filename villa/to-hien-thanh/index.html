@@ -298,6 +298,27 @@ footer b { color: var(--ink); }
 .vempty a { color: var(--pine); font-weight: 700; }
 @media (max-width: 640px) { .hsearch-row { flex-direction: column; } .hsearch button[type=submit] { padding: 12px; } }
 footer a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Form đặt phòng dạng sticky bên phải (máy tính) */
+.quick-head { display: none; }
+@media (min-width: 1180px) {
+    body.dock main > section:not(.hero) > .wrap, body.dock footer .wrap { padding-right: 410px; }
+    body.dock .book-grid { grid-template-columns: 1fr; }
+    body.dock form.quick {
+        position: fixed; z-index: 15; top: 84px; width: 370px;
+        right: max(20px, calc((100vw - 1160px) / 2 + 20px));
+        max-height: calc(100vh - 100px); overflow-y: auto; overscroll-behavior: contain;
+        padding: 20px; gap: 11px; border: 1px solid var(--line); box-shadow: 0 18px 44px rgba(20,26,24,.18);
+        transition: opacity .25s ease, transform .25s ease, visibility .25s;
+    }
+    body.dock:not(.dock-on) form.quick { opacity: 0; visibility: hidden; transform: translateY(12px); }
+    body.dock form.quick .quick-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .quick-head b { font: 700 1.15rem var(--font-display); }
+    .quick-head span { font-size: .8rem; color: var(--muted); }
+    body.dock form.quick .field textarea { min-height: 54px; }
+    body.dock form.quick .btn { padding: 14px; }
+    body.dock form.quick.flash { box-shadow: 0 0 0 3px var(--brass), 0 18px 44px rgba(20,26,24,.18); }
+}
 </style>
 </head>
 <body>
@@ -513,6 +534,7 @@ footer a { color: inherit; font-weight: 600; text-decoration: underline; text-un
                 </ul>
             </div>
             <form class="quick" id="quick" novalidate>
+                <p class="quick-head"><b>Hỏi lịch &amp; báo giá</b><span>Trả lời qua Zalo</span></p>
                 <div class="two">
                     <div class="field"><label for="f-in">Ngày nhận phòng</label><input type="date" id="f-in" required></div>
                     <div class="field"><label for="f-out">Ngày trả phòng</label><input type="date" id="f-out" required></div>
@@ -650,6 +672,36 @@ footer a { color: inherit; font-weight: 600; text-decoration: underline; text-un
             done.scrollIntoView({ behavior: "smooth", block: "nearest" });
         });
     });
+
+    // Form đặt phòng nổi bên phải khi đã cuộn qua phần đầu trang (màn hình rộng)
+    (function () {
+        var form = document.getElementById("quick"), hero = document.querySelector(".hero");
+        if (!form || !hero) return;
+        var wide = window.matchMedia("(min-width: 1180px)");
+        function setDock() { document.body.classList.toggle("dock", wide.matches); }
+        setDock();
+        if (wide.addEventListener) wide.addEventListener("change", setDock); else wide.addListener(setDock);
+        if ("IntersectionObserver" in window) {
+            new IntersectionObserver(function (es) {
+                document.body.classList.toggle("dock-on", !es[0].isIntersecting);
+            }, { rootMargin: "-80px 0px 0px 0px", threshold: 0 }).observe(hero);
+        } else { document.body.classList.add("dock-on"); }
+        Array.prototype.forEach.call(document.querySelectorAll('a[href="#dat-phong"]'), function (a) {
+            a.addEventListener("click", function (e) {
+                if (!wide.matches) return;
+                e.preventDefault();
+                var wait = 0;
+                if (!document.body.classList.contains("dock-on")) {
+                    window.scrollTo({ top: hero.offsetTop + hero.offsetHeight - 60, behavior: "smooth" });
+                    wait = 700;
+                }
+                setTimeout(function () {
+                    form.classList.add("flash"); setTimeout(function () { form.classList.remove("flash"); }, 1200);
+                    document.getElementById("f-in").focus({ preventScroll: true });
+                }, wait + 250);
+            });
+        });
+    })();
 })();
 </script>
 </body>
