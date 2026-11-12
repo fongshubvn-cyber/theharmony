@@ -270,7 +270,7 @@ footer b { color: var(--ink); }
 .hub-hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 800; max-width: 14ch; }
 .hub-hero p { font-size: 1.15rem; max-width: 34rem; margin: 18px 0 28px; color: rgba(255,255,255,.88); }
 .hub-hero .btn-line { border-color: #fff; color: #fff; }
-.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: var(--ink); transition: transform .2s ease, box-shadow .2s ease; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,26,24,.12); }
 .card img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
@@ -282,7 +282,7 @@ footer b { color: var(--ink); }
 .card ul { list-style: none; display: grid; gap: 4px; font-size: .93rem; color: var(--muted); }
 .card li::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; background: var(--brass); margin-right: 8px; transform: translateY(-2px); }
 .card-cta { margin-top: auto; padding-top: 12px; font-weight: 700; color: var(--pine); }
-@media (max-width: 1100px) { .cards { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 960px) { .cards { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .hub-hero .wrap { padding: 64px 20px 56px; } }
 
 /* Tìm kiếm villa */
@@ -313,6 +313,9 @@ footer b { color: var(--ink); }
 .vempty a { color: var(--pine); font-weight: 700; }
 @media (max-width: 640px) { .hub-hero p { font-size: 1rem; margin: 12px 0 18px; } .hub-cta .btn-main { display: none; } .hsearch-row { flex-direction: column; } .hsearch button[type=submit] { padding: 12px; } }
 footer a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.more-wrap { display: flex; justify-content: center; margin-top: 28px; }
+.more-wrap .btn[hidden] { display: none; }
+.more-wrap .btn { min-width: 260px; cursor: pointer; font: 700 1rem var(--font-body); }
 </style>
 </head>
 <body>
@@ -426,6 +429,7 @@ footer a { color: inherit; font-weight: 600; text-decoration: underline; text-un
                     </div>
                 </a>
             </div>
+            <div class="more-wrap"><button type="button" class="btn btn-line" id="cards-more" hidden>Xem thêm căn</button></div>
             <div class="cards-empty" id="cards-empty" hidden>Chưa có căn nào khớp đủ yêu cầu này. <a href="https://zalo.me/0854604339" target="_blank" rel="noopener">Nhắn Zalo, The Harmony tìm căn phù hợp giúp anh chị</a>.</div>
         </div>
     </section>

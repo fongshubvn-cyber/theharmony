@@ -222,7 +222,24 @@
         var grid = document.getElementById("cards"), status = document.getElementById("search-status");
         if (!form || !input || !grid) return;
         var cards = {};
-        Array.prototype.forEach.call(grid.querySelectorAll(".card[data-villa]"), function (c) { cards[c.getAttribute("data-villa")] = c; });
+        var order = [];
+        Array.prototype.forEach.call(grid.querySelectorAll(".card[data-villa]"), function (c) { cards[c.getAttribute("data-villa")] = c; order.push(c.getAttribute("data-villa")); });
+
+        // Nút "Xem thêm căn": hiện trước PER căn, bấm để mở thêm
+        var PER = 3, showing = PER, more = document.getElementById("cards-more");
+        function page() {
+            order.forEach(function (id, i) { cards[id].hidden = i >= showing; });
+            if (!more) return;
+            var left = order.length - showing;
+            more.hidden = left <= 0;
+            if (left > 0) more.textContent = left <= PER ? "Xem thêm " + left + " căn" : "Xem thêm căn (còn " + left + " căn)";
+        }
+        if (more) more.addEventListener("click", function () {
+            var first = order[showing];
+            showing += PER; page();
+            if (first && cards[first]) cards[first].focus();
+        });
+        page();
 
         function apply(q, scroll) {
             Object.keys(cards).forEach(function (id) {
@@ -230,7 +247,8 @@
                 var w = c.querySelector(".card-why"); if (w) w.remove();
             });
             var empty = document.getElementById("cards-empty"); if (empty) empty.hidden = true;
-            if (!q) { status.textContent = ""; Object.keys(cards).forEach(function (id) { grid.appendChild(cards[id]); }); return; }
+            if (!q) { status.textContent = ""; order.forEach(function (id) { grid.appendChild(cards[id]); }); page(); return; }
+            if (more) more.hidden = true;
 
             var r = search(q), shown = {};
             r.results.forEach(function (x) {
