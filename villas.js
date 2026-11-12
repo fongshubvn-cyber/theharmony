@@ -74,6 +74,23 @@
                 "sang-trong": "Nhà mới xây, nội thất hiện đại",
                 "gia-dinh-nho": "3 phòng ngủ cho nhóm 8–10 người"
             }
+        },
+        {
+            id: "to-hien-thanh", name: "Home Tô Hiến Thành",
+            area: "Trung tâm, ~2 km tới chợ đêm", bedrooms: 2, min: 6, max: 8,
+            img: "img/menu-to-hien-thanh.jpg", card: "img/card-to-hien-thanh.jpg",
+            features: {
+                "bbq": "Bếp nướng BBQ ngoài sân",
+                "san-vuon": "Sân có mái che, bàn ăn ngoài trời",
+                "view": "Sân nhìn ra thành phố",
+                "bep": "Bếp đầy đủ dụng cụ, gia vị cơ bản",
+                "giat-say": "Máy giặt miễn phí, khu phơi đồ",
+                "dau-xe": "Ô tô, xe máy tới tận nơi, chỗ để xe rộng",
+                "tv": "TV, tủ lạnh",
+                "trung-tam": "Ngay trung tâm, ~2 km tới chợ đêm",
+                "tre-nho": "Phòng nệm sàn cho bé nằm chung",
+                "gia-dinh-nho": "2 phòng ngủ cho nhóm 6–8 người"
+            }
         }
     ];
 
@@ -95,6 +112,7 @@
         "giat-say": ["may giat", "giat do", "say do", "may say"],
         "bep": ["bep", "nau an", "tu nau"],
         "may-lanh": ["may lanh", "dieu hoa", "may dieu hoa"],
+        "view": ["view", "ngam pho", "nhin ra thanh pho", "ngam thanh pho", "canh dep"],
         "trung-tam": ["trung tam", "gan cho", "cho dem", "ho xuan huong", "di bo", "gan pho"],
         "gan-ga": ["ga da lat", "nha ga", "gan ga"],
         "tuyen-lam": ["tuyen lam"],
@@ -112,7 +130,7 @@
         "xe-16": "Xe 16 chỗ", "wc-rieng": "WC riêng", "giat-say": "Máy giặt", "bep": "Bếp",
         "trung-tam": "Gần trung tâm", "gan-ga": "Gần Ga Đà Lạt", "tuyen-lam": "Gần Tuyền Lâm",
         "dinh-3": "Gần Dinh III", "piano": "Piano", "tv": "Smart TV", "sang-trong": "Sang trọng",
-        "gia-dinh-nho": "Gia đình nhỏ", "may-lanh": "Máy lạnh"
+        "gia-dinh-nho": "Gia đình nhỏ", "may-lanh": "Máy lạnh", "view": "View thành phố"
     };
 
     function plain(s) {
