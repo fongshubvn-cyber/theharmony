@@ -58,6 +58,22 @@
                 "gan-ga": "Gần, nhìn ra Ga Đà Lạt",
                 "sang-trong": "Nội thất nhập khẩu Ý"
             }
+        },
+        {
+            id: "nguyen-chi-thanh", name: "Home Nguyễn Chí Thanh",
+            area: "Phố đi bộ, 200 m tới chợ Đà Lạt", bedrooms: 3, min: 8, max: 10,
+            img: "img/menu-nguyen-chi-thanh.jpg", card: "img/card-nguyen-chi-thanh.jpg",
+            features: {
+                "bon-tam": "2 phòng đơn có bồn tắm, toilet riêng",
+                "may-lanh": "Máy lạnh trong từng phòng",
+                "bbq": "Sân BBQ và lò nướng trước nhà",
+                "giat-say": "Máy giặt, máy lọc nước",
+                "bep": "Bếp hiện đại, bàn ăn cho cả nhóm",
+                "dau-xe": "Đậu 1 ô tô trước nhà, xe thứ 2 gửi bãi 70 m",
+                "trung-tam": "200 m tới chợ Đà Lạt, ngay phố đi bộ",
+                "sang-trong": "Nhà mới xây, nội thất hiện đại",
+                "gia-dinh-nho": "3 phòng ngủ cho nhóm 8–10 người"
+            }
         }
     ];
 
@@ -78,6 +94,7 @@
         "wc-rieng": ["wc rieng", "toilet rieng", "ve sinh rieng", "phong tam rieng", "wc"],
         "giat-say": ["may giat", "giat do", "say do", "may say"],
         "bep": ["bep", "nau an", "tu nau"],
+        "may-lanh": ["may lanh", "dieu hoa", "may dieu hoa"],
         "trung-tam": ["trung tam", "gan cho", "cho dem", "ho xuan huong", "di bo", "gan pho"],
         "gan-ga": ["ga da lat", "nha ga", "gan ga"],
         "tuyen-lam": ["tuyen lam"],
@@ -95,7 +112,7 @@
         "xe-16": "Xe 16 chỗ", "wc-rieng": "WC riêng", "giat-say": "Máy giặt", "bep": "Bếp",
         "trung-tam": "Gần trung tâm", "gan-ga": "Gần Ga Đà Lạt", "tuyen-lam": "Gần Tuyền Lâm",
         "dinh-3": "Gần Dinh III", "piano": "Piano", "tv": "Smart TV", "sang-trong": "Sang trọng",
-        "gia-dinh-nho": "Gia đình nhỏ"
+        "gia-dinh-nho": "Gia đình nhỏ", "may-lanh": "Máy lạnh"
     };
 
     function plain(s) {

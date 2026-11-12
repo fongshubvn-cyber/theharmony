@@ -270,7 +270,7 @@ footer b { color: var(--ink); }
 .hub-hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 800; max-width: 14ch; }
 .hub-hero p { font-size: 1.15rem; max-width: 34rem; margin: 18px 0 28px; color: rgba(255,255,255,.88); }
 .hub-hero .btn-line { border-color: #fff; color: #fff; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: var(--ink); transition: transform .2s ease, box-shadow .2s ease; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(20,26,24,.12); }
 .card img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
@@ -282,7 +282,7 @@ footer b { color: var(--ink); }
 .card ul { list-style: none; display: grid; gap: 4px; font-size: .93rem; color: var(--muted); }
 .card li::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; background: var(--brass); margin-right: 8px; transform: translateY(-2px); }
 .card-cta { margin-top: auto; padding-top: 12px; font-weight: 700; color: var(--pine); }
-@media (max-width: 960px) { .cards { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1100px) { .cards { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .hub-hero .wrap { padding: 64px 20px 56px; } }
 
 /* Tìm kiếm villa */
@@ -390,6 +390,16 @@ footer b { color: var(--ink); }
                         <h3>The Min's House</h3>
                         <div class="card-stats"><span><b>2</b>phòng ngủ</span><span><b>4–6</b>khách</span></div>
                         <ul><li>Sân vườn, BBQ ngoài trời</li><li>Karaoke, máy chiếu phim</li><li>Ô tô đậu trước nhà</li></ul>
+                        <span class="card-cta">Xem căn →</span>
+                    </div>
+                </a>
+                <a class="card" data-villa="nguyen-chi-thanh" href="villa/nguyen-chi-thanh/">
+                    <img src="img/card-nguyen-chi-thanh.jpg" alt="Home Nguyễn Chí Thanh" loading="lazy">
+                    <div class="card-body">
+                        <span class="card-area">Phố đi bộ · 200 m tới chợ Đà Lạt</span>
+                        <h3>Home Nguyễn Chí Thanh</h3>
+                        <div class="card-stats"><span><b>3</b>phòng ngủ</span><span><b>8–10</b>khách</span></div>
+                        <ul><li>Nhà mới xây, ngay trung tâm</li><li>2 phòng có bồn tắm riêng</li><li>Sân BBQ, máy lạnh từng phòng</li></ul>
                         <span class="card-cta">Xem căn →</span>
                     </div>
                 </a>
